@@ -25,3 +25,4 @@ Ignore directory is a function to exclude one directory from a folder by specify
 # Cmdlets
 To modifying Folders, you need to call [Folder Cmdlets](../cmdlet/cmdlets.md#folder).
 To modifying Ignored Directories, you need to call [Ignore Directory Cmdlets](../cmdlet/cmdlets.md#ignored-directory).
+After folder created, you should call [Sync-ImageStoreFolder](../cmdlet/Folder/SyncFolder.md) to make sure the file system is consistent with database.
