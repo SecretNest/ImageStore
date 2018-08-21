@@ -74,6 +74,6 @@ namespace SecretNest.ImageStore.Folder
     {
         All = 0,
         FilesInOtherDirectories = 1,
-        FilesInOtherFolders
+        FilesInOtherFolders = 2
     }
 }
