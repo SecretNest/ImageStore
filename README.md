@@ -31,6 +31,15 @@ By default, the information and verbose level output will be silenced. ImageStor
 These setting will not be preserved among instances of PowerShell. Every time the PowerShell started, there are set as ```
 "SilentlyContinue"```.
 
+# Database
+ImageStore need SqlServer 2017 for hosting database. Each project should have a dedicated database.
+
+All editions of SqlServer 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux verions are not tested.
+
+Attached database file mode is supported and recommended.
+
+To install SqlServer 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desierd. LocalDb or Express edition will be a good choice IMHO.
+
 # Concept
 
 # Cmdlet
