@@ -10,8 +10,18 @@ priHash is a C# Implementation of pHash (http://phash.org). Based on phash-0.9.4
 In this tool, [difference degree](doc/concept/DifferenceDegree.md) is based on the calculation of priHash.
 
 # Use module in PowerShell
+To use any module from dll in PowerShell, you just need 3 steps:
+1. Start PowerShell. Usually it is placed as ```C:\windows\System32\windowspowershell\v1.0\powershell.exe``` in Windows.
+2. Use command ```Import-Module``` to load module from dll file. The parameter of this command is the path of the dll file.  
+```Import-Module C:\ImageStore.dll``` will load the module file named as ImageStore.dll and placed in the root folder of drive C.  
+```Import-Module .\ImageStore.dll``` will load the module file named as ImageStore.dll from the current directory.
+3. Use cmdlets.
+
+Also, you can combine the step 1 and 2 as one, by passing the command as a parameter while starting PowerShell.  
+```C:\windows\System32\windowspowershell\v1.0\powershell.exe -noexit -command "Import-Module .\ImageStore.dll"```
 
 # Cmdlet
+
 
 # Workthough
 

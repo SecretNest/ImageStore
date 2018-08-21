@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace SecretNest.ImageStore.SameFile
 {
     [Cmdlet(VerbsCommon.Remove, "ImageStoreSameFileGroup")]
-    [Alias("RemoveSameFile")]
+    [Alias("RemoveSameFileGroup")]
     public class RemoveSameFileGroupCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
