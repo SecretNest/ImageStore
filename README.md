@@ -20,9 +20,10 @@ To use any module from dll in PowerShell, you just need 3 steps:
 Also, you can combine the step 1 and 2 as one, by passing the command as a parameter while starting PowerShell.  
 ```C:\windows\System32\windowspowershell\v1.0\powershell.exe -noexit -command "Import-Module .\ImageStore.dll"```
 
+# Concept
+
 # Cmdlet
 
+# Type
 
 # Workthough
-
-# Concept
