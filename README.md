@@ -23,10 +23,10 @@ Also, you can combine the step 1 and 2 as one, by passing the command as a param
 ## Enable Information and Verbose Output
 By default, the information and verbose level output will be silenced. ImageStore will report key information as informational output and progress updates as verbose one. Thus, enabling information output is highly recommended. If ImageStore is dealing with large amount of files, turning on verbose output is advised.
 
-⋅⋅* Turn on information output: ```$InformationPreference="Continue"```
-⋅⋅* Turn on verbose output: ```$VerbosePreference="Continue"```
-⋅⋅* Turn off information output: ```$InformationPreference="SilentlyContinue"```, or simply restart PowerShell.
-⋅⋅* Turn off verbose output: ```$VerbosePreference="SilentlyContinue"```, or simply restart PowerShell.
+  * Turn on information output: ```$InformationPreference="Continue"```
+  * Turn on verbose output: ```$VerbosePreference="Continue"```
+  * Turn off information output: ```$InformationPreference="SilentlyContinue"```, or simply restart PowerShell.
+  * Turn off verbose output: ```$VerbosePreference="SilentlyContinue"```, or simply restart PowerShell.
 
 These setting will not be preserved among instances of PowerShell. Every time the PowerShell started, there are set as ```
 "SilentlyContinue"```.
