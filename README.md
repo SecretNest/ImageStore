@@ -70,3 +70,5 @@ These types of entities will be used while operating with cmdlets of ImageStore.
 |[ImageStoreSimilarFile](doc/type/ImageStoreSimilarFile.md)|Represents a [similar relationship](doc/concept/SimilarFile.md) between two image files.|
 
 # Workthough
+
+# Test-Mark
