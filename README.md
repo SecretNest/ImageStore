@@ -9,7 +9,7 @@ This tool use a [forked version](https://github.com/scegg/phash) of [priHash](ht
 priHash is a C# Implementation of pHash (http://phash.org). Based on phash-0.9.4 for Windows.
 In this tool, [difference degree](doc/concept/DifferenceDegree.md) is based on the calculation of priHash.
 
-# Use module in PowerShell
+# Use Module in PowerShell
 To use any module from dll in PowerShell, you just need 3 steps:
 1. Start PowerShell. Usually it is placed as ```C:\windows\System32\windowspowershell\v1.0\powershell.exe``` in Windows.
 2. Use command ```Import-Module``` to load module from dll file. The parameter of this command is the path of the dll file.  
@@ -55,6 +55,7 @@ There are several concepts defined in ImageStore. Reading these docs will help y
 |[Difference Degree](doc/concept/DifferenceDegree.md)|The difference between two image files.|
 
 # Cmdlets
+See [Cmdlets](doc/cmdlet/cmdlets.md].
 
 # Entity Types
 These types of entities will be used while operating with cmdlets of ImageStore.
