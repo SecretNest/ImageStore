@@ -13,6 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmdlet", "cmdlet", "{20CDC5AD-D882-474E-AFEB-B26828597677}"
+	ProjectSection(SolutionItems) = preProject
+		doc\cmdlet\cmdlets.md = doc\cmdlet\cmdlets.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "walkthrough", "walkthrough", "{395036E5-C0A0-4F4E-A0C9-952A9A48EB4B}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,19 +24,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "walkthrough", "walkthrough"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "concept", "concept", "{BEBBCEC2-9257-4836-9D52-C5705D63095D}"
 	ProjectSection(SolutionItems) = preProject
-		doc\concept\Compare.md = doc\concept\Compare.md
 		doc\concept\Database.md = doc\concept\Database.md
 		DifferenceDegree.md = DifferenceDegree.md
 		doc\concept\Directory.md = doc\concept\Directory.md
 		doc\concept\Extension.md = doc\concept\Extension.md
 		doc\concept\File.md = doc\concept\File.md
 		doc\concept\Folder.md = doc\concept\Folder.md
-		doc\concept\IgnoredDirectory.md = doc\concept\IgnoredDirectory.md
-		doc\concept\Measure.md = doc\concept\Measure.md
 		doc\concept\SameFile.md = doc\concept\SameFile.md
-		doc\concept\SameFileGroup.md = doc\concept\SameFileGroup.md
 		doc\concept\SimilarFile.md = doc\concept\SimilarFile.md
-		doc\concept\Sync.md = doc\concept\Sync.md
 		doc\concept\ThumbprintCache.md = doc\concept\ThumbprintCache.md
 	EndProjectSection
 EndProject
@@ -51,14 +49,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{EF
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\Database\CloseDatabase.md = doc\cmdlet\Database\CloseDatabase.md
 		doc\cmdlet\Database\CompressDatabase.md = doc\cmdlet\Database\CompressDatabase.md
-		doc\cmdlet\Database\Database.md = doc\cmdlet\Database\Database.md
 		doc\cmdlet\Database\OpenDatabase.md = doc\cmdlet\Database\OpenDatabase.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extension", "Extension", "{F63FEC2E-A8C7-4034-9DBF-F32450020130}"
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\Extension\AddExtension.md = doc\cmdlet\Extension\AddExtension.md
-		doc\cmdlet\Extension\Extension.md = doc\cmdlet\Extension\Extension.md
 		doc\cmdlet\Extension\FindExtension.md = doc\cmdlet\Extension\FindExtension.md
 		doc\cmdlet\Extension\GetExtension.md = doc\cmdlet\Extension\GetExtension.md
 		doc\cmdlet\Extension\RemoveExtension.md = doc\cmdlet\Extension\RemoveExtension.md
@@ -69,7 +65,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "File", "File", "{BEAD212B-1C6C-4DCD-ACFC-017DEBC9BA85}"
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\File\AddFile.md = doc\cmdlet\File\AddFile.md
-		doc\cmdlet\File\File.md = doc\cmdlet\File\File.md
 		doc\cmdlet\File\FindFile.md = doc\cmdlet\File\FindFile.md
 		doc\cmdlet\File\GetFile.md = doc\cmdlet\File\GetFile.md
 		doc\cmdlet\File\MeasureFile.md = doc\cmdlet\File\MeasureFile.md
@@ -88,7 +83,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Folder", "Folder", "{F7BA3A
 		doc\cmdlet\Folder\AddFolder.md = doc\cmdlet\Folder\AddFolder.md
 		doc\cmdlet\Folder\ClearEmptyFolders.md = doc\cmdlet\Folder\ClearEmptyFolders.md
 		doc\cmdlet\Folder\FindFolder.md = doc\cmdlet\Folder\FindFolder.md
-		doc\cmdlet\Folder\Folder.md = doc\cmdlet\Folder\Folder.md
 		doc\cmdlet\Folder\GetFolder.md = doc\cmdlet\Folder\GetFolder.md
 		doc\cmdlet\Folder\RemoveFolder.md = doc\cmdlet\Folder\RemoveFolder.md
 		doc\cmdlet\Folder\SearchFolder.md = doc\cmdlet\Folder\SearchFolder.md
@@ -101,7 +95,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IgnoredDirectory", "Ignored
 		doc\cmdlet\IgnoredDirectory\AddIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\AddIgnoredDirectory.md
 		doc\cmdlet\IgnoredDirectory\FindIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\FindIgnoredDirectory.md
 		doc\cmdlet\IgnoredDirectory\GetIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\GetIgnoredDirectory.md
-		doc\cmdlet\IgnoredDirectory\IgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\IgnoredDirectory.md
 		doc\cmdlet\IgnoredDirectory\RemoveIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\RemoveIgnoredDirectory.md
 		doc\cmdlet\IgnoredDirectory\SearchIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\SearchIgnoredDirectory.md
 		doc\cmdlet\IgnoredDirectory\UpdateIgnoredDirectory.md = doc\cmdlet\IgnoredDirectory\UpdateIgnoredDirectory.md
@@ -115,7 +108,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SameFile", "SameFile", "{3F
 		doc\cmdlet\SameFile\HideSameFile.md = doc\cmdlet\SameFile\HideSameFile.md
 		doc\cmdlet\SameFile\RemoveSameFile.md = doc\cmdlet\SameFile\RemoveSameFile.md
 		doc\cmdlet\SameFile\RemoveSameFileGroup.md = doc\cmdlet\SameFile\RemoveSameFileGroup.md
-		doc\cmdlet\SameFile\SameFile.md = doc\cmdlet\SameFile\SameFile.md
 		doc\cmdlet\SameFile\SearchSameFile.md = doc\cmdlet\SameFile\SearchSameFile.md
 		doc\cmdlet\SameFile\SelectSameFile.md = doc\cmdlet\SameFile\SelectSameFile.md
 		doc\cmdlet\SameFile\ShowSameFile.md = doc\cmdlet\SameFile\ShowSameFile.md
@@ -126,16 +118,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimilarFile", "SimilarFile"
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\SimilarFile\ClearThumbprintCache.md = doc\cmdlet\SimilarFile\ClearThumbprintCache.md
 		doc\cmdlet\SimilarFile\ClearThumbprintCacheFolder.md = doc\cmdlet\SimilarFile\ClearThumbprintCacheFolder.md
-		doc\cmdlet\SimilarFile\CompareSimilarFile.md = doc\cmdlet\SimilarFile\CompareSimilarFile.md
+		doc\cmdlet\SimilarFile\CompareSimilarFiles.md = doc\cmdlet\SimilarFile\CompareSimilarFiles.md
 		doc\cmdlet\SimilarFile\GetSimilarFile.md = doc\cmdlet\SimilarFile\GetSimilarFile.md
 		doc\cmdlet\SimilarFile\HideSimilarFile.md = doc\cmdlet\SimilarFile\HideSimilarFile.md
 		doc\cmdlet\SimilarFile\RemoveSimilarFile.md = doc\cmdlet\SimilarFile\RemoveSimilarFile.md
 		doc\cmdlet\SimilarFile\ResetSimilarFile.md = doc\cmdlet\SimilarFile\ResetSimilarFile.md
-		doc\cmdlet\SimilarFile\ResolveSimilarFile.md = doc\cmdlet\SimilarFile\ResolveSimilarFile.md
+		doc\cmdlet\SimilarFile\ResolveSimilarFiles.md = doc\cmdlet\SimilarFile\ResolveSimilarFiles.md
 		doc\cmdlet\SimilarFile\SearchSimilarFile.md = doc\cmdlet\SimilarFile\SearchSimilarFile.md
 		doc\cmdlet\SimilarFile\SetThumbprintCacheFolder.md = doc\cmdlet\SimilarFile\SetThumbprintCacheFolder.md
 		doc\cmdlet\SimilarFile\ShowSimilarFile.md = doc\cmdlet\SimilarFile\ShowSimilarFile.md
-		doc\cmdlet\SimilarFile\SimilarFile.md = doc\cmdlet\SimilarFile\SimilarFile.md
 		doc\cmdlet\SimilarFile\UpdateSimilarFile.md = doc\cmdlet\SimilarFile\UpdateSimilarFile.md
 	EndProjectSection
 EndProject

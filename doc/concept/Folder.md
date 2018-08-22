@@ -23,6 +23,6 @@ No directory should be shared among folders. In another word, there should not b
 Ignore directory is a function to exclude one directory from a folder by specifying the path. You could choose to include the sub directories or not. All files in the directories pointed from Ignored Directory records will be ignored while processing.
 
 # Cmdlets
-  * To modify Folders, you need to call [Folder Cmdlets](../cmdlet/cmdlets.md#folder).
-  * To modify Ignored Directories, you need to call [Ignore Directory Cmdlets](../cmdlet/cmdlets.md#ignored-directory).
+  * To check or modify Folders, you need to call [Folder Cmdlets](../cmdlet/cmdlets.md#folder).
+  * To check or modify Ignored Directories, you need to call [Ignore Directory Cmdlets](../cmdlet/cmdlets.md#ignored-directory).
   * After folder created, you should call [Sync-ImageStoreFolder](../cmdlet/Folder/SyncFolder.md) to make sure the database is consistent with file system.

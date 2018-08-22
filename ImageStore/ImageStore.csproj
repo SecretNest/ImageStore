@@ -163,7 +163,7 @@
     <Compile Include="SimilarFile\RemoveSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResetSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\SearchSimilarFileCmdlet.cs" />
-    <Compile Include="SimilarFile\ResolveSimilarFileCmdlet.cs" />
+    <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\SetThumbprintCacheFolderCmdlet.cs" />
     <Compile Include="SimilarFile\ShowSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\SimilarFileManager.cs">

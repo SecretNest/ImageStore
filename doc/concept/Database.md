@@ -1,5 +1,5 @@
 # Database
-ImageStore need a database hosted in Sql Server 2017 to store data generated from file and settings. See [Database section](../../README.md#database) of readme file for detail.
+ImageStore need a database hosted in Sql Server 2017 to store data generated from file and settings. See [Database section](../../README.md#database) of readme file for details.
 
 Each project should have a dedicated database. For switching project, you need to change the connection string pointed to other database.
 

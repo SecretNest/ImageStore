@@ -10,4 +10,4 @@ Property Ignored is used to set this kind of file ignored for all comparison.
 The extension names found in files but not having a related extension setting will be treated as ignored.
 
 # Cmdlets
-To modify Extensions, you need to call [Extension Cmdlets](../cmdlet/cmdlets.md#extension).
+To check or modify Extensions, you need to call [Extension Cmdlets](../cmdlet/cmdlets.md#extension).
