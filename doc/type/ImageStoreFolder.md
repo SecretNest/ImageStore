@@ -9,7 +9,7 @@ Namespace: SecretNest.ImageStore.Folder
 |Id|Guid|Record id|Yes|
 |Name|string|Name of this folder|No|
 |Path|string|Path of the root directory of this folder|No|
-|CompareImageWith|[CompareImageWith](#Compare-Image-With)|The scope of the target files to be compared with for each file located in this folder|No|
+|CompareImageWith|[CompareImageWith](#compare-image-with)|The scope of the target files to be compared with for each file located in this folder|No|
 |IsSealed|bool|Whether this folder should be read-only|No|
 
 # Compare Image With

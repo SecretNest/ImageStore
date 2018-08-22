@@ -10,7 +10,7 @@ Namespace: SecretNest.ImageStore.SimilarFile
 |File1Id|Guid|Record id of one [file](ImageStoreFile.md)|Yes|
 |File2Id|Guid|Record id of another [file](ImageStoreFile.md)|Yes|
 |DifferenceDegree|float|[Difference degree](../concept/DifferenceDegree.md)|Yes|
-|IgnoredMode|[IgnoredMode](#Ignored-Mode)|State of this relationship|No|
+|IgnoredMode|[IgnoredMode](#ignored-mode)|State of this relationship|No|
 
 # Ignored Mode
 Enum: SecretNest.ImageStore.SimilarFile.IgnoredMode
