@@ -34,13 +34,25 @@ These setting will not be preserved among instances of PowerShell. Every time th
 # Database
 ImageStore need SqlServer 2017 for hosting database. Each project should have a dedicated database.
 
-All editions of SqlServer 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux verions are not tested.
+All editions of SqlServer 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux versions are not tested.
 
 Attached database file mode is supported and recommended.
 
-To install SqlServer 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desierd. LocalDb or Express edition will be a good choice IMHO.
+To install SqlServer 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
 
 # Concept
+There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.
+
+|Concept|Description|
+| --- | --- |
+|[Database](doc/concept/Database.md)|A Sql Server 2017 database to save all records and settings.|
+|[Folder](doc/concept/Folder.md)|The root directory of your image library.|
+|[Extension](doc/concept/Extension.md)|Extension record for each kind of files.|
+|[File](doc/concept/File.md)|File record for each file.|
+|[Same File](doc/concept/SameFile.md)|Exactly same files detected by Sha1 hashing.|
+|[Similar File](doc/concept/SimilarFile.md)|Similar images detected by pHash algorithm.|
+|[Thumbprint Cache](doc/concept/ThumbprintCache.md)|Cache for image thumbprints used in Similar File UI.|
+|[Difference Degree](doc/concept/DifferenceDegree.md)|The difference between two image files.|
 
 # Cmdlet
 

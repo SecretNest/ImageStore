@@ -7,11 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageStore", "ImageStore\Im
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{9C14AD78-9262-4C54-927A-A58133A7CF94}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{237D15FE-1788-41CC-B7C5-AD69391F6427}"
-	ProjectSection(SolutionItems) = preProject
-		README.md = README.md
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmdlet", "cmdlet", "{20CDC5AD-D882-474E-AFEB-B26828597677}"
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\cmdlets.md = doc\cmdlet\cmdlets.md
@@ -25,8 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "concept", "concept", "{BEBBCEC2-9257-4836-9D52-C5705D63095D}"
 	ProjectSection(SolutionItems) = preProject
 		doc\concept\Database.md = doc\concept\Database.md
-		DifferenceDegree.md = DifferenceDegree.md
-		doc\concept\Directory.md = doc\concept\Directory.md
+		doc\concept\DifferenceDegree.md = doc\concept\DifferenceDegree.md
 		doc\concept\Extension.md = doc\concept\Extension.md
 		doc\concept\File.md = doc\concept\File.md
 		doc\concept\Folder.md = doc\concept\Folder.md
@@ -128,6 +122,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SimilarFile", "SimilarFile"
 		doc\cmdlet\SimilarFile\SetThumbprintCacheFolder.md = doc\cmdlet\SimilarFile\SetThumbprintCacheFolder.md
 		doc\cmdlet\SimilarFile\ShowSimilarFile.md = doc\cmdlet\SimilarFile\ShowSimilarFile.md
 		doc\cmdlet\SimilarFile\UpdateSimilarFile.md = doc\cmdlet\SimilarFile\UpdateSimilarFile.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E7D525BF-B729-48B2-96FB-5060B0C837AA}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
