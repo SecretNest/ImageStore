@@ -55,7 +55,7 @@ There are several concepts defined in ImageStore. Reading these docs will help y
 |[Difference Degree](doc/concept/DifferenceDegree.md)|The difference between two image files.|
 
 # Cmdlets
-See [Cmdlets](doc/cmdlet/cmdlets.md].
+See [Cmdlets](doc/cmdlet/cmdlets.md).
 
 # Entity Types
 These types of entities will be used while operating with cmdlets of ImageStore.
