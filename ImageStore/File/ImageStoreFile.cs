@@ -106,7 +106,6 @@ namespace SecretNest.ImageStore.File
         New = 0,
         NotImage = 1,
         NotReadable = 2,
-        NotDeleted = 3,
         SizeZero = 254,
         Computed = 255
     }

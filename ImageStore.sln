@@ -81,7 +81,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Folder", "Folder", "{F7BA3A
 		doc\cmdlet\Folder\RemoveFolder.md = doc\cmdlet\Folder\RemoveFolder.md
 		doc\cmdlet\Folder\SearchFolder.md = doc\cmdlet\Folder\SearchFolder.md
 		doc\cmdlet\Folder\SyncFolder.md = doc\cmdlet\Folder\SyncFolder.md
-		doc\cmdlet\Folder\UpdateFoldermd = doc\cmdlet\Folder\UpdateFoldermd
+		doc\cmdlet\Folder\UpdateFolder.md = doc\cmdlet\Folder\UpdateFolder.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IgnoredDirectory", "IgnoredDirectory", "{12AE0E07-653C-4C2C-94BA-1A012F7F5499}"

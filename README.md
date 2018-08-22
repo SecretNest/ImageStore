@@ -40,7 +40,7 @@ Attached database file mode is supported and recommended.
 
 To install SqlServer 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
 
-# Concept
+# Concepts
 There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.
 
 |Concept|Description|
@@ -54,8 +54,18 @@ There are several concepts defined in ImageStore. Reading these docs will help y
 |[Thumbprint Cache](doc/concept/ThumbprintCache.md)|Cache for image thumbprints used in Similar File UI.|
 |[Difference Degree](doc/concept/DifferenceDegree.md)|The difference between two image files.|
 
-# Cmdlet
+# Cmdlets
 
-# Type
+# Entity Types
+These types of entities will be used while operating with cmdlets of ImageStore.
+
+|Type|Description|
+| --- | --- |
+|[ImageStoreFolder](doc/type/ImageStoreFolder.md)|Represents a [folder](doc/concept/Folder.md) for storing image files.|
+|[ImageStoreIgnoredDirectory](doc/type/ImageStoreIgnoredDirectory.md)|Excludes a directory from a [folder](doc/concept/Folder.md).|
+|[ImageStoreExtension](doc/type/ImageStoreExtension.md)|Represents an [extension](doc/concept/extension.md), a kind of file.|
+|[ImageStoreFile](doc/type/ImageStoreFile.md)|Represents a [file](doc/concept/File.md) stored in a [folder](doc/concept/Folder.md).|
+|[ImageStoreSameFile](doc/type/ImageStoreSameFile.md)|Represents a [record](doc/concept/SameFile.md) that a file detected to be the same as at least one other file.|
+|[ImageStoreSimilarFile](doc/type/ImageStoreSimilarFile.md)|Represents a [similar relationship](doc/concept/SimilarFile.md) between two image files.|
 
 # Workthough
