@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.Folder
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |Name|string|Name of this folder|No|
 |Path|string|Path of the root directory of this folder|No|

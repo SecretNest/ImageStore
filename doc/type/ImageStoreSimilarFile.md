@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.SimilarFile
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |File1Id|Guid|Record id of one [file](ImageStoreFile.md)|Yes|
 |File2Id|Guid|Record id of another [file](ImageStoreFile.md)|Yes|

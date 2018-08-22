@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.SameFile
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |Sha1Hash|byte[]|Sha1 hashing result of this file|Yes|
 |FileId|Guid|Record id of the [file](ImageStoreFile.md) related|Yes|

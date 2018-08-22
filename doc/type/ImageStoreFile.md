@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.File
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |FolderId|Guid|Record id of the [folder](ImageStoreFolder.md) related|Yes|
 |Path|string|Path to the directory related to the root directory of this folder. Empty means the root directory of this folder. File name is not included.|Yes|

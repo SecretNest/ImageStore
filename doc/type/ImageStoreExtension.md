@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.Extension
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |Extension|string|Extension name|No|
 |IsImage|bool|Whether this kind of file is image|No|

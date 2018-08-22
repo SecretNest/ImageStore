@@ -5,7 +5,7 @@ Namespace: SecretNest.ImageStore.IgnoredDirectory
 
 # Properties
 |Name|Type|Description|ReadOnly|
-|---|---|---|
+|---|---|---|---|
 |Id|Guid|Record id|Yes|
 |FolderId|Guid|Record id of the [folder](ImageStoreFolder.md) related|No|
 |Directory|string|Path of the directory to be excluded|No|
