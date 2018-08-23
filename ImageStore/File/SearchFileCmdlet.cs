@@ -112,7 +112,8 @@ namespace SecretNest.ImageStore.File
                             ImageHash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[5]),
                             Sha1Hash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[6]),
                             FileSize = (int)reader[7],
-                            FileStateCode = (int)reader[8]
+                            FileStateCode = (int)reader[8],
+                            ImageComparedThreshold = (float)reader[9]
                         };
                         result.Add(line);
                     }
