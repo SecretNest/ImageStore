@@ -10,7 +10,7 @@ namespace SecretNest.ImageStore.SameFile
 {
     [Cmdlet(VerbsCommon.Search, "ImageStoreSameFile")]
     [Alias("SearchSameFile")]
-    [OutputType(typeof(IEnumerable<ImageStoreSameFile>))]
+    [OutputType(typeof(List<ImageStoreSameFile>))]
     public class SearchSameFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]

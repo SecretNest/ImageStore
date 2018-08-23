@@ -11,7 +11,7 @@ namespace SecretNest.ImageStore.Folder
 {
     [Cmdlet(VerbsCommon.Search, "ImageStoreFolder")]
     [Alias("SearchFolder")]
-    [OutputType(typeof(IEnumerable<ImageStoreFolder>))]
+    [OutputType(typeof(List<ImageStoreFolder>))]
     public class SearchFolderCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]

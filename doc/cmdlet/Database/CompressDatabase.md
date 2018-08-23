@@ -7,6 +7,9 @@ Alias: ShrinkDatabase, CompressDatabase, Shrink-ImageStoreDatabase
 # Parameters
 None
 
+# Return
+None
+
 # See also
   * [Concept: Database](../../concept/Database.md)
   * [Database Cmdlets](../cmdlets.md#database)

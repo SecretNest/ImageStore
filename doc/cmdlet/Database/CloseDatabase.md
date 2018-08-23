@@ -11,6 +11,9 @@ Alias: CloseDatabase
 # Parameters
 None
 
+# Return
+None
+
 # See also
   * [Concept: Database](../../concept/Database.md)
   * [Database Cmdlets](../cmdlets.md#database)

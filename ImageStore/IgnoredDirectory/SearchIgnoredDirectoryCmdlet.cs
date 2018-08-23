@@ -11,7 +11,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
 {
     [Cmdlet(VerbsCommon.Search, "ImageStoreIgnoredDirectory")]
     [Alias("SearchIgnoredDirectory")]
-    [OutputType(typeof(IEnumerable<ImageStoreIgnoredDirectory>))]
+    [OutputType(typeof(List<ImageStoreIgnoredDirectory>))]
     public class SearchIgnoredDirectoryCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]

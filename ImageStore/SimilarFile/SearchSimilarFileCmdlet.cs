@@ -22,7 +22,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
     [Cmdlet(VerbsCommon.Search, "ImageStoreSimilarFile")]
     [Alias("SearchSimilarFile")]
-    [OutputType(typeof(IEnumerable<ImageStoreSimilarFile>))]
+    [OutputType(typeof(List<ImageStoreSimilarFile>))]
     public class SearchSimilarFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]

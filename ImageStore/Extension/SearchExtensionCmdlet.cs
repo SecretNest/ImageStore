@@ -11,7 +11,7 @@ namespace SecretNest.ImageStore.Extension
 {
     [Cmdlet(VerbsCommon.Search, "ImageStoreExtension")]
     [Alias("SearchExtension")]
-    [OutputType(typeof(IEnumerable<ImageStoreExtension>))]
+    [OutputType(typeof(List<ImageStoreExtension>))]
     public class SearchExtensionCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]

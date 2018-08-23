@@ -11,6 +11,9 @@ Alias: OpenDatabase
 |---|---|---|---|
 |ConnectionString|string|Connection string to target database|No|
 
+# Return
+None
+
 # See also
   * [Concept: Database](../../concept/Database.md)
   * [Database Cmdlets](../cmdlets.md#database)

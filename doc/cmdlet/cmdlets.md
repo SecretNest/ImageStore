@@ -3,7 +3,7 @@
 Here lists all cmdlets provided from ImageStore.
 
 # Database
-Operates on database connection or shrinks database.
+Operates on [database](../concept/database.md) connection or shrinks database.
 
 |Command|Alias|Description|
 |---|---|---|
@@ -14,6 +14,16 @@ Operates on database connection or shrinks database.
 # Folder
 
 # Extension
+Manages [extensions](../concept/extension.md).
+
+|Command|Alias|Description|
+|---|---|---|
+|[Add-ImageStoreExtension](Extension/AddExtension.md)|AddExtension|Adds an extension to database.|
+|[Find-ImageStoreExtension](Extension/FindExtension.md)|FindExtension|Finds the record related to the extension by name.|
+|[Get-ImageStoreExtension](Extension/GetExtension.md)|GetExtension|Gets the record by id.|
+|[Remove-ImageStoreExtension](Extension/RemoveExtension.md)|RemoveExtension|Removes the extension record specified from database.|
+|[Search-ImageStoreExtension](Extension/SearchExtension.md)|SearchExtension|Searches all extensions records which matches the conditions provided.|
+|[Update-ImageStoreExtension](Extension/UpdateExtension.md)|UpdateExtension|Updates the extension record by the entity provided.|
 
 # Ignored Directory
 

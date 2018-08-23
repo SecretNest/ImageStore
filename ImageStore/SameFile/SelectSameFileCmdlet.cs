@@ -21,7 +21,7 @@ namespace SecretNest.ImageStore.SameFile
 
     [Cmdlet(VerbsCommon.Select, "ImageStoreSameFile")]
     [Alias("SelectSameFile")]
-    [OutputType(typeof(IEnumerable<ImageStoreSameFile>))]
+    [OutputType(typeof(List<ImageStoreSameFile>))]
     public class SelectSameFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]

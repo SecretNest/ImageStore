@@ -18,7 +18,7 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     [Cmdlet(VerbsDiagnostic.Resolve, "ImageStoreSimilarFiles")]
     [Alias("ResolveSimilarFiles")]
-    [OutputType(typeof(IEnumerable<ImageStoreFile>))]
+    [OutputType(typeof(List<ImageStoreFile>))]
     public class ResolveSimilarFilesCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
