@@ -38,6 +38,16 @@ Manages [extensions](../concept/extension.md).
 |[Update-ImageStoreExtension](Extension/UpdateExtension.md)|UpdateExtension|Updates the extension record by the entity provided.|
 
 # Ignored Directory
+Manages the directories excluded from folders.
+
+|Command|Alias|Description|
+|---|---|---|
+|[Add-ImageStoreIgnoredDirectory](IgnoredDirectory/AddIgnoredDirectory.md)|AddIgnoredDirectory|Creates and adds an ignored directory record to database.|
+|[Find-ImageStoreIgnoredDirectory](IgnoredDirectory/FindIgnoredDirectory.md)|FindIgnoredDirectory|Finds the record related to the ignored directory by all properties.|
+|[Get-ImageStoreIgnoredDirectory](IgnoredDirectory/GetIgnoredDirectory.md)|GetIgnoredDirectory|Gets the record of ignored directory by id.|
+|[Remove-ImageStoreIgnoredDirectory](IgnoredDirectory/RemoveIgnoredDirectory.md)|RemoveIgnoredDirectory|Removes the ignored directory record specified from database.|
+|[Search-ImageStoreIgnoredDirectory](IgnoredDirectory/SearchIgnoredDirectory.md)|SearchIgnoredDirectory|Searches all ignore directory records which matches the conditions provided.|
+|[Update-ImageStoreIgnoredDirectory](IgnoredDirectory/UpdateIgnoredDirectory.md)|UpdateIgnoredDirectory|Updates the ignored directory record by the entity provided.|
 
 # File
 

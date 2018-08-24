@@ -1,5 +1,5 @@
 # Search-ImageStoreFolder
-Searches all folders records which matches the conditions provided.
+Searches all records of folders which matches the conditions provided.
 
 Alias: SearchFolder
 

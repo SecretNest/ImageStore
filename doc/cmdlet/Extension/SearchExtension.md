@@ -1,5 +1,5 @@
 # Search-ImageStoreExtension
-Searches all extensions records which matches the conditions provided.
+Searches all records of extensions which matches the conditions provided.
 
 Alias: SearchExtension
 
