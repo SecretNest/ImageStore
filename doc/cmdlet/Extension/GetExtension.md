@@ -1,5 +1,5 @@
 # Get-ImageStoreExtension
-Gets the record by id.
+Gets the record related to the extension by id.
 
 Alias: GetExtension
 

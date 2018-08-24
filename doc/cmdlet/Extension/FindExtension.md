@@ -6,7 +6,7 @@ Alias: FindExtension
 # Parameters
 |Name|Type|Description|Optional|
 |---|---|---|---|
-|Extension|string|Extension name of this kind of file. Empty string is acceptable for the kind of file without extension.|No|
+|Extension|string|Extension name of this kind of file to find. Empty string is acceptable for the kind of file without extension.|No|
 
 # Return
 The record of the extension.

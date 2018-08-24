@@ -15,7 +15,7 @@ Namespace: SecretNest.ImageStore.Folder
 # Compare Image With
 Enum: SecretNest.ImageStore.Folder.CompareImageWith
 
-|Member|Value|Description|
+|Element|Value|Description|
 |---|---|---|
 |All|0|The files in this folder will be compared with all files.|
 |FilesInOtherDirectories|1|The files in this folder will be compared with all files other than those from same directory (sub directories are not included).|

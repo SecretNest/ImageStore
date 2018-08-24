@@ -1,5 +1,5 @@
 # Add-ImageStoreExtension
-Adds an extension to database.
+Creates and adds an extension to database.
 
 Alias: AddExtension
 

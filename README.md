@@ -69,5 +69,12 @@ These types of entities will be used while operating with cmdlets of ImageStore.
 |[ImageStoreSameFile](doc/type/ImageStoreSameFile.md)|Represents a [record](doc/concept/SameFile.md) that a file detected to be the same as at least one other file.|
 |[ImageStoreSimilarFile](doc/type/ImageStoreSimilarFile.md)|Represents a [similar relationship](doc/concept/SimilarFile.md) between two image files.|
 
+# Other Types
+These types will be used while operating with cmdlets of ImageStore.
+
+|Type|Class|Description|
+| --- | --- | --- |
+|[StringPropertyComparingModes](doc/type/StringPropertyComparingModes.md)|enum|Defines the way to use the string provided as search condition.|
+
 # Workthough
 

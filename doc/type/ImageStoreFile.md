@@ -20,7 +20,7 @@ Namespace: SecretNest.ImageStore.File
 # File State
 Enum: SecretNest.ImageStore.File.FileState
 
-|Member|Value|Description|
+|Element|Value|Description|
 |---|---|---|
 |New|0|New created|
 |NotImage|1|This file is not an image. Reported by [Measure-ImageStoreFile](../cmdlet/File/MeasureFile.md) or [Measure-ImageStoreFiles](../cmdlet/File/MeasureFiles.md).|
