@@ -280,12 +280,16 @@ namespace SecretNest.ImageStore.File
 
             var connection = DatabaseConnection.Current;
 
-            using (var commandToDelete = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
+            using (var commandToDeleteSame = new SqlCommand("Delete from [SameFile] Where [FileId]=@Id"))
+            using (var commandToDeleteSimilar = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
             using (var command = new SqlCommand("Update [File] Set [ImageHash]=@ImageHash, [Sha1Hash]=@Sha1Hash, [FileSize]=@FileSize, [FileState]=@FileState, [ImageComparedThreshold]=0 where [Id]=@Id"))
             {
-                commandToDelete.Connection = connection;
-                commandToDelete.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandToDelete.CommandTimeout = 180;
+                commandToDeleteSame.Connection = connection;
+                commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
+                commandToDeleteSame.CommandTimeout = 180;
+                commandToDeleteSimilar.Connection = connection;
+                commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
+                commandToDeleteSimilar.CommandTimeout = 180;
                 command.Connection = connection;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
                 command.Parameters.Add(new SqlParameter("@ImageHash", System.Data.SqlDbType.Binary, 40));
@@ -314,10 +318,12 @@ namespace SecretNest.ImageStore.File
                             exceptions.Add(new ErrorRecord(new InvalidOperationException(text), "ImageStore Measuring - Update database", ErrorCategory.WriteError, record.Item1));
                         }
 
-                        if (record.Item6)
+                        if (!record.Item6)
                         {
-                            commandToDelete.Parameters[0].Value = record.Item1;
-                            commandToDelete.ExecuteNonQuery();
+                            commandToDeleteSame.Parameters[0].Value = record.Item1;
+                            commandToDeleteSame.ExecuteNonQuery();
+                            commandToDeleteSimilar.Parameters[0].Value = record.Item1;
+                            commandToDeleteSimilar.ExecuteNonQuery();
                         }
                     }
                     catch (InvalidOperationException)

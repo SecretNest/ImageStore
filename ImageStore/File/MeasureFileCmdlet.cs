@@ -27,10 +27,24 @@ namespace SecretNest.ImageStore.File
         {
             if (File == null)
                 throw new ArgumentNullException(nameof(File));
+
+            bool isRecomputing;
             
-            if (File.FileState != FileState.New && !Recompute.IsPresent)
+            if (File.FileState == FileState.New)
             {
-                ThrowTerminatingError(new ErrorRecord(new InvalidOperationException("State of this file is not set to New and -" + nameof(Recompute) + " is not set."), "ImageStore Measure File", ErrorCategory.InvalidOperation, File.Id));
+                isRecomputing = false;
+            }
+            else
+            {
+                if (Recompute.IsPresent)
+                {
+                    isRecomputing = true;
+                }
+                else
+                {
+                    ThrowTerminatingError(new ErrorRecord(new InvalidOperationException("State of this file is not set to New and -" + nameof(Recompute) + " is not set."), "ImageStore Measure File", ErrorCategory.InvalidOperation, File.Id));
+                    isRecomputing = true; //Place here for avoiding compiling error. Won't be executed.
+                }
             }
 
             var extension = ExtensionHelper.GetExtensionName(File.ExtensionId, out var extensionIsImage, out var extensionIgnored);
@@ -77,14 +91,21 @@ namespace SecretNest.ImageStore.File
                 WriteError(new ErrorRecord(new InvalidOperationException("Cannot update this file."), "ImageStore - Measuring", ErrorCategory.WriteError, null));
             }
 
-            var connection = DatabaseConnection.Current;
-            using (var commandToDelete = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
+            if (isRecomputing)
             {
-                commandToDelete.Connection = connection;
-                commandToDelete.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
-                commandToDelete.ExecuteNonQuery();
+                var connection = DatabaseConnection.Current;
+                using (var commandToDeleteSame = new SqlCommand("Delete from [SameFile] Where [FileId]=@Id"))
+                using (var commandToDeleteSimilar = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
+                {
+                    commandToDeleteSame.Connection = connection;
+                    commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
+                    commandToDeleteSame.ExecuteNonQuery();
+
+                    commandToDeleteSimilar.Connection = connection;
+                    commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
+                    commandToDeleteSimilar.ExecuteNonQuery();
+                }
             }
-            
             WriteObject(newFile);
         }
     }

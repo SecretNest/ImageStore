@@ -15,7 +15,7 @@ To use any module from dll in PowerShell, you just need 3 steps:
 2. Use command ```Import-Module``` to load module from dll file. The parameter of this command is the path of the dll file.  
 ```Import-Module C:\ImageStore.dll``` will load the module file named as ImageStore.dll and placed in the root folder of drive C.  
 ```Import-Module .\ImageStore.dll``` will load the module file named as ImageStore.dll from the current directory.
-3. Use cmdlets.
+3. Use [cmdlets](doc/cmdlet/cmdlets.md).
 
 Also, you can combine the step 1 and 2 as one, by passing the command as a parameter while starting PowerShell.  
 ```C:\windows\System32\windowspowershell\v1.0\powershell.exe -noexit -command "Import-Module .\ImageStore.dll"```
@@ -32,13 +32,13 @@ These setting will not be preserved among instances of PowerShell. Every time th
 "SilentlyContinue"```.
 
 # Database
-ImageStore need SqlServer 2017 for hosting database. Each project should have a dedicated database.
+ImageStore need Sql Server 2017 for hosting database. Each project should have a dedicated database.
 
-All editions of SqlServer 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux versions are not tested.
+All editions of Sql Server 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux versions are not tested.
 
 Attached database file mode is supported and recommended.
 
-To install SqlServer 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
+To install Sql Server 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
 
 # Concepts
 There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.

@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "type", "type", "{11AA0075-9
 		doc\type\ImageStoreIgnoredDirectory.md = doc\type\ImageStoreIgnoredDirectory.md
 		doc\type\ImageStoreSameFile.md = doc\type\ImageStoreSameFile.md
 		doc\type\ImageStoreSimilarFile.md = doc\type\ImageStoreSimilarFile.md
+		doc\type\StringPropertyComparingModes.md = doc\type\StringPropertyComparingModes.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{EF6E290B-AA42-4675-971E-741772B58F80}"

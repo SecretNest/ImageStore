@@ -26,7 +26,7 @@ Manages [folders](../concept/folder.md).
 |[Update-ImageStoreFolder](Folder/UpdateFolder.md)|UpdateFolder|Updates the folder record by the entity provided.|
 
 # Extension
-Manages [extensions](../concept/extension.md).
+Manages [extensions](../concept/Extension.md).
 
 |Command|Alias|Description|
 |---|---|---|
@@ -50,6 +50,16 @@ Manages the directories excluded from folders.
 |[Update-ImageStoreIgnoredDirectory](IgnoredDirectory/UpdateIgnoredDirectory.md)|UpdateIgnoredDirectory|Updates the ignored directory record by the entity provided.|
 
 # File
+Manages [files](../concept/File.md) and computes hashing results.
+
+|Command|Alias|Description|
+|---|---|---|
+|[Add-ImageStoreFile](File/AddFile.md)|AddFile|Creates and adds a file record to database.|
+|[Find-ImageStoreFile](File/FindFile.md)|FindFolder|Finds the record related to the file by folder, path and file name.|
+|[Get-ImageStoreFile](File/GetFile.md)|GetFile|Gets the record related to the file by id.|
+|[Measure-ImageStoreFile](File/MeasureFile.md)|MeasureFile|Computes hashing result of the file specified.|
+|[Measure-ImageStoreFiles](File/MeasureFiles.md)|MeasureFiles|Computes hashing result of the files within the folder specified.|
+
 
 # Same File
 
