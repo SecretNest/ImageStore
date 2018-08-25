@@ -6,7 +6,9 @@ Alias: UpdateFolder
 # Parameters
 |Name|Type|Description|Optional
 |---|---|---|---|
-|Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|Folder entity|No|
+|Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|Folder entity to be used in updating|No|
+
+From Pipeline: Folder
 
 # Return
 None.

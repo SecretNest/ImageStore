@@ -13,6 +13,8 @@ Alias: ClearEmptyFolders
 |Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|The root folder to search within|No|
 |OverrideSealedFolder|*switch*|Overrides the IsSealed mark of the folder.|-|
 
+From Pipeline: Folder
+
 # Return
 None.
 

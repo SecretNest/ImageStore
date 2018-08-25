@@ -10,6 +10,8 @@ Alias: AddExtension
 |IsImage|bool|Whether this kind of file is image. Default value is ```true```.|Yes|
 |Ignored|bool|Whether this kind of file should be ignored. Default value is ```false```.|Yes|
 
+FromPipeline: Extension
+
 # Return
 The record of newly created extension.
 

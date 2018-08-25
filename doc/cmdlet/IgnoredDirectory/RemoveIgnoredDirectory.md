@@ -6,8 +6,10 @@ Alias: RemoveIgnoredDirectory
 # Parameters
 |Name|Type|Description|Optional|
 |---|---|---|---|
-|ImageStoreIgnoredDirectory|[ImageStoreIgnoredDirectory](../../type/ImageStoreIgnoredDirectory.md)|Ignored directory entity|No(*1)|
+|IgnoredDirectory|[ImageStoreIgnoredDirectory](../../type/ImageStoreIgnoredDirectory.md)|Ignored directory entity to be removed|No(*1)|
 |Id|Guid|Id of the record to be removed|No(*1)|
+
+From Pipeline: IgnoredDirectory, Id
 
 *1: One and only one parameter within this group should be provided.
 

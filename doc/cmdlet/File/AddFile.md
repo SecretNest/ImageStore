@@ -12,6 +12,8 @@ Alias: AddFile
 |Extension|[ImageStoreExtension](../../type/ImageStoreExtension.md)|Extension of the file|No|
 |OverrideSealedFolder|*switch*|Overrides the IsSealed mark of the folder.|-|
 
+From Pipeline: FileName
+
 # Return
 The record of newly created file.
 

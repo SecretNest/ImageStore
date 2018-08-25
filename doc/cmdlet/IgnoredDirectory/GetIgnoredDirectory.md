@@ -8,12 +8,14 @@ Alias: GetIgnoredDirectory
 |---|---|---|---|
 |Id|Guid|Record id|No|
 
+From Pipeline: Id
+
 # Return
 The record of the ignored directory.
 
 Type: [ImageStoreIgnoredDirectory](../../type/ImageStoreIgnoredDirectory.md)
 
-Or, null, when no related record can be found.
+Or, ```null```, when no related record can be found.
 
 # See also
   * [Concept: Folder](../../concept/Folder.md)
