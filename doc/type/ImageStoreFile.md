@@ -18,6 +18,8 @@ Namespace: SecretNest.ImageStore.File
 |ImageComparedThreshold|float|The maximum threshold of all affected callings of [Compare-ImageStoreSimilarFiles](../cmdlet/SimilarFile/CompareSimilarFiles.md). 0 means not being measured yet. Changing this value manually is not recommended.
 
 # File State
+State of this record of file.
+
 Enum: SecretNest.ImageStore.File.FileState
 
 |Element|Value|Description|

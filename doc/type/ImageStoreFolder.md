@@ -13,6 +13,8 @@ Namespace: SecretNest.ImageStore.Folder
 |IsSealed|bool|Whether this folder should be read-only|No|
 
 # Compare Image With
+The scope of the target files to be compared with for each file located in this folder.
+
 Enum: SecretNest.ImageStore.Folder.CompareImageWith
 
 |Element|Value|Description|
