@@ -16,14 +16,14 @@ namespace SecretNest.ImageStore.Folder
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
         public string Path { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1, ValueFromPipeline = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
         [AllowEmptyString][AllowNull]
         public string Name { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 2, ValueFromPipeline = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
         public CompareImageWith CompareImageWith { get; set; } = CompareImageWith.All;
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 3, ValueFromPipeline = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 3)]
         public bool IsSealed { get; set; } = false;
 
         protected override void ProcessRecord()
