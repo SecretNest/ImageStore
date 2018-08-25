@@ -17,7 +17,7 @@ namespace SecretNest.ImageStore.File
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, Mandatory = true)]
         public ImageStoreFolder Folder { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1, Mandatory = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1, Mandatory = true, ValueFromPipeline = true)]
         [AllowEmptyString]
         public string Path { get; set; }
 
