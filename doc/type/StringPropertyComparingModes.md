@@ -1,5 +1,5 @@
 # StringPropertyComparingModes
-Defines the way to use the string provided as search condition.
+The way to use the string provided as search condition.
 
 *Note: If the string related is provided with empty string (not null), comparing mode will always use equal no matter how comparing mode is set.*
 

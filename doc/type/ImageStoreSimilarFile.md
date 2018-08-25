@@ -13,6 +13,8 @@ Namespace: SecretNest.ImageStore.SimilarFile
 |IgnoredMode|[IgnoredMode](#ignored-mode)|State of this relationship|No|
 
 # Ignored Mode
+Whether or how this relation should be ignored.
+
 Enum: SecretNest.ImageStore.SimilarFile.IgnoredMode
 
 |Element|Value|Description|

@@ -74,7 +74,7 @@ These types will be used while operating with cmdlets of ImageStore.
 
 |Type|Class|Description|
 | --- | --- | --- |
-|[StringPropertyComparingModes](doc/type/StringPropertyComparingModes.md)|enum|Defines the way to use the string provided as search condition.|
+|[StringPropertyComparingModes](doc/type/StringPropertyComparingModes.md)|enum|The way to use the string provided as search condition.|
 
 # Workthough
 
