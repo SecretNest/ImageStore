@@ -251,13 +251,13 @@ namespace SecretNest.ImageStore.File
                             }
                         }
                     }
-
-                    commandDropTable.Connection = connection;
-                    commandDropTable.Transaction = transation;
-                    commandDropTable.ExecuteNonQuery();
                 }
                 else
                     result = 0;
+
+                commandDropTable.Connection = connection;
+                commandDropTable.Transaction = transation;
+                commandDropTable.ExecuteNonQuery();
 
                 transation.Commit();
             }
@@ -297,6 +297,7 @@ namespace SecretNest.ImageStore.File
                     if (commandSelect.ExecuteNonQuery() != 0)
                     {
                         bool result;
+
                         commandDeleteSimilar.ExecuteNonQuery();
 
                         result = commandDeleteFile.ExecuteNonQuery() != 0;
@@ -315,9 +316,7 @@ namespace SecretNest.ImageStore.File
                                 }
                             }
                         }
-
-                        commandDropTable.ExecuteNonQuery();
-
+                        
                         if (result)
                             operation.Item2();
                         else
@@ -325,6 +324,9 @@ namespace SecretNest.ImageStore.File
                     }
                     else
                         operation.Item3();
+
+                    commandDropTable.ExecuteNonQuery();
+
                 }
 
                 transation.Commit();
