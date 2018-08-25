@@ -31,7 +31,7 @@ namespace SecretNest.ImageStore.File
         public ImageStoreFolder NewFolder { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
-        [AllowEmptyString()] public string NewPath { get; set; }
+        [AllowEmptyString()][AllowNull] public string NewPath { get; set; }
 
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 3)]
