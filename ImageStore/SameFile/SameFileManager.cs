@@ -281,6 +281,43 @@ namespace SecretNest.ImageStore.SameFile
             }
         }
 
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            foreach (ListViewItem item in listView1.Items)
+            {
+                if (item.Selected)
+                {
+                    var filename = item.SubItems[2].Text;
+                    System.Diagnostics.Process.Start(filename);
+                    return;
+                }
+            }
+        }
+
+        bool mouseDown = false;
+        private void listView1_MouseLeave(object sender, EventArgs e)
+        {
+            mouseDown = false;
+        }
+
+        private void listView1_MouseUp(object sender, MouseEventArgs e)
+        {
+            mouseDown = false;
+        }
+
+        private void listView1_MouseDown(object sender, MouseEventArgs e)
+        {
+            mouseDown = true;
+        }
+
+        private void listView1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (mouseDown && !listLoading)
+            {
+                e.NewValue = e.CurrentValue;
+            }
+        }
+
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             Application.DoEvents();
