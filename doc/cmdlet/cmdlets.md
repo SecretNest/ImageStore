@@ -70,6 +70,8 @@ Manages [files](../concept/File.md) and computes hashing results.
 # Same File
 Generates, manages and deals with [same files](../concept/SameFile.md) based on file hashing result using Sha1 algorithm.
 
+|Command|Alias|Description|
+|---|---|---|
 |[Clear-ImageStoreSameFileObsoletedGroups](SameFile/ClearSameFileObsoletedGroups.md)|ClearSameFileObsoletedGroups|Clears same file groups which have only one record left.|
 |[Compare-ImageStoreSameFiles](SameFile/CompareSameFiles.md)|CompareSameFiles|Compares file hashing result and generates same groups.|
 |[Get-ImageStoreSameFile](SameFile/GetSameFile.md)|GetSameFile|Gets the record of same file by id.|
