@@ -10,12 +10,12 @@ namespace SecretNest.ImageStore.SameFile
 {
     [Cmdlet(VerbsCommon.Hide, "ImageStoreSameFile", DefaultParameterSetName = "Id")]
     [Alias("HideSameFile")]
-    public class HiddeneSameFileCmdlet : Cmdlet
+    public class HideSameFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "Entity")]
         public ImageStoreSameFile SameFile { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, Mandatory = true, ParameterSetName = "Id")]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "Id")]
         public Guid Id { get; set; }
 
         protected override void ProcessRecord()
