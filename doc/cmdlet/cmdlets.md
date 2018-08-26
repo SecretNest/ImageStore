@@ -21,7 +21,7 @@ Manages [folders](../concept/folder.md).
 |[Find-ImageStoreFolder](Folder/FindFolder.md)|FindFolder|Finds the record related to the folder by name.|
 |[Get-ImageStoreFolder](Folder/GetFolder.md)|GetFolder|Gets the record related to the folder by id.|
 |[Remove-ImageStoreFolder](Folder/RemoveFolder.md)|RemoveFolder|Removes the folder record specified from database.|
-|[Search-ImageStoreFolder](Folder/SearchFolder.md)|SearchFolder|Searches all folders records which matches the conditions provided.|
+|[Search-ImageStoreFolder](Folder/SearchFolder.md)|SearchFolder|Searches all folders records matched with the conditions provided.|
 |[Sync-ImageStoreFolder](Folder/SyncFolder.md)|SyncFolder|Syncs the database to make records consistent with file system.|
 |[Update-ImageStoreFolder](Folder/UpdateFolder.md)|UpdateFolder|Updates the folder record by the entity provided.|
 
@@ -34,7 +34,7 @@ Manages [extensions](../concept/Extension.md).
 |[Find-ImageStoreExtension](Extension/FindExtension.md)|FindExtension|Finds the record related to the extension by name.|
 |[Get-ImageStoreExtension](Extension/GetExtension.md)|GetExtension|Gets the record by id.|
 |[Remove-ImageStoreExtension](Extension/RemoveExtension.md)|RemoveExtension|Removes the extension record specified from database.|
-|[Search-ImageStoreExtension](Extension/SearchExtension.md)|SearchExtension|Searches all extensions records which matches the conditions provided.|
+|[Search-ImageStoreExtension](Extension/SearchExtension.md)|SearchExtension|Searches all extensions records matched with the conditions provided.|
 |[Update-ImageStoreExtension](Extension/UpdateExtension.md)|UpdateExtension|Updates the extension record by the entity provided.|
 
 # Ignored Directory
@@ -46,7 +46,7 @@ Manages the directories excluded from folders.
 |[Find-ImageStoreIgnoredDirectory](IgnoredDirectory/FindIgnoredDirectory.md)|FindIgnoredDirectory|Finds the record related to the ignored directory by all properties.|
 |[Get-ImageStoreIgnoredDirectory](IgnoredDirectory/GetIgnoredDirectory.md)|GetIgnoredDirectory|Gets the record of ignored directory by id.|
 |[Remove-ImageStoreIgnoredDirectory](IgnoredDirectory/RemoveIgnoredDirectory.md)|RemoveIgnoredDirectory|Removes the ignored directory record specified from database.|
-|[Search-ImageStoreIgnoredDirectory](IgnoredDirectory/SearchIgnoredDirectory.md)|SearchIgnoredDirectory|Searches all ignore directory records which matches the conditions provided.|
+|[Search-ImageStoreIgnoredDirectory](IgnoredDirectory/SearchIgnoredDirectory.md)|SearchIgnoredDirectory|Searches all ignored directory records matched with the conditions provided.|
 |[Update-ImageStoreIgnoredDirectory](IgnoredDirectory/UpdateIgnoredDirectory.md)|UpdateIgnoredDirectory|Updates the ignored directory record by the entity provided.|
 
 # File
@@ -59,7 +59,13 @@ Manages [files](../concept/File.md) and computes hashing results.
 |[Get-ImageStoreFile](File/GetFile.md)|GetFile|Gets the record related to the file by id.|
 |[Measure-ImageStoreFile](File/MeasureFile.md)|MeasureFile|Computes hashing result of the file specified.|
 |[Measure-ImageStoreFiles](File/MeasureFiles.md)|MeasureFiles|Computes hashing result of the files within the folder specified.|
-
+|[Move-ImageStoreFile](File/MoveFile.md)|MoveFile|Moves the file record specified and the pointed file to the target folder and directory.|
+|[Remove-ImageStoreDirectory](File/RemoveDirectory.md)|RemoveDirectory|Removes the directory specified, including all files and sub directories, from database and file system.|
+|[Remove-ImageStoreFile](File/RemoveFile.md)|RemoveFile|Removes the file record specified and the pointed file.|
+|[Rename-ImageStoreFile](File/RenameFile.md)|RenameFile|Renames the file record specified and the pointed file.|
+|[Resolve-ImageStoreFile](File/ResolveFile.md)|ResolveFile|Gets the full path of the file specified.|
+|[Search-ImageStoreFile](File/SearchFile.md)|SearchFile|Searches all files records matched with the conditions provided.|
+|[Update-ImageStoreFile](file/UpdateFile.md)|UpdateFile|Updates the file record by the entity provided.|
 
 # Same File
 

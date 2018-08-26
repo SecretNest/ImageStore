@@ -11,12 +11,14 @@ Alias: FindFile
 |FileName|string|File name without extension. Set to empty string when the file doesn't have a name.|No|
 |ExtensionId|Guid|Record id of the extension of this file|No|
 
+From Pipeline: FileName
+
 # Return
 The record of the file.
 
 Type: [ImageStoreFile](../../type/ImageStoreFile.md)
 
-Or, null, when no related record can be found.
+Or, ```null```, when no related record can be found.
 
 # See also
   * [Concept: File](../../concept/File.md)

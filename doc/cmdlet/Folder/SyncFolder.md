@@ -15,11 +15,17 @@ Alias: SyncFolder
 |Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|Folder to sync. All folders will be synced if this parameter is not specified.|Yes|
 |OverrideSealedFolder|*switch*|Overrides the IsSealed mark of the folder.|-|
 
+From Pipeline: Folder
+
 If Folder is not specified and OverrideSealedFolder is missing, all folders without IsSealed marked will be synced.
 
 # Return
 None.
 
+# Thumbprint Cache
+To remove the related cache files, call [Set-ImageStoreThumbprintCacheFolder](../SimilarFile/SetThumbprintCacheFolder.md) before this operating.
+
 # See also
   * [Concept: Folder](../../concept/Folder.md)
+  * [Concept: ThumbprintCache](../../concept/ThumbprintCache.md)
   * [Folder Cmdlets](../cmdlets.md#folder)

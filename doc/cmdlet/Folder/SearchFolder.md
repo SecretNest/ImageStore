@@ -1,17 +1,19 @@
 # Search-ImageStoreFolder
-Searches all records of folders which matches the conditions provided.
+Searches all records of folders matched with the conditions provided.
 
 Alias: SearchFolder
 
 # Parameters
 |Name|Type|Description|Optional|
 |---|---|---|---|
-|Name|string|Uses name property as an condition to search.|Yes|
+|Name|string|Filters records by name.|Yes|
 |NamePropertyComparingModes|[StringPropertyComparingModes](../../type/StringPropertyComparingModes.md)|The ways to use Name in condition. Default value is ```Contains```.|Yes|
-|Path|string|Uses path property as an condition to search.|Yes|
+|Path|string|Filters records by the path of the root directory.|Yes|
 |PathPropertyComparingModes|[StringPropertyComparingModes](../../type/StringPropertyComparingModes.md)|The ways to use Path in condition. Default value is ```Contains```.|Yes|
-|CompareImageWith|[CompareImageWith](../../type/ImageStoreFolder.md#compare-image-with)|Uses CompareImageWith property as an condition to search.|Yes|
-|IsSealed|bool?|Uses IsSealed property as an condition to search.|Yes|
+|CompareImageWith|[CompareImageWith](../../type/ImageStoreFolder.md#compare-image-with)|Filters records by the scope of the target files to be compared with for each file located in this folder.|Yes|
+|IsSealed|bool?|Filters records by whether the folder is set to sealed.|Yes|
+
+From Pipeline: Name
 
 Conditions will be ignored if not provided or set as null, unless a default value is specified above.
 

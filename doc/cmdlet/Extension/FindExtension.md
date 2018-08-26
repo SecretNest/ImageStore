@@ -8,12 +8,14 @@ Alias: FindExtension
 |---|---|---|---|
 |Extension|string|Extension name of this kind of file to find. Empty string is acceptable for the kind of file without extension.|No|
 
+From Pipeline: Extension
+
 # Return
 The record of the extension.
 
 Type: [ImageStoreExtension](../../type/ImageStoreExtension.md)
 
-Or, null, when no related record can be found.
+Or, ```null```, when no related record can be found.
 
 # See also
   * [Concept: Extension](../../concept/Extension.md)

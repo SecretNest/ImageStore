@@ -11,6 +11,8 @@ Alias: AddFolder
 |CompareImageWith|[CompareImageWith](#compare-image-with)|The scope of the target files to be compared with for each file located in this folder. Default value is ```All```.|Yes|
 |IsSealed|bool|Whether this folder should be read-only. Default value is ```false```.|Yes|
 
+From Pipeline: Path
+
 # Return
 The record of newly created folder.
 

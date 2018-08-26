@@ -9,11 +9,15 @@ Alias: MeasureFiles
 |Name|Type|Description|Optional|
 |---|---|---|---|
 |Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|The folder which contains the files to be computed. All files within all folders will be computed when this parameter absent.|Yes|
-|RemeasuringFileStates|[RemeasuringFileStates](#remeasuring)|The kind of files to be recomputed. Default value is ```None```.|Yes|
+|RemeasuringFileStates|[RemeasuringFileStates](#remeasuring)|Kind of files to be recomputed. Default value is ```None```.|Yes|
 |FileCountLimit|int?|Limits the count of files to be computed. Default value is ```null```, which means no limit of count will be applied.|Yes|
-|ComputingThreadLimit|int|The count of thread will be created for computing hashing result. Default value will be the count of the logical processors installed in this computer. Set to -1 to remove this limit.|Yes|
+|ComputingThreadLimit|int|The count of thread will be created for computing hashing result. Default value will be set as the count of the logical processors installed in this computer. Set to ```-1``` to remove this limit.|Yes|
+
+From Pipeline: Folder
 
 # Remeasuring
+Kind of files to be recomputed.
+
 Enum: SecretNest.ImageStore.File.RemeasuringFileStates
 
 |Element|Value|Description|

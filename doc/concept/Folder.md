@@ -15,7 +15,9 @@ Multiple folders are supported and recommended. You should create folders separa
 No directory should be shared among folders. In another word, there should not be any folder which contains another one. If you have to use a sub directory from a folder as another one, you could use Ignored Directory functions.
 
 # Ignored Directory
-Ignore directory is a function to exclude one directory from a folder by specifying the path. You could choose to include the sub directories or not. All files in the directories pointed from Ignored Directory records will be ignored while processing.
+Ignored directory is a function to exclude one directory from a folder by specifying the path. You could choose to include the sub directories or not. All files in the directories pointed from Ignored Directory records will be ignored while processing.
+
+Adding, removing and updating ignored directory records won't add any file records automatically, won't remove any exists file records either. [Sync-ImageStoreFolder](../cmdlet/Folder/SyncFolder.md) need to be run manually.
 
 # Cmdlets
   * To check or modify Folders, you need to call [Folder Cmdlets](../cmdlet/cmdlets.md#folder).

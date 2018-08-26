@@ -9,7 +9,9 @@ Alias: MeasureFile
 |File|[ImageStoreFile](../../type/ImageStoreFile.md)|The file to be computed.|No|
 |Recompute|*switch*|Compute the file even the state of the file is not new created. (*1)|-|
 
-(*1): Hashing result will be recomputed when this parameter specified. After recomputed, the records related hashing result of this file will be deleted.
+From Pipeline: FileName
+
+*1: Hashing result will be recomputed when this parameter specified. After recomputed, the records related hashing result of this file will be deleted.
 
 # Return
 The record of hashed file.
