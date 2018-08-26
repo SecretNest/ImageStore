@@ -11,6 +11,8 @@ Namespace: SecretNest.ImageStore.SameFile
 |FileId|Guid|Record id of the [file](ImageStoreFile.md) related|Yes|
 |IsIgnored|bool|Whether this record is ignored or not|No|
 
+*Note: Ignored record will not be selected by [Select-ImageStoreSameFile](SelectSameFile.md) automatically. If there is only one file left as not ignored in one same file group, the only file will not be selected also.*
+
 # Cmdlets
   * [Get-ImageStoreSameFile](../cmdlet/SameFile/GetSameFile.md)
   * [Hide-ImageStoreSameFile](../cmdlet/SameFile/HideSameFile.md)

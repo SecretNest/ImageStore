@@ -13,7 +13,7 @@ namespace SecretNest.ImageStore.SameFile
     public class RemoveSameFileGroupCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
-        public Byte[] Sha1Hash { get; set; }
+        public byte[] Sha1Hash { get; set; }
 
         protected override void ProcessRecord()
         {

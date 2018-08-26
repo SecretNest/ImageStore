@@ -68,5 +68,17 @@ Manages [files](../concept/File.md) and computes hashing results.
 |[Update-ImageStoreFile](file/UpdateFile.md)|UpdateFile|Updates the file record by the entity provided.|
 
 # Same File
+Generates, manages and deals with [same files](../concept/SameFile.md) based on file hashing result using Sha1 algorithm.
+
+|[Clear-ImageStoreSameFileObsoletedGroups](SameFile/ClearSameFileObsoletedGroups.md)|ClearSameFileObsoletedGroups|Clears same file groups which have only one record left.|
+|[Compare-ImageStoreSameFiles](SameFile/CompareSameFiles.md)|CompareSameFiles|Compares file hashing result and generates same groups.|
+|[Get-ImageStoreSameFile](SameFile/GetSameFile.md)|GetSameFile|Gets the record of same file by id.|
+|[Hide-ImageStoreSameFile](SameFile/HideSameFile.md)|HideSameFile|Marks the record of same file as ignored.|
+|[Remove-ImageStoreSameFile](SameFile/RemoveSameFile.md)|RemoveSameFile|Removes the same file record specified.|
+|[Remove-ImageStoreSameFileGroup](SameFile/RemoveSameFileGroup.md)|RemoveSameFileGroup|Removes same file records by file hashing result specified.|
+|[Search-ImageStoreSameFile](SameFile/SearchSameFile.md)|SearchSameFile|Searches all same file records matched with the conditions provided.|
+|[Select-ImageStoreSameFile](SameFile/SelectSameFile.md)|SelectSameFile|Deals with found same files and selects records for further operating, like removal.|
+|[Show-ImageStoreSameFile](SameFile/ShowSameFile.md)|ShowSameFile|Marks the record of same file as normal, not ignored.|
+|[Update-ImageStoreSameFile](SameFile/UpdateSameFile.md)|UpdateSameFile|Updates the same file record by the entity provided.|
 
 # Similar File

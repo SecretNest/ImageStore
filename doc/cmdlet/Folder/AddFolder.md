@@ -8,7 +8,7 @@ Alias: AddFolder
 |---|---|---|---|
 |Path|string|Path of the root directory of this folder|No|
 |Name|string|Name of this folder. Default value is the same as Path.|Yes|
-|CompareImageWith|[CompareImageWith](#compare-image-with)|The scope of the target files to be compared with for each file located in this folder. Default value is ```All```.|Yes|
+|CompareImageWith|[CompareImageWith](../../type/ImageStoreFolder.md#compare-image-with)|The scope of the target files to be compared with for each file located in this folder. Default value is ```All```.|Yes|
 |IsSealed|bool|Whether this folder should be read-only. Default value is ```false```.|Yes|
 
 From Pipeline: Path

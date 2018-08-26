@@ -50,14 +50,14 @@ namespace SecretNest.ImageStore.SameFile
                 {
                     text += "Where [Sha1Hash]=@Sha1Hash";
                     command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = Sha1Hash });
-                    if (!OnlyIgnored.IsPresent)
+                    if (OnlyIgnored.IsPresent)
                         text += " and [IsIgnored]=1";
                     else if (!IncludeIgnored.IsPresent)
                         text += " and [IsIgnored]=0";
                 }
                 else if (IncludeObsoleted.IsPresent)
                 {
-                    if (!OnlyIgnored.IsPresent)
+                    if (OnlyIgnored.IsPresent)
                         text += "where [IsIgnored]=1";
                     else if (!IncludeIgnored.IsPresent)
                         text += "where [IsIgnored]=0";
@@ -65,7 +65,7 @@ namespace SecretNest.ImageStore.SameFile
                 else
                 {
                     text += "Where [Sha1Hash] in (Select [Sha1Hash] From [SameFile] ";
-                    if (!OnlyIgnored.IsPresent)
+                    if (OnlyIgnored.IsPresent)
                         text += "where [IsIgnored]=1 ";
                     else if (!IncludeIgnored.IsPresent)
                         text += "where [IsIgnored]=0 ";
