@@ -10,12 +10,12 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     [Cmdlet(VerbsCommon.Hide, "ImageStoreSimilarFile", DefaultParameterSetName = "Id")]
     [Alias("HideSimilarFile")]
-    public class HiddeneSimilarFileCmdlet : Cmdlet
+    public class HideSimilarFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "Entity")]
         public ImageStoreSimilarFile SimilarFile { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, Mandatory = true, ParameterSetName = "Id")]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "Id")]
         public Guid Id { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 1, Mandatory = true)]
