@@ -63,7 +63,7 @@ These types of entities will be used while operating with cmdlets of ImageStore.
 |Type|Description|
 | --- | --- |
 |[ImageStoreFolder](doc/type/ImageStoreFolder.md)|Represents a [folder](doc/concept/Folder.md) for storing image files.|
-|[ImageStoreIgnoredDirectory](doc/type/ImageStoreIgnoredDirectory.md)|Excludes a directory from a [folder](doc/concept/Folder.md).|
+|[ImageStoreIgnoredDirectory](doc/type/ImageStoreIgnoredDirectory.md)|Represents an exclusion a directory from a [folder](doc/concept/Folder.md).|
 |[ImageStoreExtension](doc/type/ImageStoreExtension.md)|Represents an [extension](doc/concept/extension.md), a kind of file.|
 |[ImageStoreFile](doc/type/ImageStoreFile.md)|Represents a [file](doc/concept/File.md) stored in a [folder](doc/concept/Folder.md).|
 |[ImageStoreSameFile](doc/type/ImageStoreSameFile.md)|Represents a [record](doc/concept/SameFile.md) that a file detected to be the same as at least one other file.|
