@@ -1,5 +1,5 @@
 # ImageStoreIgnoredDirectory
-Excludes a directory from a [folder](../concept/Folder.md).
+Represents an exclusion a directory from a [folder](../concept/Folder.md).
 
 Namespace: SecretNest.ImageStore.IgnoredDirectory
 
