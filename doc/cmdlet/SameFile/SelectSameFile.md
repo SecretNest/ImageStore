@@ -1,6 +1,8 @@
 # Select-ImageStoreSameFile
 Deals with found same files and selects records for further operating, like removal.
 
+A window may be shown while running this cmdlet.
+
 Alias: SelectSameFile
 
 # Algorithm
@@ -21,7 +23,7 @@ In each same file group:
 From Pipeline: Folder
 
 # Parameters to Modify UI Color
-UI window will use different back colors for odd and even groups, as well as different fore colors for selected, ignored and normal records by default. To change these colors, or turn off this function to use the system default colors, use these parameters below.
+UI window will use different back colors for odd and even groups, as well as different fore colors for selected, ignored and effective records by default. To change these colors, or turn off this function to use the system default colors, use these parameters below.
 
 |Name|Type|Description|Optional|
 |---|---|---|---|
@@ -51,17 +53,17 @@ A window for user dealing selection that cannot be dealt automatically.
 All records found will be listed in window.
 
   * When ordered by group (as default), different colors will be applied.
-  * Double click any item to use system default viewer to open the file related.
-  * User need to check all items which is wanted as return.
+  * Double click any item will use system default viewer to open the file related.
+  * User need to check all items which are intended to return.
 
-## Function
+## Functions
   * Button - Mark as Ignored: Marks the selected items as ignored.
   * Button - Mark as Not Ignored: Marks the selected item as normal, not ignored.
   * Button - Auto Select: Checks all but one items in each same file group as manual selection.
   * Checkbox - Prevent Non-reserved Selection: Prevents checking all items in one same file group. Will uncheck one item automatically when user attempt to check all items in one same file group.
   * Checkbox - Hide Auto Dealt: Hides all groups dealt automatically already.
-  * Button - OK: Return the checked items.
-  * Close window directly: Nothing will be returned.
+  * Button - OK: Returns the checked items.
+  * Close window directly: Returns nothing.
 
 # Return
 The list of the records which checked for the further operating.

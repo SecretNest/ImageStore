@@ -10,7 +10,6 @@ namespace SecretNest.ImageStore.SameFile
 {
     [Cmdlet(VerbsData.Update, "ImageStoreSameFile")]
     [Alias("UpdateSameFile")]
-    [OutputType(typeof(ImageStoreSameFile))]
     public class UpdateSameFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]

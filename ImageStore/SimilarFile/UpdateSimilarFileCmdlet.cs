@@ -10,7 +10,6 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     [Cmdlet(VerbsData.Update, "ImageStoreSimilarFile")]
     [Alias("UpdateSimilarFile")]
-    [OutputType(typeof(ImageStoreSimilarFile))]
     public class UpdateSimilarFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]

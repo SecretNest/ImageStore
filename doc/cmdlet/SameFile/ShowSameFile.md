@@ -1,13 +1,13 @@
 # Show-ImageStoreSameFile
-Marks the record of same file as normal, not ignored.
+Marks the record of same file as effective, not ignored.
 
 Alias: ShowSameFile
 
 # Parameters
 |Name|Type|Description|Optional|
 |---|---|---|---|
-|SameFile|[ImageStoreSameFile](../../type/ImageStoreSameFile.md)|Entity to be marked as normal|No(*1)|
-|Id|Guid|Id of the record to be marked as normal|No(*1)|
+|SameFile|[ImageStoreSameFile](../../type/ImageStoreSameFile.md)|Entity to be marked as effective|No(*1)|
+|Id|Guid|Id of the record to be marked as effective|No(*1)|
 
 From Pipeline: SameFile, Id
 

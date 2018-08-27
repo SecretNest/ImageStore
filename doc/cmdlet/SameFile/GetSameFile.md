@@ -11,7 +11,7 @@ Alias: GetSameFile
 From Pipeline: Id
 
 # Return
-The record of the same file record.
+The record of the same file.
 
 Type: [ImageStoreSameFile](../../type/ImageStoreSameFile.md)
 

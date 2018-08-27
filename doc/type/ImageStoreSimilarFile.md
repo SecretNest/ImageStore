@@ -19,7 +19,7 @@ Enum: SecretNest.ImageStore.SimilarFile.IgnoredMode
 
 |Element|Value|Description|
 |---|---|---|
-|Normal|0|Normal status, not be set as ignored.|
+|Effective|0|Effective status, not be set as ignored.|
 |HiddenButConnected|1|Hidden but still connects the files as one group. Usually used when files are similar but want to be kept both.|
 |HiddenAndDisconnected|2|Hidden and disconnects those two from one group. Usually used when files are not similar at all.|
 

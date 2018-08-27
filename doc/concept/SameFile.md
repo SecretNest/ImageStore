@@ -8,6 +8,9 @@ Same files will be grouped into Same File Groups based on Sha1 hashing result.
 # Same File Group
 All files with same Sha1 hashing result will be placed in one Same File Group.
 
+# Ignored
+If a same file record is marked as ignored, it won't be treated as the point file is same as others in the same group. Uses this function when need to keep some files even they are same with others.
+
 # Remove Same Files
 After detection, you could use [Select-ImageStoreSameFile](../cmdlet/SameFile/SelectSameFile.md) to return same files. This cmdlet powered with algorithm to deal with same files. See the cmdlet document for details. Combines the result with [Remove-ImageStoreFile](../cmdlet/File/RemoveFile.md) to delete the same files found.
 

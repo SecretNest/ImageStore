@@ -17,12 +17,12 @@ Alias: SearchFile
 |Sha1HashIsNull|*switch*|Returns files which have no file hashing result.|Yes|
 |Sha1Hash|byte[]|Filters records by file hashing result. Will be ignored when Sha1HashIsNull is present.|Yes|
 |FileSize|int?|Filters records by the file size.|Yes|
-|FileSizeGreaterOrEqual|int?|Returns files which is equal or larger than the size. Will be ignored when FileSize is present.|Yes|
-|FileSizeLessOrEqual|int?|Returns files which is equal or smaller than the size. Will be ignored when FileSize is present.|Yes|
+|FileSizeGreaterOrEqual|int?|Returns files which are equal or larger than the size. Will be ignored when FileSize is present.|Yes|
+|FileSizeLessOrEqual|int?|Returns files which are equal or smaller than the size. Will be ignored when FileSize is present.|Yes|
 |FileState|[FileState](../../type/ImageStoreFile.md#file-state)?|Filters records by state.|Yes|
 |ImageComparedThreshold|float?|Filters records by the maximum ImageComparedThreshold used in [Compare-ImageStoreSimilarFiles](../SimilarFile/CompareSimilarFiles.md) on this file.|Yes|
-|ImageComparedThresholdGreaterOrEqual|float?|Returns files which ImageComparedThreshold is equal or greater than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
-|ImageComparedThresholdLessOrEqual|float?|Returns files which ImageComparedThreshold is equal or less than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
+|ImageComparedThresholdGreaterOrEqual|float?|Returns files which ImageComparedThreshold are equal or greater than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
+|ImageComparedThresholdLessOrEqual|float?|Returns files which ImageComparedThreshold are equal or less than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
 |Top|int?|Limits the count of the results.|Yes|
 
 From Pipeline: Path

@@ -68,19 +68,35 @@ Manages [files](../concept/File.md) and computes hashing results.
 |[Update-ImageStoreFile](file/UpdateFile.md)|UpdateFile|Updates the file record by the entity provided.|
 
 # Same File
-Generates, manages and deals with [same files](../concept/SameFile.md) based on file hashing result using Sha1 algorithm.
+Generates, manages and deals with [same files](../concept/SameFile.md) records based on file hashing result using Sha1 algorithm.
 
 |Command|Alias|Description|
 |---|---|---|
 |[Clear-ImageStoreSameFileObsoletedGroups](SameFile/ClearSameFileObsoletedGroups.md)|ClearSameFileObsoletedGroups|Clears same file groups which have only one record left.|
-|[Compare-ImageStoreSameFiles](SameFile/CompareSameFiles.md)|CompareSameFiles|Compares file hashing result and generates same groups.|
+|[Compare-ImageStoreSameFiles](SameFile/CompareSameFiles.md)|CompareSameFiles|Compares file hashing result and generates same file groups.|
 |[Get-ImageStoreSameFile](SameFile/GetSameFile.md)|GetSameFile|Gets the record of same file by id.|
 |[Hide-ImageStoreSameFile](SameFile/HideSameFile.md)|HideSameFile|Marks the record of same file as ignored.|
 |[Remove-ImageStoreSameFile](SameFile/RemoveSameFile.md)|RemoveSameFile|Removes the same file record specified.|
 |[Remove-ImageStoreSameFileGroup](SameFile/RemoveSameFileGroup.md)|RemoveSameFileGroup|Removes same file records by file hashing result specified.|
 |[Search-ImageStoreSameFile](SameFile/SearchSameFile.md)|SearchSameFile|Searches all same file records matched with the conditions provided.|
 |[Select-ImageStoreSameFile](SameFile/SelectSameFile.md)|SelectSameFile|Deals with found same files and selects records for further operating, like removal.|
-|[Show-ImageStoreSameFile](SameFile/ShowSameFile.md)|ShowSameFile|Marks the record of same file as normal, not ignored.|
+|[Show-ImageStoreSameFile](SameFile/ShowSameFile.md)|ShowSameFile|Marks the record of same file as effective, not ignored.|
 |[Update-ImageStoreSameFile](SameFile/UpdateSameFile.md)|UpdateSameFile|Updates the same file record by the entity provided.|
 
 # Similar File
+Generates, manages and deals with [similar files](../concept/SimilarFile.md) records based on image hashing result using priHash algorithm.
+
+|Command|Alias|Description|
+|---|---|---|
+|[Clear-ImageStoreThumbprintCache](SimilarFile/ClearThumbprintCache.md)|ClearThumbprintCache|Deletes all thumbprint cache data used by [Resolve-ImageStoreSimilarFiles](SimilarFile/ResolveSimilarFiles.md).|
+|[Clear-ImageStoreThumbprintCacheFolder](SimilarFile/ClearThumbprintCacheFolder.md)|ClearThumbprintCacheFolder|Disables thumbprint cache function by clearing the path setting of the cache folder.|
+|[Compare-ImageStoreSimilarFiles](SimilarFile/CompareSimilarFiles.md)|CompareSimilarFiles|Compares image hashing result and generates similar file relation records.|
+|[Get-ImageStoreSimilarFile](SimilarFile/GetSimilarFile.md)|GetSimilarFile|Gets the record of similar file relation by id.|
+|[Hide-ImageStoreSimilarFile](SimilarFile/HideSimilarFile.md)|HideSimilarFile|Marks the record of similar file relation as ignored.|
+|[Remove-ImageStoreSimilarFile](SimilarFile/RemoveSimilarFile.md)|RemoveSimilarFile|Removes the record of similar file relation specified.|
+|[Reset-ImageStoreSimilarFiles](SimilarFile/ResetSimilarFiles.md)|ResetSimilarFiles|Removes all records of similar file relations and reset all file records to the state before comparing similar files.|
+|[Resolve-ImageStoreSimilarFiles](SimilarFile/ResolveSimilarFiles.md)|ResolveSimilarFiles|Deals with found similar files and selects files for further operating, like removal.|
+|[Search-ImageStoreSimilarFile](SimilarFile/SearchSimilarFile.md)|SearchSimilarFile|Searches all records of similar file relations matched with the condition provided.|
+|[Set-ImageStoreThumbprintCacheFolder](SimilarFile/SetThumbprintCacheFolder.md)|SetThumbprintCacheFolder|Enables thumbprint cache function by setting the path setting of the cache folder.|
+|[Show-ImageStoreSimilarFile](SimilarFile/ShowSimilarFile.md)|ShowSimilarFile|Marks the record of similar file relation as effective, not ignored.|
+|[Update-ImageStoreSimilarFile](SimilarFile/UpdateSimilarFile.md)|UpdateSimilarFile|Updates the record of similar file relation by the entity provided.|
