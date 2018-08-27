@@ -11,7 +11,7 @@ namespace SecretNest.ImageStore.SimilarFile
     [Cmdlet(VerbsCommon.Get, "ImageStoreSimilarFile")]
     [Alias("GetSimilarFile")]
     [OutputType(typeof(ImageStoreSimilarFile))]
-    public class GetSimilarFile : Cmdlet
+    public class GetSimilarFileCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
         public Guid Id { get; set; }

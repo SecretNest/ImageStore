@@ -155,7 +155,7 @@
     <Compile Include="SimilarFile\CompareSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\CompareSimilarFileHelper.cs" />
     <Compile Include="SimilarFile\FileInfo.cs" />
-    <Compile Include="SimilarFile\GetSimilarFile.cs" />
+    <Compile Include="SimilarFile\GetSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\HideSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\IgnoreSimilarFileHelper.cs" />
     <Compile Include="SimilarFile\ImageStoreSimilarFile.cs" />
