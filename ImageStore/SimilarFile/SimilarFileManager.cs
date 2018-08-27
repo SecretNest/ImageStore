@@ -55,7 +55,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void SimilarFileManager_Load(object sender, EventArgs e)
         {
-            List<ListViewItem> normalGroups = new List<ListViewItem>();
+            List<ListViewItem> effectiveGroups = new List<ListViewItem>();
             List<ListViewItem> hiddenGroups = new List<ListViewItem>();
 
             listView1.BeginUpdate();
@@ -81,14 +81,14 @@ namespace SecretNest.ImageStore.SimilarFile
                 else
                 {
                     listViewItem.Group = listView1.Groups[0];
-                    normalGroups.Add(listViewItem);
+                    effectiveGroups.Add(listViewItem);
                 }
             }
 
             imageList1.Images.AddRange(images);
             images = null;
 
-            listView1.Items.AddRange(normalGroups.ToArray());
+            listView1.Items.AddRange(effectiveGroups.ToArray());
             this.hiddenGroups = hiddenGroups.ToArray();
 
             if (groupedFiles.TryGetValue(-1, out var disconnectedGroup))
@@ -103,7 +103,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             listView1.EndUpdate();
-            if (normalGroups.Count == 0)
+            if (effectiveGroups.Count == 0)
             {
                 if (listView1.Items.Count > 0)
                     listView1.Items[0].Selected = true;
@@ -112,7 +112,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 listView1.Groups[0].Items[0].Selected = true;
             }
-            normalGroups = null;
+            effectiveGroups = null;
             hiddenGroups = null;
 
             TopMost = true;
