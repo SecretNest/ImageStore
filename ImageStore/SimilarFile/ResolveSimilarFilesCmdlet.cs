@@ -21,7 +21,7 @@ namespace SecretNest.ImageStore.SimilarFile
     [OutputType(typeof(List<ImageStoreFile>))]
     public class ResolveSimilarFilesCmdlet : Cmdlet
     {
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]
         public float? DifferenceDegree { get; set; }
 
         protected override void BeginProcessing()

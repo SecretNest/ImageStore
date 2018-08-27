@@ -11,7 +11,7 @@ namespace SecretNest.ImageStore.SimilarFile
     [Flags]
     public enum IgnoredModes : int
     {
-        Normal = 1,
+        Effective = 1,
         HiddenButConnected = 2,
         HiddenAndDisconnected = 4,
         
@@ -43,7 +43,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public float? DifferenceDegreeLessOrEqual { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 5)]
-        public IgnoredModes IgnoredModes { get; set; } = IgnoredModes.Normal;
+        public IgnoredModes IgnoredModes { get; set; } = IgnoredModes.Effective;
         
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 6)]
         public int? Top { get; set; }
@@ -114,7 +114,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 if (IgnoredModes != IgnoredModes.All)
                 {
                     List<string> ignoreCode = new List<string>();
-                    if (IgnoredModes.HasFlag(IgnoredModes.Normal))
+                    if (IgnoredModes.HasFlag(IgnoredModes.Effective))
                     {
                         ignoreCode.Add("[IgnoredMode] = 0");
                     }

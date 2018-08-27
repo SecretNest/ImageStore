@@ -10,7 +10,7 @@ namespace SecretNest.ImageStore.Extension
 {
     [Cmdlet(VerbsData.Update, "ImageStoreExtension")]
     [Alias("UpdateExtension")]
-    public class UpdateFolderCmdlet : Cmdlet
+    public class UpdateExtensionCmdlet : Cmdlet
     {
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
         public ImageStoreExtension Extension { get; set; }

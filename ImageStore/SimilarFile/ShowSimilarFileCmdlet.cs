@@ -23,7 +23,7 @@ namespace SecretNest.ImageStore.SimilarFile
             if (SimilarFile != null)
                 Id = SimilarFile.Id;
 
-            var result = IgnoreSimilarFileHelper.MarkIgnore(Id, IgnoredMode.Normal);
+            var result = IgnoreSimilarFileHelper.MarkIgnore(Id, IgnoredMode.Effective);
 
             if (!result)
             {
@@ -33,7 +33,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             if (SimilarFile != null)
-                SimilarFile.IgnoredMode = IgnoredMode.Normal;
+                SimilarFile.IgnoredMode = IgnoredMode.Effective;
         }
     }
 }

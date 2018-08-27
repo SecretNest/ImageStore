@@ -8,7 +8,7 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     public enum IgnoredMode : int
     {
-        Normal = 0,
+        Effective = 0,
         HiddenButConnected = 1,
         HiddenAndDisconnected = 2
     }
