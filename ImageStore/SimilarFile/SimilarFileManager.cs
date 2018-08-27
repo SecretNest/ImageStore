@@ -42,7 +42,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         string IgnoredModeToString(IgnoredMode ignoredMode)
         {
-            if (ignoredMode == IgnoredMode.Normal)
+            if (ignoredMode == IgnoredMode.Effective)
                 return "";
             else if (ignoredMode == IgnoredMode.HiddenButConnected)
                 return "Yes";
@@ -72,7 +72,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 var fileGroup = groupedFiles[i];
                 images[i] = loadImage(fileGroup.Keys.First());
-                bool isHiddenGroup = !groupedRecords[i].Any(id => allRecords[id].IgnoredMode == IgnoredMode.Normal);
+                bool isHiddenGroup = !groupedRecords[i].Any(id => allRecords[id].IgnoredMode == IgnoredMode.Effective);
                 var listViewItem = new ListViewItem(string.Format("{0} files", fileGroup.Count), i) { Tag = i };
                 if (isHiddenGroup)
                 {
@@ -195,7 +195,7 @@ namespace SecretNest.ImageStore.SimilarFile
             foreach(var file1 in grouped)
             {
                 var fileId = file1.Key;
-                var show = !hideHidden || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Normal);
+                var show = !hideHidden || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Effective);
                 if (show)
                 {
                     var selected = selectedFiles.Contains(fileId);
@@ -263,7 +263,7 @@ namespace SecretNest.ImageStore.SimilarFile
             var grouped = relatedRecords.ConvertAll(i => allRecords[i]);
             if (hideHidden)
             {
-                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Normal).ToList();
+                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
             }
             if (grouped.Count > 0)
             {
@@ -514,7 +514,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void button12_Click(object sender, EventArgs e)
         {
-            FileModeChangeIgnore(IgnoredMode.Normal);
+            FileModeChangeIgnore(IgnoredMode.Effective);
         }
 
         private void button11_Click(object sender, EventArgs e)
@@ -537,7 +537,7 @@ namespace SecretNest.ImageStore.SimilarFile
             var grouped = groupedRecords[selectedGroupId].ConvertAll(i => allRecords[i]);
             if (hideHidden)
             {
-                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Normal).ToList();
+                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
             }
             if (grouped.Count > 0)
             {
@@ -738,7 +738,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void button7_Click(object sender, EventArgs e)
         {
-            RelationModeChangeIgnore(IgnoredMode.Normal);
+            RelationModeChangeIgnore(IgnoredMode.Effective);
         }
 
         private void button8_Click(object sender, EventArgs e)
