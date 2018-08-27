@@ -687,7 +687,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.textBox2);
             this.splitContainer2.Panel2.Controls.Add(this.panel2);
             this.splitContainer2.Size = new System.Drawing.Size(832, 391);
-            this.splitContainer2.SplitterDistance = 412;
+            this.splitContainer2.SplitterDistance = 413;
             this.splitContainer2.TabIndex = 0;
             this.splitContainer2.Resize += new System.EventHandler(this.splitContainer2_Resize);
             // 
@@ -700,7 +700,7 @@
             this.textBox1.Location = new System.Drawing.Point(3, 2);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(406, 13);
+            this.textBox1.Size = new System.Drawing.Size(407, 13);
             this.textBox1.TabIndex = 1;
             // 
             // panel1
@@ -712,7 +712,7 @@
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Location = new System.Drawing.Point(0, 21);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(412, 367);
+            this.panel1.Size = new System.Drawing.Size(413, 367);
             this.panel1.TabIndex = 2;
             // 
             // pictureBox1
@@ -733,7 +733,7 @@
             this.textBox2.Location = new System.Drawing.Point(3, 2);
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
-            this.textBox2.Size = new System.Drawing.Size(408, 13);
+            this.textBox2.Size = new System.Drawing.Size(407, 13);
             this.textBox2.TabIndex = 3;
             // 
             // panel2
@@ -745,7 +745,7 @@
             this.panel2.Controls.Add(this.pictureBox2);
             this.panel2.Location = new System.Drawing.Point(0, 21);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(414, 367);
+            this.panel2.Size = new System.Drawing.Size(413, 367);
             this.panel2.TabIndex = 4;
             // 
             // pictureBox2
