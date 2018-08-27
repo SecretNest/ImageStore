@@ -143,7 +143,7 @@ namespace SecretNest.ImageStore.SameFile
                                 var one = others.First();
                                 listLoading = true;
                                 one.ListViewItem.Checked = false;
-                                listLoading = true;
+                                listLoading = false;
                                 one.ListViewItem.ForeColor = normalForeColor;
                                 one.Record.IsSelectedToReturn = false;
                             }
