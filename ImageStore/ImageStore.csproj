@@ -89,7 +89,7 @@
     <Compile Include="Extension\ImageStoreExtension.cs" />
     <Compile Include="Extension\RemoveExtensionCmdlet.cs" />
     <Compile Include="Extension\SearchExtensionCmdlet.cs" />
-    <Compile Include="Extension\UpdateFolderCmdlet.cs" />
+    <Compile Include="Extension\UpdateExtensionCmdlet.cs" />
     <Compile Include="File\AddFileCmdlet.cs" />
     <Compile Include="File\MeasureFileCmdlet.cs" />
     <Compile Include="File\MeasureFilesCmdlet.cs" />
