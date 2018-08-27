@@ -310,7 +310,7 @@
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(107, 28);
             this.button13.TabIndex = 21;
-            this.button13.Text = "Select the &2nd";
+            this.button13.Text = "Check the &2nd";
             this.button13.UseVisualStyleBackColor = true;
             this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
@@ -321,7 +321,7 @@
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(107, 28);
             this.button14.TabIndex = 20;
-            this.button14.Text = "Select the &1st";
+            this.button14.Text = "Check the &1st";
             this.button14.UseVisualStyleBackColor = true;
             this.button14.Click += new System.EventHandler(this.button14_Click);
             // 
@@ -332,7 +332,7 @@
             this.button15.Name = "button15";
             this.button15.Size = new System.Drawing.Size(107, 28);
             this.button15.TabIndex = 19;
-            this.button15.Text = "Select &Both";
+            this.button15.Text = "Check &Both";
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
@@ -343,7 +343,7 @@
             this.button16.Name = "button16";
             this.button16.Size = new System.Drawing.Size(107, 28);
             this.button16.TabIndex = 18;
-            this.button16.Text = "Select &None";
+            this.button16.Text = "Check &None";
             this.button16.UseVisualStyleBackColor = true;
             this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
@@ -531,7 +531,7 @@
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(107, 28);
             this.button6.TabIndex = 13;
-            this.button6.Text = "Select the &2nd";
+            this.button6.Text = "Check the &2nd";
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
@@ -542,7 +542,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(107, 28);
             this.button3.TabIndex = 12;
-            this.button3.Text = "Select the &1st";
+            this.button3.Text = "Check the &1st";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -553,7 +553,7 @@
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(107, 28);
             this.button2.TabIndex = 11;
-            this.button2.Text = "Select &Both";
+            this.button2.Text = "Check &Both";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -564,7 +564,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(107, 28);
             this.button1.TabIndex = 10;
-            this.button1.Text = "Select &None";
+            this.button1.Text = "Check &None";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
