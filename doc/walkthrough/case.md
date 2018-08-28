@@ -16,10 +16,8 @@ After PowerShell started, enter these commands:
 
   * Makes the outputs on.
 
-   ```
-   $InformationPreference="Continue"
-   $VerbosePreference="Continue"
-   ```
+    ```$InformationPreference="Continue"```
+    ```$VerbosePreference="Continue"```
 
   * Enables cache. D:\ImageStoreDatabase\Cache is created for storing cache files.
 
@@ -64,17 +62,77 @@ Add-ImageStoreExtension -Extension "gif"
 Add-ImageStoreExtension -Extension "mp4" -IsImage $false
 ```
 
-# Sync folders
+# Folders syncing
 Now I can put new collected images into New Libs or New Standalone Images. After that, I need to run ```Sync-ImageStoreFolder``` to sync. If I make some change in the first 2 folders, run ```Sync-ImageStoreFolder -OverrideSealedFolder``` to sync them all.
 
-# Measure files
+# File measuring
 After sync, measure the new added files by using ```Measure-ImageStoreFiles```.
 
-# Compare same files
+# Dealing with same files
 It's a good idea to remove same files before comparing similar files.
 
-First, I want to select all same files located in the New Standalone Images folder.
+First, use ```Compare-ImageStoreSameFiles``` to find all same files.
 
+I want to select all same files located in the New Standalone Images folder and remove them:
+
+```
+$target = Find-ImageStoreFolder -Name "New Standalone Images"
+$files = Select-ImageStoreSameFile -Folder $target
+foreach($i in $files){Remove-ImageStoreFile -Id $i.id}
+```
+
+And do the same thing on the folder New Libs:
+
+```
+$target = Find-ImageStoreFolder -Name "New Libs"
+$files = Select-ImageStoreSameFile -Folder $target
+foreach($i in $files){Remove-ImageStoreFile -Id $i.id}
+```
+
+Finally, remove the obsoleted records:
+
+```Clear-ImageStoreSameFileObsoletedGroups```
+
+# Dealing with similar files
+First to find the similar file relations by running ```Compare-ImageStoreSimilarFiles```.
+
+Then run [Resolve-ImageStoreSimilarFiles](../cmdlet/SimilarFile/ResolveSimilarFiles.md) to deal the similar files.
+
+Because too many records may be generated and some of them are by mistake, I strongly recommend you run it with DifferenceDegree parameter increasingly, and disconnect all wrong relations.
+
+For example:
+```
+$files = Resolve-ImageStoreSimilarFiles -DifferenceDegree 0.01
+foreach($i in $files){Remove-ImageStoreFile -File $i -OverrideSealedFolder}
+```
+
+# Remove directory
+When you realize there is a full directory should be removed, you don't need to remove all files one by one.
+
+You can choose:
+  * Remove this directory from file system and then rerun sync command. Or,
+  * Use [Remove-ImageStoreDirectory](../cmdlet/File/RemoveDirectory.md) to remove it.
+
+# Move files
+Finally, move all files from the 3rd and 4th folder into the 1st and 2nd one.
+
+```
+$source = Find-ImageStoreFolder -Name "New Libs"
+$target = Find-ImageStoreFolder -Name "Standalone Images"
+$files = Search-ImageStoreFolder -FolderId $source.Id
+foreach($i in $files){Move-ImageStoreFile -File $i -NewFolder $target -OverrideSealedFolder}
 ```
 
 ```
+$source = Find-ImageStoreFolder -Name "New Standalone Images"
+$target = Find-ImageStoreFolder -Name "Images"
+$files = Search-ImageStoreFolder -FolderId $source.Id
+foreach($i in $files){Move-ImageStoreFile -File $i -NewFolder $target -OverrideSealedFolder}
+```
+# Remove empty directories
+After removing and moving files, there may be some directories are empty.
+
+To remove them, use [Clear-ImageStoreEmptyFolders](../cmdlet/Folder/ClearEmptyFolders.md), or remove them directly from file system.
+
+# Tips
+Actually, you dont need to enter the names of parameters in all commands above, starting with hyphen, except switch like ```-OverrideSealedFolder```. Because those parameters are provided in the right sequence, cmdlet can detect the parameter of them correctly.
