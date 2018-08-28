@@ -16,14 +16,14 @@ After PowerShell started, enter these commands:
 
   * Makes the outputs on.
 
-    ```
-    $InformationPreference="Continue"
-    $VerbosePreference="Continue"
-    ```
+   ```
+   $InformationPreference="Continue"
+   $VerbosePreference="Continue"
+   ```
 
   * Enables cache. D:\ImageStoreDatabase\Cache is created for storing cache files.
 
-    ```SetThumbprintCacheFolder "D:\ImageStoreDatabase\Cache"````
+    ```SetThumbprintCacheFolder "D:\ImageStoreDatabase\Cache"```
 
 # Preparation
 ## Folders
