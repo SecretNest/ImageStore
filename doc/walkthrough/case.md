@@ -17,6 +17,7 @@ After PowerShell started, enter these commands:
   * Makes the outputs on.
 
     ```$InformationPreference="Continue"```
+    
     ```$VerbosePreference="Continue"```
 
   * Enables cache. D:\ImageStoreDatabase\Cache is created for storing cache files.
