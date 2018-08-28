@@ -8,16 +8,22 @@ After PowerShell started, enter these commands:
 
   * Loads ImageStore. You may need to change the path to the dll file.
 
-   ```import-module .\ImageStore.dll```
+    ```import-module .\ImageStore.dll```
 
-```open-ImageStoreDatabase "server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\ImageStoreDatabase\DataStore.mdf;Integrated Security=True"``` I placed the database file in D:\ImageStoreDatabase and want to use it with Sql Server 2017 LocalDB.
+  * Opens database connection. I placed the database file in D:\ImageStoreDatabase and want to use it with Sql Server 2017 LocalDB.
 
+    ```open-ImageStoreDatabase "server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\ImageStoreDatabase\DataStore.mdf;Integrated Security=True"``` 
 
-```
-$InformationPreference="Continue"
-$VerbosePreference="Continue"
-```
-SetThumbprintCacheFolder "Cache"
+  * Makes the outputs on.
+
+    ```
+    $InformationPreference="Continue"
+    $VerbosePreference="Continue"
+    ```
+
+  * Enables cache. D:\ImageStoreDatabase\Cache is created for storing cache files.
+
+    ```SetThumbprintCacheFolder "D:\ImageStoreDatabase\Cache"````
 
 # Preparation
 ## Folders
