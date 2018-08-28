@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmdlet", "cmdlet", "{20CDC5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "walkthrough", "walkthrough", "{395036E5-C0A0-4F4E-A0C9-952A9A48EB4B}"
 	ProjectSection(SolutionItems) = preProject
-		doc\workthrough\case.md = doc\workthrough\case.md
+		doc\walkthrough\case.md = doc\walkthrough\case.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "concept", "concept", "{BEBBCEC2-9257-4836-9D52-C5705D63095D}"
