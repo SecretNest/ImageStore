@@ -5,6 +5,8 @@ This cmdlet will create same groups based on the file Sha1 hashing result genera
 
 *Note: This cmdlet may cost several minutes to run.*
 
+*Note: This cmdlet will not consider the [CompareImageWith](../../type/ImageStoreFolder.md#compare-image-with) setting in folders.*
+
 Alias: CompareSameFiles
 
 # Parameters

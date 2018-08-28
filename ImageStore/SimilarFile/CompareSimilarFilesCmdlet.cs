@@ -118,7 +118,7 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
             var sqlCommandText = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
-            using (var command = new SqlCommand(sqlCommandText, connection))
+            using (var command = new SqlCommand(sqlCommandText, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
                 Guid lastFolderKey = Guid.Empty;

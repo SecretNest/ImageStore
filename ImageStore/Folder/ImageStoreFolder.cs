@@ -25,7 +25,7 @@ namespace SecretNest.ImageStore.Folder
             }
         }
         public CompareImageWith CompareImageWith { get; set; }
-        public int CompareImageWithCode
+        internal int CompareImageWithCode
         {
             get
             {

@@ -15,6 +15,10 @@ Namespace: SecretNest.ImageStore.Folder
 # Compare Image With
 The scope of the target files to be compared with for each file located in this folder.
 
+*Note: This is only applied while comparing image hashing result, not file hashing result (Sha1). Same file comparing will never use this setting.*
+
+*Note: After enlarging the scope, similar file records need to be [reset](../cmdlet/SimilarFile/ResetSimilarFile.md), or no additional comparing will be processed with the files affected.*
+
 Enum: SecretNest.ImageStore.Folder.CompareImageWith
 
 |Element|Value|Description|
