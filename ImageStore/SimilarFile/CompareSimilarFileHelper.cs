@@ -73,11 +73,11 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 if (targetsCount == 1)
                 {
-                    outputs.Add(new Tuple<bool, string>(false, string.Format("Processing file {0}: Compare with 1 file.", fileIndex)));
+                    outputs.Add(new Tuple<bool, string>(false, string.Format("Processing file {0}: Comparing with 1 file.", fileIndex)));
                 }
                 else
                 {
-                    outputs.Add(new Tuple<bool, string>(false, string.Format("Processing file {0}: Compare with {1} files.", fileIndex, targetsCount)));
+                    outputs.Add(new Tuple<bool, string>(false, string.Format("Processing file {0}: Comparing with {1} files.", fileIndex, targetsCount)));
                 }
                 try
                 {
