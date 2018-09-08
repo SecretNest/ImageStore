@@ -101,7 +101,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 using (var image = LoadFromFile(path, out bool succeeded))
                 {
                     var thumbprint = GenerateThumbprint(image);
-                    thumbprint.Save(cacheFile);
+                    if (succeeded) thumbprint.Save(cacheFile);
                     return thumbprint;
                 }
             }

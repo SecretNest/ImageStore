@@ -73,7 +73,7 @@ namespace SecretNest.ImageStore.File
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand(" [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState] from [File]"))
+            using (var command = new SqlCommand(" [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File]"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
