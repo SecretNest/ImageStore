@@ -176,13 +176,6 @@
     <Compile Include="StringPropertyComparingModes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DataStore.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="DataStore_log.ldf">
-      <DependentUpon>DataStore.mdf</DependentUpon>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="System.Numerics.Vectors.dll" />
     <None Include="Resources\download.png" />
     <Content Include="Shipwreck.Phash.Bitmaps.dll" />

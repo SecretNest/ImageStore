@@ -40,6 +40,8 @@ Attached database file mode is supported and recommended.
 
 To install Sql Server 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
 
+You could download the empty database file DataStore.mdf and DataStore_log.mdf from Database folder, or create an empty database by script provided as CreateDatabase.txt in the samne folder.
+
 # Concepts
 There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.
 

@@ -1,0 +1,321 @@
+USE [master]
+GO
+/****** Object:  Database [C:\Database\DataStore.MDF]    Script Date: 12/15/2018 10:31:25 PM ******/
+CREATE DATABASE [C:\Database\DataStore.MDF]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'DataStore', FILENAME = N'C:\Database\DataStore.mdf' , SIZE = 4096KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+ LOG ON 
+( NAME = N'DataStore_log', FILENAME = N'C:\Database\DataStore_log.ldf' , SIZE = 4096KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET COMPATIBILITY_LEVEL = 100
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [C:\Database\DataStore.MDF].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET AUTO_CLOSE ON 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET AUTO_SHRINK ON 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET RECOVERY SIMPLE 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET  MULTI_USER 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET TARGET_RECOVERY_TIME = 60 SECONDS 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET DELAYED_DURABILITY = DISABLED 
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET QUERY_STORE = OFF
+GO
+USE [C:\Database\DataStore.MDF]
+GO
+/****** Object:  Table [dbo].[Extension]    Script Date: 12/15/2018 10:31:25 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Extension](
+	[Id] [uniqueidentifier] NOT NULL,
+	[Extension] [nvarchar](256) NOT NULL,
+	[IsImage] [bit] NOT NULL,
+	[Ignored] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[File]    Script Date: 12/15/2018 10:31:25 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[File](
+	[Id] [uniqueidentifier] NOT NULL,
+	[FolderId] [uniqueidentifier] NOT NULL,
+	[Path] [nvarchar](256) NOT NULL,
+	[FileName] [nvarchar](256) NOT NULL,
+	[ExtensionId] [uniqueidentifier] NOT NULL,
+	[ImageHash] [binary](40) NULL,
+	[Sha1Hash] [binary](20) NULL,
+	[FileSize] [int] NOT NULL,
+	[FileState] [int] NOT NULL,
+	[ImageComparedThreshold] [real] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Folder]    Script Date: 12/15/2018 10:31:25 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Folder](
+	[Id] [uniqueidentifier] NOT NULL,
+	[Name] [nvarchar](256) NOT NULL,
+	[Path] [nvarchar](256) NOT NULL,
+	[CompareImageWith] [int] NOT NULL,
+	[IsSealed] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[IgnoredDirectory]    Script Date: 12/15/2018 10:31:25 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[IgnoredDirectory](
+	[Id] [uniqueidentifier] NOT NULL,
+	[FolderId] [uniqueidentifier] NOT NULL,
+	[Directory] [nvarchar](256) NOT NULL,
+	[IsSubDirectoryIncluded] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[SameFile]    Script Date: 12/15/2018 10:31:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SameFile](
+	[Id] [uniqueidentifier] NOT NULL,
+	[Sha1Hash] [binary](20) NOT NULL,
+	[FileId] [uniqueidentifier] NOT NULL,
+	[IsIgnored] [bit] NOT NULL,
+ CONSTRAINT [PK__SameFile__3214EC07AA2C19A1] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[SimilarFile]    Script Date: 12/15/2018 10:31:26 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SimilarFile](
+	[Id] [uniqueidentifier] NOT NULL,
+	[File1Id] [uniqueidentifier] NOT NULL,
+	[File2Id] [uniqueidentifier] NOT NULL,
+	[DifferenceDegree] [real] NOT NULL,
+	[IgnoredMode] [int] NOT NULL,
+ CONSTRAINT [PK_SimilarFile] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Extension]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Extension] ON [dbo].[Extension]
+(
+	[Extension] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_File_FolderId]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_File_FolderId] ON [dbo].[File]
+(
+	[FolderId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_File_FolderIdPath]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_File_FolderIdPath] ON [dbo].[File]
+(
+	[FolderId] ASC,
+	[Path] ASC,
+	[FileName] ASC,
+	[ExtensionId] ASC,
+	[FileState] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_File_ForComparing]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_File_ForComparing] ON [dbo].[File]
+(
+	[ImageComparedThreshold] ASC,
+	[FileState] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Folder_Name]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Folder_Name] ON [dbo].[Folder]
+(
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_Folder_Path]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_Folder_Path] ON [dbo].[Folder]
+(
+	[Path] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_IgnoredDirectory_FolderId]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_IgnoredDirectory_FolderId] ON [dbo].[IgnoredDirectory]
+(
+	[FolderId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_IgnoredDirectory_FolderIdDirectory]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [IX_IgnoredDirectory_FolderIdDirectory] ON [dbo].[IgnoredDirectory]
+(
+	[FolderId] ASC,
+	[Directory] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_SameFile_FileId]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE UNIQUE NONCLUSTERED INDEX [IX_SameFile_FileId] ON [dbo].[SameFile]
+(
+	[FileId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_SameFile_Sha1Hash]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_SameFile_Sha1Hash] ON [dbo].[SameFile]
+(
+	[Sha1Hash] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_SimilarFile]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_SimilarFile] ON [dbo].[SimilarFile]
+(
+	[DifferenceDegree] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_SimilarFile_File1]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_SimilarFile_File1] ON [dbo].[SimilarFile]
+(
+	[File1Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_SimilarFile_File2]    Script Date: 12/15/2018 10:31:26 PM ******/
+CREATE NONCLUSTERED INDEX [IX_SimilarFile_File2] ON [dbo].[SimilarFile]
+(
+	[File2Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[File] ADD  DEFAULT ((-1)) FOR [FileSize]
+GO
+ALTER TABLE [dbo].[File] ADD  CONSTRAINT [DF_File_ImageComparedThreshold]  DEFAULT ((0)) FOR [ImageComparedThreshold]
+GO
+ALTER TABLE [dbo].[File]  WITH CHECK ADD  CONSTRAINT [FK_File_ToExtension] FOREIGN KEY([ExtensionId])
+REFERENCES [dbo].[Extension] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[File] CHECK CONSTRAINT [FK_File_ToExtension]
+GO
+ALTER TABLE [dbo].[File]  WITH CHECK ADD  CONSTRAINT [FK_File_ToFolder] FOREIGN KEY([FolderId])
+REFERENCES [dbo].[Folder] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[File] CHECK CONSTRAINT [FK_File_ToFolder]
+GO
+ALTER TABLE [dbo].[IgnoredDirectory]  WITH CHECK ADD  CONSTRAINT [FK_IgnoredDirectory_ToFolder] FOREIGN KEY([FolderId])
+REFERENCES [dbo].[Folder] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[IgnoredDirectory] CHECK CONSTRAINT [FK_IgnoredDirectory_ToFolder]
+GO
+ALTER TABLE [dbo].[SameFile]  WITH CHECK ADD  CONSTRAINT [FK_SameFile_ToFile] FOREIGN KEY([FileId])
+REFERENCES [dbo].[File] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[SameFile] CHECK CONSTRAINT [FK_SameFile_ToFile]
+GO
+ALTER TABLE [dbo].[SimilarFile]  WITH CHECK ADD  CONSTRAINT [FK_SimilarFile_File] FOREIGN KEY([File1Id])
+REFERENCES [dbo].[File] ([Id])
+GO
+ALTER TABLE [dbo].[SimilarFile] CHECK CONSTRAINT [FK_SimilarFile_File]
+GO
+ALTER TABLE [dbo].[SimilarFile]  WITH CHECK ADD  CONSTRAINT [FK_SimilarFile_File1] FOREIGN KEY([File2Id])
+REFERENCES [dbo].[File] ([Id])
+GO
+ALTER TABLE [dbo].[SimilarFile] CHECK CONSTRAINT [FK_SimilarFile_File1]
+GO
+USE [master]
+GO
+ALTER DATABASE [C:\Database\DataStore.MDF] SET  READ_WRITE 
+GO
