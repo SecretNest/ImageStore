@@ -159,13 +159,13 @@ namespace SecretNest.ImageStore.DatabaseShared
                     {
                         whereCauses.Add(string.Format("[{0}] like @{1}", columnName, parameterName));
                         parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3 + 1)
-                        { Value = "%" + SqlServerLikeValueBuilder.Escape(value) });
+                        { Value = SqlServerLikeValueBuilder.Escape(value) + "%" });
                     }
                     else if (comparingModes == StringPropertyComparingModes.EndsWith)
                     {
                         whereCauses.Add(string.Format("[{0}] like @{1}", columnName, parameterName));
                         parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3 + 1)
-                        { Value = SqlServerLikeValueBuilder.Escape(value) + "%" });
+                        { Value = "%" + SqlServerLikeValueBuilder.Escape(value) });
                     }
                     else
                     {
