@@ -21,13 +21,14 @@ namespace SecretNest.ImageStore.SameFile
         bool showAuto = false;
         bool preventNonReserved = true;
         bool showDifferentBackColor = true;
+        List<Guid> folderIds;
 
         bool listLoading = false;
 
         internal SameFileManager(Dictionary<Guid, SameFileMatchingRecord> records,
             Color oddGroupLinesBackColor, Color evenGroupLinesBackColor, Color normalBackColor,
             Color normalForeColor, Color selectedForeColor, Color ignoredForeColor,
-            Func<Guid, bool, bool> markIgnoreCallback)
+            Func<Guid, bool, bool> markIgnoreCallback, List<Guid> folderIds)
         {
             InitializeComponent();
             this.records = records;
@@ -38,6 +39,7 @@ namespace SecretNest.ImageStore.SameFile
             this.selectedForeColor = selectedForeColor;
             this.ignoredForeColor = ignoredForeColor;
             this.markIgnoreCallback = markIgnoreCallback;
+            this.folderIds = folderIds;
         }
 
         private void SameFileManager_Load(object sender, EventArgs e)
@@ -255,7 +257,7 @@ namespace SecretNest.ImageStore.SameFile
                         if (notSelectedCount == 0)
                         {
                             //Uncheck the 1st one if all are selected
-                            var one = notIgnored.First();
+                            var one = notIgnored.OrderByDescending(i => i.Record.GetFolderOrder(folderIds)).First();
                             listLoading = true;
                             one.ListViewItem.Checked = false;
                             listLoading = false;
@@ -266,7 +268,7 @@ namespace SecretNest.ImageStore.SameFile
                         {
                             //Select all but the 1st.
                             listLoading = true;
-                            foreach (var one in notSelected.Skip(1))
+                            foreach (var one in notSelected.OrderByDescending(i => i.Record.GetFolderOrder(folderIds)).Skip(1))
                             {
                                 one.ListViewItem.Checked = true;
                                 one.ListViewItem.ForeColor = selectedForeColor;

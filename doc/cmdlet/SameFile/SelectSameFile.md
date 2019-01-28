@@ -6,21 +6,26 @@ A window may be shown while running this cmdlet.
 Alias: SelectSameFile
 
 # Algorithm
-User need to provide a folder as a main folder.
+User need to provide at least one folder.
 
 In each same file group: 
-  * If at least one file is not in the main folder, all records in the main folder will be selected automatically.
-  * If no file is in the main folder, no record will be selected automatically.
-  * If all records are in the main folder, no record will be selected automatically and this group need to be dealt by user interaction.
+  * If at least one file is not in the folders specified, all records in the folders specified will be selected automatically.
+  * If no file is in the folders specified, no record will be selected automatically.
+  * If all records are in the folders specified, no record will be selected automatically and this group need to be dealt by user interaction.
 
 # Parameters
 |Name|Type|Description|Optional|
 |---|---|---|---|
-|Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|Main folder|No|
+|Folder|[ImageStoreFolder](../../type/ImageStoreFolder.md)|Main folder|No*|
+|FolderId|Guid|Id of main folder|No*|
+|OrderedFolders|[ImageStoreFolder](../../type/ImageStoreFolder.md)[]|Folders in order|No*|
+|OrderedFolderIds|Guid[]|Id of folders in order|No*|
 |Sha1Hash|byte[]|Processes only one same file group specified by file hashing result. Processes all groups when absent.|Yes|
 |UserInteraction|[UserInteraction](#user-interation)|Whether user interaction UI should be displayed. Default is ```Auto```.|Yes|
 
-From Pipeline: Folder
+*: One and only one should be specified.
+
+From Pipeline: Folder, FolderId, OrderedFolders, OrderedFolderIds
 
 # Parameters to Modify UI Color
 UI window will use different back colors for odd and even groups, as well as different fore colors for selected, ignored and effective records by default. To change these colors, or turn off this function to use the system default colors, use these parameters below.
@@ -59,7 +64,7 @@ All records found will be listed in window.
 ## Functions
   * Button - Mark as Ignored: Marks the selected items as ignored.
   * Button - Mark as Not Ignored: Marks the selected item as normal, not ignored.
-  * Button - Auto Select: Checks all but one items in each same file group as manual selection.
+  * Button - Auto Select: Checks all but one items in each same file group as manual selection. It will follow the order of folder specified if more than one specified.
   * Checkbox - Prevent Non-reserved Selection: Prevents checking all items in one same file group. Will uncheck one item automatically when user attempt to check all items in one same file group.
   * Checkbox - Hide Auto Dealt: Hides all groups dealt automatically already.
   * Button - OK: Returns the checked items.

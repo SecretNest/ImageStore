@@ -19,13 +19,24 @@ namespace SecretNest.ImageStore.SameFile
         Suppressed = 2
     }
 
-    [Cmdlet(VerbsCommon.Select, "ImageStoreSameFile")]
+    [Cmdlet(VerbsCommon.Select, "ImageStoreSameFile", DefaultParameterSetName = "SingleFolder")]
     [Alias("SelectSameFile")]
     [OutputType(typeof(List<ImageStoreSameFile>))]
-    public class SelectSameFileCmdlet : Cmdlet
+    public class SelectSameFileCmdlet : PSCmdlet
     {
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "SingleFolder")]
         public ImageStoreFolder Folder { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "SingleFolderId")]
+        public Guid FolderId { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "Folders")]
+        [Alias("Folders")]
+        public ImageStoreFolder[] OrderedFolders { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true, Mandatory = true, ParameterSetName = "FolderIds")]
+        [Alias("FolderIds")]
+        public Guid[] OrderedFolderIds { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
         public byte[] Sha1Hash { get; set; }
@@ -91,17 +102,41 @@ namespace SecretNest.ImageStore.SameFile
                 }
             }
 
+            List<Guid> folderIds = new List<Guid>();
+
+            if (ParameterSetName == "SingleFolder")
+            {
+                folderIds.Add(Folder.Id);
+            }
+            else if (ParameterSetName == "SingleFolderId")
+            {
+                folderIds.Add(FolderId);
+            }
+            else if (ParameterSetName == "Folders")
+            {
+                foreach (var folder in OrderedFolders)
+                    folderIds.Add(folder.Id);
+            }
+            else if (ParameterSetName == "FolderIds")
+            {
+                folderIds.AddRange(OrderedFolderIds);
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+
             if (Sha1Hash == null)
             {
                 var hashes = GetHashes();
                 foreach (var hash in hashes)
                 {
-                    ProcessOneHash(hash);
+                    ProcessOneHash(hash, folderIds);
                 }
             }
             else
             {
-                ProcessOneHash(Sha1Hash);
+                ProcessOneHash(Sha1Hash, folderIds);
             }
 
             bool needInteraction;
@@ -118,7 +153,7 @@ namespace SecretNest.ImageStore.SameFile
 
             if (needInteraction)
             {
-                if (!ShowUserInteraction())
+                if (!ShowUserInteraction(folderIds))
                 {
                     WriteObject(null);
                     return;
@@ -169,7 +204,7 @@ namespace SecretNest.ImageStore.SameFile
         }
 
         int currentGroupNumber = 1;
-        void ProcessOneHash(byte[] sha1Hash)
+        void ProcessOneHash(byte[] sha1Hash, List<Guid> folderIds)
         {
             var connection = DatabaseConnection.Current;
 
@@ -188,7 +223,8 @@ namespace SecretNest.ImageStore.SameFile
                         var folderId = (Guid)reader[1];
                         SameFileMatchingRecord record = new SameFileMatchingRecord()
                         {
-                            IsInTargetFolder = (folderId == Folder.Id),
+                            IsInTargetFolder = folderIds.Contains(folderId),
+                            FolderId = folderId,
                             FileId = (Guid)reader[2],
                             FileName = GetFileName(folderId, (string)reader[3], (string)reader[4], (Guid)reader[5]),
                             IsIgnored = (bool)reader[6],
@@ -231,9 +267,9 @@ namespace SecretNest.ImageStore.SameFile
             }
         }
 
-        bool ShowUserInteraction()
+        bool ShowUserInteraction(List<Guid> folderIds)
         {
-            using (SameFileManager window = new SameFileManager(records, OddGroupLinesBackColor, EvenGroupLinesBackColor, NormalBackColor, NormalForeColor, SelectedForeColor, IgnoredForeColor, IgnoreSameFileHelper.MarkIgnore))
+            using (SameFileManager window = new SameFileManager(records, OddGroupLinesBackColor, EvenGroupLinesBackColor, NormalBackColor, NormalForeColor, SelectedForeColor, IgnoredForeColor, IgnoreSameFileHelper.MarkIgnore, folderIds))
             {
                 WriteVerbose("Please select all files you want to returned from the popped up window.");
                 return window.ShowDialog() == System.Windows.Forms.DialogResult.OK;
