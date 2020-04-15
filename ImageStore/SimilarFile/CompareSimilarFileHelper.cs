@@ -305,7 +305,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void Compare(KeyValuePair<Guid, byte[]> target)
         {
-            float cross = 1 - Shipwreck.Phash.CrossCorrelationWithLimitation.GetCrossCorrelation(imageHash, target.Value, 40);
+            float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(imageHash, target.Value);
             if (cross <= imageComparedThreshold)
             {
                 dbJobs.Add(new InsertSimilarFileJob(fileId, target.Key, cross));

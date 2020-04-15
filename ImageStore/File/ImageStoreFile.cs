@@ -38,7 +38,7 @@ namespace SecretNest.ImageStore.File
                 else
                 {
                     _imageHashDigest = new Digest();
-                    _imageHashDigest.Coefficents = _imageHashByte;
+                    _imageHashDigest.Coefficients = _imageHashByte;
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace SecretNest.ImageStore.File
                 }
                 else
                 {
-                    _imageHashByte = value.Coefficents;
+                    _imageHashByte = value.Coefficients;
                 }
             }
         }

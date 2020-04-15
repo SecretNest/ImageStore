@@ -270,7 +270,7 @@ namespace SecretNest.ImageStore.File
             {
                 outputs.Add(new Tuple<int, string>(0, "Measuring of " + fullPath + " is completed."));
             }
-            toWrite.Add(new Tuple<Guid, byte[], byte[], int, FileState, bool>(fileId, imageHash?.Coefficents, sha1Hash, fileSize, fileState, isNew));
+            toWrite.Add(new Tuple<Guid, byte[], byte[], int, FileState, bool>(fileId, imageHash?.Coefficients, sha1Hash, fileSize, fileState, isNew));
 
             return helper;
         }
