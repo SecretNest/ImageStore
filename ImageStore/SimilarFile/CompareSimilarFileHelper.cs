@@ -20,6 +20,7 @@ namespace SecretNest.ImageStore.SimilarFile
         //FileId, FileId
         Dictionary<Guid, HashSet<Guid>> existingSimilars;
         int finishedFileCount = 0;
+        float totalFileCount;
         string totalFileText;
 
         //IsWarning, Text
@@ -38,6 +39,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.comparingThreadLimit = comparingThreadLimit;
             this.outputs = outputs;
             this.exceptions = exceptions;
+            totalFileCount = filesToBeCompared.Count;
             totalFileText = filesToBeCompared.Count.ToString();
         }
 
@@ -148,7 +150,7 @@ namespace SecretNest.ImageStore.SimilarFile
         void OutputOneFileFinished()
         {
             var now = Interlocked.Increment(ref finishedFileCount);
-            outputs.Add(new Tuple<bool, string>(false, string.Format("The {0} of {1} is processed.", now.ToString(), totalFileText)));
+            outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, now / totalFileCount)));
         }
 
         #region DB Job and Output
