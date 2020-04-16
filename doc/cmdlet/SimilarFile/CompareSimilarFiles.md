@@ -13,7 +13,7 @@ Alias: CompareSimilarFiles
 |Name|Type|Description|Optional|
 |---|---|---|---|
 |ImageComparedThreshold|float|The maximum difference degree should be recorded. Default value is 0.05.|Yes|
-|ComparingThreadLimit|int|The count of thread will be created for comparing image hashing. Default value will be set as the count of the logical processors installed in this computer. Set to ```-1``` to remove this limit.|Yes|
+|ComparingThreadLimit|int|The count of thread will be created for comparing image hashing. Default value will be set as the count of the logical processors installed in this computer.|Yes|
 |SuppressTimeWarning|*switch*|Disables the warning about time cost.|Yes|
 
 From Pipeline: ImageComparedThreshold

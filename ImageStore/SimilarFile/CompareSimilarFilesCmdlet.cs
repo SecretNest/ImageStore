@@ -33,18 +33,16 @@ namespace SecretNest.ImageStore.SimilarFile
                 WriteInformation("This may need several hours even days to finish. Please wait patiently...", new string[] { "CompareSimilarFile", "TimeWarning" });
             WriteInformation("Image compared threshold (max difference degree): " + ImageComparedThreshold.ToString(), new string[] { "CompareSimilarFile", "MaxDifferenceDegree", "ImageComparedThreshold" });
 
-            if (ComparingThreadLimit == -1)
+            if (ComparingThreadLimit < 1)
             {
-                WriteVerbose("Comparing thread count: No limited");
+                ComparingThreadLimit = 1;
             }
-            else
-            {
-                WriteVerbose("Comparing thread count: " + ComparingThreadLimit.ToString());
-            }
+            WriteVerbose("Comparing thread count: " + ComparingThreadLimit.ToString());
 
             WriteVerbose("Loading folders and files data into memory...");
+            PrepareFolders();
             PrepareFiles();
-            var filesToBeCompareCount = filesToBeCompare.Count;
+            var filesToBeCompareCount = filesToBeCompared.Count;
             if (filesToBeCompareCount == 0)
             {
                 WriteInformation("No files need to be compared.", new string[] { "CompareSimilarFile" });
@@ -59,12 +57,13 @@ namespace SecretNest.ImageStore.SimilarFile
                 WriteInformation(filesToBeCompareCount.ToString() + " files are found to be compared.", new string[] { "CompareSimilarFile" });
             }
 
-            PrepareFolders();
 
-            Thread job = new Thread(FileJob);
+            CompareSimilarFileHelper helper = new CompareSimilarFileHelper(ImageComparedThreshold, allFiles, filesToBeCompared, ComparingThreadLimit, outputs, exceptions);
+
+            Task job = new Task(helper.Process, TaskCreationOptions.LongRunning);
             job.Start();
 
-            while(true)
+            while (true)
             {
                 try
                 {
@@ -84,7 +83,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            job.Join();
+            job.Wait();
 
             if (exceptions.Count == 1)
             {
@@ -111,14 +110,14 @@ namespace SecretNest.ImageStore.SimilarFile
         }
 
         //FolderId, Path, FileId, ImageHash
-        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> files = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
-        //FileId, FolderId, Path, ImageHash
-        List<Tuple<Guid, Guid, string, byte[]>> filesToBeCompare = new List<Tuple<Guid, Guid, string, byte[]>>();
+        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
+        //FileId, FolderId, Path, ImageHash, CompareImageWith
+        List<Tuple<Guid, Guid, string, byte[], CompareImageWith>> filesToBeCompared = new List<Tuple<Guid, Guid, string, byte[], CompareImageWith>>();
         void PrepareFiles()
         {
             var connection = DatabaseConnection.Current;
-            var sqlCommandText = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
-            using (var command = new SqlCommand(sqlCommandText, connection) { CommandTimeout = 0 })
+            var sqlCommandTextGetNewFiles = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
+            using (var command = new SqlCommand(sqlCommandTextGetNewFiles, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
                 Guid lastFolderKey = Guid.Empty;
@@ -138,7 +137,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     {
                         lastFolderKey = folderId;
                         lastFolder = new Dictionary<string, Dictionary<Guid, byte[]>>(StringComparer.OrdinalIgnoreCase);
-                        files.Add(lastFolderKey, lastFolder);
+                        allFiles.Add(lastFolderKey, lastFolder);
                     }
                     if (string.Compare(path, lastPathKey, true) != 0)
                     {
@@ -148,24 +147,10 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     lastPath.Add(fileId, imageHash);
                     if (threshold < ImageComparedThreshold)
-                        filesToBeCompare.Add(new Tuple<Guid, Guid, string, byte[]>(fileId, folderId, path, imageHash));
+                        filesToBeCompared.Add(new Tuple<Guid, Guid, string, byte[], CompareImageWith>(fileId, folderId, path, imageHash, folders[folderId]));
                 }
                 reader.Close();
             }
-        }
-
-        HashSet<Guid> processedFiles = new HashSet<Guid>();
-        void FileJob()
-        {
-            CompareSimilarFileHelper helper = new CompareSimilarFileHelper(ImageComparedThreshold, files, processedFiles, ComparingThreadLimit, outputs, exceptions);
-            int index = 0;
-            string totalText = "/" + filesToBeCompare.Count.ToString();
-            foreach (var file in filesToBeCompare)
-            {
-                helper.Process((++index).ToString() + totalText, file.Item1, file.Item2, file.Item3, file.Item4, folders[file.Item2]);
-            }
-            helper.Stop();
-            helper = null;
         }
     }
 }
