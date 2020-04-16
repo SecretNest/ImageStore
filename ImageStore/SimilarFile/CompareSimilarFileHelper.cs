@@ -14,10 +14,9 @@ namespace SecretNest.ImageStore.SimilarFile
     class CompareSimilarFileHelper
     {
         //FolderId, Path, FileId, ImageHash
-        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
-        //FileId, FolderId, Path, ImageHash, CompareImageWith
-        List<Tuple<Guid, Guid, string, byte[], CompareImageWith>> filesToBeCompared = new List<Tuple<Guid, Guid, string, byte[], CompareImageWith>>();
-
+        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles;
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
+        SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared;
         int finishedFileCount = 0;
         string totalFileText;
 
@@ -27,7 +26,7 @@ namespace SecretNest.ImageStore.SimilarFile
         float imageComparedThreshold;
         int comparingThreadLimit;
 
-        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles, List<Tuple<Guid, Guid, string, byte[], CompareImageWith>> filesToBeCompared,
+        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles, SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared,
             int comparingThreadLimit, BlockingCollection<Tuple<bool, string>> outputs, ConcurrentBag<ErrorRecord> exceptions)
         {
             this.imageComparedThreshold = imageComparedThreshold;
@@ -69,11 +68,12 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void FillJobs()
         {
-            foreach (var fileToBeCompared in filesToBeCompared)
+            Parallel.ForEach(filesToBeCompared, fileToBeCompared =>
             {
-                var targets = FindTargets(fileToBeCompared.Item1, fileToBeCompared.Item2, fileToBeCompared.Item3, fileToBeCompared.Item5);
-                jobs.Add(new Tuple<Guid, byte[], List<KeyValuePair<Guid, byte[]>>>(fileToBeCompared.Item1, fileToBeCompared.Item4, targets));
-            }
+                var targets = FindTargets(fileToBeCompared.Key, fileToBeCompared.Value.Item1, fileToBeCompared.Value.Item2, fileToBeCompared.Value.Item4);
+                jobs.Add(new Tuple<Guid, byte[], List<KeyValuePair<Guid, byte[]>>>(fileToBeCompared.Key, fileToBeCompared.Value.Item3, targets));
+            });
+
             jobs.CompleteAdding();
         }
 
@@ -97,9 +97,6 @@ namespace SecretNest.ImageStore.SimilarFile
         #endregion
 
         #region Find Targets
-
-
-        HashSet<Guid> processedFiles = new HashSet<Guid>();
         List<KeyValuePair<Guid, byte[]>> FindTargets(Guid fileId, Guid fileFolderId, string filePath, CompareImageWith compareImageWith)
         {
             List<KeyValuePair<Guid, byte[]>> result = new List<KeyValuePair<Guid, byte[]>>();
@@ -109,7 +106,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 foreach (var folder in allFiles)
                 {
-                    FillTargetsInFolder(folder.Value, compared, result);
+                    FillTargetsInFolder(fileId, folder.Value, compared, result);
                 }
             }
             else if (compareImageWith == CompareImageWith.FilesInOtherDirectories)
@@ -121,12 +118,12 @@ namespace SecretNest.ImageStore.SimilarFile
                         foreach (var path in folder.Value)
                         {
                             if (string.Compare(path.Key, filePath, true) == 0) continue;
-                            else FillTargetsInPath(path.Value, compared, result);
+                            else FillTargetsInPath(fileId, path.Value, compared, result);
                         }
                     }
                     else
                     {
-                        FillTargetsInFolder(folder.Value, compared, result);
+                        FillTargetsInFolder(fileId, folder.Value, compared, result);
                     }
                 }
             }
@@ -135,33 +132,39 @@ namespace SecretNest.ImageStore.SimilarFile
                 foreach (var folder in allFiles)
                 {
                     if (folder.Key == fileFolderId) continue;
-                    else FillTargetsInFolder(folder.Value, compared, result);
+                    else FillTargetsInFolder(fileId, folder.Value, compared, result);
                 }
             }
             
-            processedFiles.Add(fileId);
             return result;
         }
 
-        void FillTargetsInFolder(Dictionary<string, Dictionary<Guid, byte[]>> filesInFolder, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
+        void FillTargetsInFolder(Guid fileId, Dictionary<string, Dictionary<Guid, byte[]>> filesInFolder, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
         {
             foreach (var path in filesInFolder)
             {
-                FillTargetsInPath(path.Value, compared, result);
+                FillTargetsInPath(fileId, path.Value, compared, result);
             }
         }
 
-        void FillTargetsInPath(Dictionary<Guid, byte[]> filesInPath, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
+        void FillTargetsInPath(Guid fileId, Dictionary<Guid, byte[]> filesInPath, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
         {
             foreach (var file in filesInPath)
             {
-                if (!processedFiles.Contains(file.Key))
+                if (compared.Contains(file.Key))
                 {
-                    if (!compared.Contains(file.Key))
+                    continue;
+                }
+
+                if (filesToBeCompared.ContainsKey(file.Key))
+                {
+                    if (Comparer<Guid>.Default.Compare(fileId, file.Key) > 0) //fileId is larger than file.Key => leave this job when processing file.Key one.
                     {
-                        result.Add(new KeyValuePair<Guid, byte[]>(file.Key, file.Value));
+                        continue;
                     }
                 }
+
+                result.Add(new KeyValuePair<Guid, byte[]>(file.Key, file.Value));
             }
         }
 

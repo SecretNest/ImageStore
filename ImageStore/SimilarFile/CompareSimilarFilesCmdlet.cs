@@ -111,8 +111,8 @@ namespace SecretNest.ImageStore.SimilarFile
 
         //FolderId, Path, FileId, ImageHash
         Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
-        //FileId, FolderId, Path, ImageHash, CompareImageWith
-        List<Tuple<Guid, Guid, string, byte[], CompareImageWith>> filesToBeCompared = new List<Tuple<Guid, Guid, string, byte[], CompareImageWith>>();
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
+        SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared = new SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>>();
         void PrepareFiles()
         {
             var connection = DatabaseConnection.Current;
@@ -147,7 +147,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     lastPath.Add(fileId, imageHash);
                     if (threshold < ImageComparedThreshold)
-                        filesToBeCompared.Add(new Tuple<Guid, Guid, string, byte[], CompareImageWith>(fileId, folderId, path, imageHash, folders[folderId]));
+                        filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith>(folderId, path, imageHash, folders[folderId]));
                 }
                 reader.Close();
             }
