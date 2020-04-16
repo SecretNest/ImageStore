@@ -145,24 +145,19 @@ namespace SecretNest.ImageStore.SimilarFile
 
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Create table #tempSimilarFile ([Id] uniqueidentifier, [File1Id] uniqueidentifier, [File2Id] uniqueidentifier, [DifferenceDegree] real, [IgnoredMode] int)"))
+            using (var command = new SqlCommand("Create table #tempSimilarFile ([Id] uniqueidentifier, [File1Id] uniqueidentifier, [File2Id] uniqueidentifier, [DifferenceDegree] real, [IgnoredMode] int)", connection))
             {
-                command.Connection = connection;
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree"))
+            using (var command = new SqlCommand("insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree", connection) { CommandTimeout = 180 })
             {
                 command.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real) { Value = DifferenceDegree });
-                command.Connection = connection;
-                command.CommandTimeout = 180;
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from #tempSimilarFile"))
+            using (var command = new SqlCommand("Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from #tempSimilarFile", connection) { CommandTimeout = 180 })
             {
-                command.Connection = connection;
-                command.CommandTimeout = 180;
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
@@ -189,30 +184,23 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            using (var command = new SqlCommand("Create table #tempSimilarFileId ([Id] uniqueidentifier)"))
+            using (var command = new SqlCommand("Create table #tempSimilarFileId ([Id] uniqueidentifier)", connection))
             {
-                command.Connection = connection;
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("insert into #tempSimilarFileId select distinct * from (select [File1Id] from #tempSimilarFile union select [File2Id] from #tempSimilarFile) IdTable"))
+            using (var command = new SqlCommand("insert into #tempSimilarFileId select distinct * from (select [File1Id] from #tempSimilarFile union select [File2Id] from #tempSimilarFile) IdTable", connection) { CommandTimeout = 180 })
             {
-                command.Connection = connection;
-                command.CommandTimeout = 180;
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("drop table #tempSimilarFile"))
+            using (var command = new SqlCommand("drop table #tempSimilarFile", connection))
             {
-                command.Connection = connection;
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("Select [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id] in (select [id] from #tempSimilarFileId)"))
+            using (var command = new SqlCommand("Select [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id] in (select [id] from #tempSimilarFileId)", connection) { CommandTimeout = 180 })
             {
-                command.Connection = connection;
-                command.CommandTimeout = 180;
-
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     ImageStoreFile result;
@@ -233,9 +221,8 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            using (var command = new SqlCommand("drop table #tempSimilarFileId"))
+            using (var command = new SqlCommand("drop table #tempSimilarFileId", connection))
             {
-                command.Connection = connection;
                 command.ExecuteNonQuery();
             }
 

@@ -19,7 +19,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public float ImageComparedThreshold { get; set; } = 0.05f;
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
-        public int ComparingThreadLimit { get; set; } = Environment.ProcessorCount;
+        public int ComparingThreadLimit { get; set; } = 0;
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
         public SwitchParameter SuppressTimeWarning { get; set; }
@@ -33,11 +33,15 @@ namespace SecretNest.ImageStore.SimilarFile
                 WriteInformation("This may need several hours even days to finish. Please wait patiently...", new string[] { "CompareSimilarFile", "TimeWarning" });
             WriteInformation("Image compared threshold (max difference degree): " + ImageComparedThreshold.ToString(), new string[] { "CompareSimilarFile", "MaxDifferenceDegree", "ImageComparedThreshold" });
 
-            if (ComparingThreadLimit < 1)
+            if (ComparingThreadLimit <= 0)
             {
-                ComparingThreadLimit = 1;
+                ComparingThreadLimit = Environment.ProcessorCount;
+                WriteVerbose("Comparing thread count: Auto (Count of CPU Cores = " + ComparingThreadLimit.ToString() + ")");
             }
-            WriteVerbose("Comparing thread count: " + ComparingThreadLimit.ToString());
+            else
+            {
+                WriteVerbose("Comparing thread count: " + ComparingThreadLimit.ToString());
+            }
 
             WriteVerbose("Loading folders and files data into memory...");
             PrepareFolders();
@@ -58,7 +62,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
 
-            CompareSimilarFileHelper helper = new CompareSimilarFileHelper(ImageComparedThreshold, allFiles, filesToBeCompared, ComparingThreadLimit, outputs, exceptions);
+            CompareSimilarFileHelper helper = new CompareSimilarFileHelper(ImageComparedThreshold, allFiles, filesToBeCompared, existingSimilars, ComparingThreadLimit, outputs, exceptions);
 
             Task job = new Task(helper.Process, TaskCreationOptions.LongRunning);
             job.Start();
@@ -112,7 +116,9 @@ namespace SecretNest.ImageStore.SimilarFile
         //FolderId, Path, FileId, ImageHash
         Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
         //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
-        SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared = new SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>>();
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared = new Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>>();
+        //FileId, FileId
+        Dictionary<Guid, HashSet<Guid>> existingSimilars = new Dictionary<Guid, HashSet<Guid>>();
         void PrepareFiles()
         {
             var connection = DatabaseConnection.Current;
@@ -150,6 +156,50 @@ namespace SecretNest.ImageStore.SimilarFile
                         filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith>(folderId, path, imageHash, folders[folderId]));
                 }
                 reader.Close();
+            }
+
+            var sqlCommandTextCreateTable = "Create table #filesToBeCompared ([Id] uniqueidentifier)";
+            using (var command = new SqlCommand(sqlCommandTextCreateTable, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+            var sqlCommandTextInsertFilesToBeCompared = "Insert into #filesToBeCompared Select [Id] from [File] where [ImageComparedThreshold] < @ImageComparedThreshold";
+            using (var command = new SqlCommand(sqlCommandTextInsertFilesToBeCompared, connection) { CommandTimeout = 0 })
+            {
+                command.Parameters.Add(new SqlParameter("@ImageComparedThreshold", System.Data.SqlDbType.Real) { Value = ImageComparedThreshold });
+                command.ExecuteNonQuery();
+            }
+
+            var sqlCommandTextSelectSimilar = "Select [File1Id],[File1Id] from [SimilarFile] where [File1Id] in (Select [Id] from #filesToBeCompared) or [File2Id] in (Select [Id] from #filesToBeCompared)";
+            using (var command = new SqlCommand(sqlCommandTextSelectSimilar, connection) { CommandTimeout = 0 })
+            using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
+            {
+                while (reader.Read())
+                {
+                    var file1Id = (Guid)reader[0];
+                    var file2Id = (Guid)reader[1];
+
+                    if (!existingSimilars.TryGetValue(file1Id, out var set))
+                    {
+                        set = new HashSet<Guid>();
+                        existingSimilars[file1Id] = set;
+                    }
+                    set.Add(file2Id);
+
+                    if (!existingSimilars.TryGetValue(file2Id, out set))
+                    {
+                        set = new HashSet<Guid>();
+                        existingSimilars[file2Id] = set;
+                    }
+                    set.Add(file1Id);
+                }
+                reader.Close();
+            }
+
+            var sqlCommandTextDeleteTable = "Drop table #filesToBeCompared";
+            using (var command = new SqlCommand(sqlCommandTextDeleteTable, connection))
+            {
+                command.ExecuteNonQuery();
             }
         }
     }

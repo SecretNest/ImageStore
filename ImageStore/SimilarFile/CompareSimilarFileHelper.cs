@@ -16,7 +16,9 @@ namespace SecretNest.ImageStore.SimilarFile
         //FolderId, Path, FileId, ImageHash
         Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles;
         //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
-        SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared;
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared;
+        //FileId, FileId
+        Dictionary<Guid, HashSet<Guid>> existingSimilars;
         int finishedFileCount = 0;
         string totalFileText;
 
@@ -26,12 +28,13 @@ namespace SecretNest.ImageStore.SimilarFile
         float imageComparedThreshold;
         int comparingThreadLimit;
 
-        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles, SortedDictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared,
+        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles, Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared, Dictionary<Guid, HashSet<Guid>> existingSimilars,
             int comparingThreadLimit, BlockingCollection<Tuple<bool, string>> outputs, ConcurrentBag<ErrorRecord> exceptions)
         {
             this.imageComparedThreshold = imageComparedThreshold;
             this.allFiles = allFiles;
             this.filesToBeCompared = filesToBeCompared;
+            this.existingSimilars = existingSimilars;
             this.comparingThreadLimit = comparingThreadLimit;
             this.outputs = outputs;
             this.exceptions = exceptions;
@@ -43,70 +46,40 @@ namespace SecretNest.ImageStore.SimilarFile
             Task dbOperator = new Task(DBOperator, TaskCreationOptions.LongRunning);
             dbOperator.Start();
 
-            jobs = new BlockingCollection<Tuple<Guid, byte[], List<KeyValuePair<Guid, byte[]>>>>(50);
-
-            Task pub = new Task(FillJobs, TaskCreationOptions.LongRunning);
-            pub.Start();
-
-            Task[] subs = new Task[comparingThreadLimit];
-            for (int i = 0; i < comparingThreadLimit; i++)
+            try
             {
-                subs[i] = new Task(DoJobs, TaskCreationOptions.LongRunning);
-                subs[i].Start();
+                ParallelOptions options = new ParallelOptions() { MaxDegreeOfParallelism = comparingThreadLimit };
+                Parallel.ForEach(filesToBeCompared, options, ProcessOneFile);
             }
-
-            pub.Wait();
-            Task.WaitAll(subs);
+            catch (Exception ex)
+            {
+                outputs.Add(new Tuple<bool, string>(true, ex.ToString()));
+                exceptions.Add(new ErrorRecord(ex, "ImageStore Comparing Similar File", ErrorCategory.NotSpecified, null));
+            }
 
             dbJobs.CompleteAdding();
             dbOperator.Wait();
+
+            outputs.CompleteAdding();
         }
 
-        #region Pub/Sub
-        //File1Id, File1ImageHash, File2s
-        BlockingCollection<Tuple<Guid, byte[], List<KeyValuePair<Guid, byte[]>>>> jobs = null;
 
-        void FillJobs()
+        void ProcessOneFile(KeyValuePair<Guid , Tuple<Guid, string, byte[], CompareImageWith>> one)
         {
-            Parallel.ForEach(filesToBeCompared, fileToBeCompared =>
-            {
-                var targets = FindTargets(fileToBeCompared.Key, fileToBeCompared.Value.Item1, fileToBeCompared.Value.Item2, fileToBeCompared.Value.Item4);
-                jobs.Add(new Tuple<Guid, byte[], List<KeyValuePair<Guid, byte[]>>>(fileToBeCompared.Key, fileToBeCompared.Value.Item3, targets));
-            });
-
-            jobs.CompleteAdding();
+            ProcessOneFile(one.Key, one.Value.Item1, one.Value.Item2, one.Value.Item3, one.Value.Item4);
         }
 
-        void DoJobs()
+        void ProcessOneFile(Guid fileId, Guid fileFolderId, string filePath, byte[] imageHash, CompareImageWith compareImageWith)
         {
-            while (true)
-            {
-                try
-                {
-                    var job = jobs.Take();
-                    ProcessOneFileJobs(job.Item1, job.Item2, job.Item3);
-                }
-                catch (InvalidOperationException)
-                {
-                    outputs.CompleteAdding();
-                    break;
-                }
-            }
-        }
+            existingSimilars.TryGetValue(fileId, out HashSet<Guid> existingSimilar);
 
-        #endregion
-
-        #region Find Targets
-        List<KeyValuePair<Guid, byte[]>> FindTargets(Guid fileId, Guid fileFolderId, string filePath, CompareImageWith compareImageWith)
-        {
-            List<KeyValuePair<Guid, byte[]>> result = new List<KeyValuePair<Guid, byte[]>>();
-            HashSet<Guid> compared = GetComparedSimilarFiles(fileId);
+            List<InsertSimilarFileJob> results = new List<InsertSimilarFileJob>();
 
             if (compareImageWith == CompareImageWith.All)
             {
                 foreach (var folder in allFiles)
                 {
-                    FillTargetsInFolder(fileId, folder.Value, compared, result);
+                    ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
                 }
             }
             else if (compareImageWith == CompareImageWith.FilesInOtherDirectories)
@@ -118,12 +91,12 @@ namespace SecretNest.ImageStore.SimilarFile
                         foreach (var path in folder.Value)
                         {
                             if (string.Compare(path.Key, filePath, true) == 0) continue;
-                            else FillTargetsInPath(fileId, path.Value, compared, result);
+                            else ProcessOneFileTargetsInPath(fileId, path.Value, existingSimilar, imageHash, results);
                         }
                     }
                     else
                     {
-                        FillTargetsInFolder(fileId, folder.Value, compared, result);
+                        ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
                     }
                 }
             }
@@ -132,26 +105,26 @@ namespace SecretNest.ImageStore.SimilarFile
                 foreach (var folder in allFiles)
                 {
                     if (folder.Key == fileFolderId) continue;
-                    else FillTargetsInFolder(fileId, folder.Value, compared, result);
+                    else ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
                 }
             }
-            
-            return result;
+
+            dbJobs.Add(new InsertSimilarFileJobs(fileId, results));
         }
 
-        void FillTargetsInFolder(Guid fileId, Dictionary<string, Dictionary<Guid, byte[]>> filesInFolder, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
+        void ProcessOneFileTargetsInFolder(Guid fileId, Dictionary<string, Dictionary<Guid, byte[]>> filesInFolder, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
         {
             foreach (var path in filesInFolder)
             {
-                FillTargetsInPath(fileId, path.Value, compared, result);
+                ProcessOneFileTargetsInPath(fileId, path.Value, existingSimilar, imageHash, result);
             }
         }
 
-        void FillTargetsInPath(Guid fileId, Dictionary<Guid, byte[]> filesInPath, HashSet<Guid> compared, List<KeyValuePair<Guid, byte[]>> result)
+        void ProcessOneFileTargetsInPath(Guid fileId, Dictionary<Guid, byte[]> filesInPath, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
         {
             foreach (var file in filesInPath)
             {
-                if (compared.Contains(file.Key))
+                if (existingSimilar != null && existingSimilar.Contains(file.Key))
                 {
                     continue;
                 }
@@ -164,56 +137,11 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                 }
 
-                result.Add(new KeyValuePair<Guid, byte[]>(file.Key, file.Value));
-            }
-        }
-
-        HashSet<Guid> GetComparedSimilarFiles(Guid fileId)
-        {
-            var item = new ReadingExistsJob(fileId);
-            dbJobs.Add(item);
-            item.Finished.WaitOne();
-            item.Finished.Dispose();
-            return item.Result;
-        }
-        #endregion
-
-        #region Compare
-        void ProcessOneFileJobs(Guid file1Id, byte[] file1Hash, List<KeyValuePair<Guid, byte[]>> targets)
-        {
-            List<InsertSimilarFileJob> results = new List<InsertSimilarFileJob>();
-            try
-            {
-                foreach (var target in targets)
+                float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(imageHash, file.Value);
+                if (cross <= imageComparedThreshold)
                 {
-                    var oneResult = ProcessOneJob(file1Hash, target.Key, target.Value);
-                    if (oneResult != null)
-                    {
-                        results.Add(oneResult);
-                    }
+                    result.Add(new InsertSimilarFileJob(file.Key, cross));
                 }
-            }
-            catch (Exception ex)
-            {
-                outputs.Add(new Tuple<bool, string>(true, ex.ToString()));
-                exceptions.Add(new ErrorRecord(ex, "ImageStore Comparing Similar File", ErrorCategory.NotSpecified, null));
-                OutputOneFileFinished();
-                return;
-            }
-
-            dbJobs.Add(new InsertSimilarFileJobs(file1Id, results));
-        }
-
-        InsertSimilarFileJob ProcessOneJob(byte[] file1Hash, Guid file2Id, byte[] file2Hash)
-        {
-            float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(file1Hash, file2Hash);
-            if (cross <= imageComparedThreshold)
-            {
-                return new InsertSimilarFileJob(file2Id, cross);
-            }
-            else
-            {
-                return null;
             }
         }
 
@@ -222,19 +150,13 @@ namespace SecretNest.ImageStore.SimilarFile
             var now = Interlocked.Increment(ref finishedFileCount);
             outputs.Add(new Tuple<bool, string>(false, string.Format("The {0} of {1} is processed.", now.ToString(), totalFileText)));
         }
-        #endregion
 
         #region DB Job and Output
-        BlockingCollection<DBJob> dbJobs = new BlockingCollection<DBJob>();
+        BlockingCollection<InsertSimilarFileJobs> dbJobs = new BlockingCollection<InsertSimilarFileJobs>();
 
-        abstract class DBJob
-        {
-            public abstract int JobType { get; }
-        }
-        class InsertSimilarFileJobs : DBJob
+        class InsertSimilarFileJobs
         {
             public Guid File1Id { get; }
-            public override int JobType => 1;
             public List<InsertSimilarFileJob> Jobs { get; }
             public InsertSimilarFileJobs(Guid file1Id, List<InsertSimilarFileJob> jobs)
             {
@@ -252,15 +174,6 @@ namespace SecretNest.ImageStore.SimilarFile
                 Difference = difference;
             }
         }
-        class ReadingExistsJob : DBJob
-        {
-            public Guid FileId { get; }
-            public HashSet<Guid> Result { get; } = new HashSet<Guid>();
-            public ManualResetEvent Finished { get; } = new ManualResetEvent(false);
-            public override int JobType => 2;
-            public ReadingExistsJob(Guid fileId)
-            { FileId = fileId; }
-        }
 
         void DBOperator()
         {
@@ -268,8 +181,6 @@ namespace SecretNest.ImageStore.SimilarFile
 
             using (var commandInserting = new SqlCommand("Insert into [SimilarFile] Values(@Id,@File1Id,@File2Id,@DifferenceDegree,0)"))
             using (var commandUpdating = new SqlCommand("Update [File] Set [ImageComparedThreshold]=@ImageComparedThreshold where [Id]=@Id"))
-            using (var commandReading1 = new SqlCommand("Select [File1Id] from [SimilarFile] where [File2Id]=@Id"))
-            using (var commandReading2 = new SqlCommand("Select [File2Id] from [SimilarFile] where [File1Id]=@Id"))
             {
                 commandInserting.Connection = connection;
                 commandInserting.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
@@ -279,90 +190,67 @@ namespace SecretNest.ImageStore.SimilarFile
                 commandUpdating.Connection = connection;
                 commandUpdating.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
                 commandUpdating.Parameters.Add(new SqlParameter("@ImageComparedThreshold", System.Data.SqlDbType.Real) { Value = imageComparedThreshold });
-                commandReading1.Connection = connection;
-                commandReading1.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandReading2.Connection = connection;
-                commandReading2.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
 
                 while (true)
                 {
+                    InsertSimilarFileJobs item;
                     try
                     {
-                        var job = dbJobs.Take();
-                        if (job.JobType == 2)
-                        {
-                            var item = job as ReadingExistsJob;
-                            commandReading1.Parameters[0].Value = item.FileId;
-                            using (var reader = commandReading1.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
-                            {
-                                while (reader.Read())
-                                {
-                                    item.Result.Add((Guid)reader[0]);
-                                }
-                                reader.Close();
-                            }
-                            commandReading2.Parameters[0].Value = item.FileId;
-                            using (var reader = commandReading2.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
-                            {
-                                while (reader.Read())
-                                {
-                                    item.Result.Add((Guid)reader[0]);
-                                }
-                                reader.Close();
-                            }
-                            item.Finished.Set();
-                        }
-                        else if (job.JobType == 1)
-                        {
-                            var item = job as InsertSimilarFileJobs;
-                            bool failed = false;
-                            var targetCount = item.Jobs.Count;
-                            if (targetCount > 0)
-                            {
-                                commandInserting.Parameters[0].Value = Guid.NewGuid();
-                                commandInserting.Parameters[1].Value = item.File1Id;
-                                foreach (var oneJob in item.Jobs)
-                                {
-                                    commandInserting.Parameters[2].Value = oneJob.File2Id;
-                                    commandInserting.Parameters[3].Value = oneJob.Difference;
-                                    if (commandInserting.ExecuteNonQuery() == 0)
-                                    {
-                                        var text = string.Format("Cannot insert this record. File1: {0}; File2: {1}", item.File1Id, oneJob.File2Id);
-                                        outputs.Add(new Tuple<bool, string>(true, text));
-                                        exceptions.Add(new ErrorRecord(new InvalidOperationException(text), "ImageStore Comparing Similar File - Insert record", ErrorCategory.WriteError, null));
-                                        failed = true;
-                                    }
-                                }
-                            }
-
-                            if (failed)
-                            {
-                                var text = string.Format("Skip updating file record due to failed processes. Id: {0}", item.File1Id);
-                                outputs.Add(new Tuple<bool, string>(true, text));
-                            }
-                            else
-                            {
-                                commandUpdating.Parameters[0].Value = item.File1Id;
-                                if (commandUpdating.ExecuteNonQuery() == 0)
-                                {
-                                    var text = string.Format("Cannot update file record. Id: {0}", item.File1Id);
-                                    outputs.Add(new Tuple<bool, string>(true, text));
-                                    exceptions.Add(new ErrorRecord(new InvalidOperationException(text), "ImageStore Comparing Similar File - Update database", ErrorCategory.WriteError, item.File1Id));
-                                }
-                            }
-                            OutputOneFileFinished();
-                        }
+                        item = dbJobs.Take();
                     }
                     catch (InvalidOperationException)
                     {
                         outputs.CompleteAdding();
                         break;
                     }
-                    //catch (Exception ex)
-                    //{
-                    //    outputs.Add(new Tuple<bool, string>(true, ex.ToString()));
-                    //    exceptions.Add(new ErrorRecord(ex, "ImageStore Comparing Similar File - Operate database", ErrorCategory.ResourceUnavailable, null));
-                    //}
+
+                    try
+                    {
+                        bool failed = false;
+                        var targetCount = item.Jobs.Count;
+                        if (targetCount > 0)
+                        {
+                            commandInserting.Parameters[1].Value = item.File1Id;
+                            foreach (var oneJob in item.Jobs)
+                            {
+                                commandInserting.Parameters[0].Value = Guid.NewGuid();
+                                commandInserting.Parameters[2].Value = oneJob.File2Id;
+                                commandInserting.Parameters[3].Value = oneJob.Difference;
+                                if (commandInserting.ExecuteNonQuery() == 0)
+                                {
+                                    var text = string.Format("Cannot insert this record. File1: {0}; File2: {1}", item.File1Id, oneJob.File2Id);
+                                    outputs.Add(new Tuple<bool, string>(true, text));
+                                    exceptions.Add(new ErrorRecord(new InvalidOperationException(text), "ImageStore Comparing Similar File - Insert record", ErrorCategory.WriteError, null));
+                                    failed = true;
+                                }
+                            }
+                        }
+
+                        if (failed)
+                        {
+                            var text = string.Format("Skip updating file record due to failed processes. Id: {0}", item.File1Id);
+                            outputs.Add(new Tuple<bool, string>(true, text));
+                        }
+                        else
+                        {
+                            commandUpdating.Parameters[0].Value = item.File1Id;
+                            if (commandUpdating.ExecuteNonQuery() == 0)
+                            {
+                                var text = string.Format("Cannot update file record. Id: {0}", item.File1Id);
+                                outputs.Add(new Tuple<bool, string>(true, text));
+                                exceptions.Add(new ErrorRecord(new InvalidOperationException(text), "ImageStore Comparing Similar File - Update database", ErrorCategory.WriteError, item.File1Id));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        outputs.Add(new Tuple<bool, string>(true, ex.ToString()));
+                        exceptions.Add(new ErrorRecord(ex, "ImageStore Comparing Similar File - Operate database", ErrorCategory.ResourceUnavailable, null));
+                    }
+                    finally
+                    {
+                        OutputOneFileFinished();
+                    }
                 }
             }
         }
