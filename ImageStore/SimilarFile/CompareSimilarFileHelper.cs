@@ -150,14 +150,14 @@ namespace SecretNest.ImageStore.SimilarFile
         void OutputOneFileFinished()
         {
             var now = Interlocked.Increment(ref finishedFileCount);
-            var percent = Math.Floor(now * 100 / totalFileCount) / 100;
+            var percent = Math.Floor(now * 10000 / totalFileCount) / 10000;
             outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent)));
         }
 
         void OutputOneFileFinished(int count)
         {
             var now = Interlocked.Increment(ref finishedFileCount);
-            var percent = Math.Floor(now * 100 / totalFileCount) / 100;
+            var percent = Math.Floor(now * 10000 / totalFileCount) / 10000;
             string text;
             if (count == 0)
             {
