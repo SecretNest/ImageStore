@@ -158,7 +158,7 @@ namespace SecretNest.ImageStore.File
                 var extension = extensionsById[file.ExtensionId];
                 if (extension.Ignored) continue;
 
-                string fullPath = MeasureFileHelper.GetFullFilePath(baseFolder, file.Path, file.FileName, extension.Extension);
+                string fullPath = FileHelper.GetFullFilePath(baseFolder, file.Path, file.FileName, extension.Extension);
 
                 files.Add(new Tuple<string, bool, Guid, bool>(fullPath, extension.IsImage, file.Id, file.FileState == FileState.New));
             }

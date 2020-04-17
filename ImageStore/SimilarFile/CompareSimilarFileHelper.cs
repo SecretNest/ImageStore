@@ -15,8 +15,8 @@ namespace SecretNest.ImageStore.SimilarFile
     {
         //FolderId, Path, FileId, ImageHash, sequence
         Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles;
-        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence
-        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared;
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence, fullPath
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int, string>> filesToBeCompared;
         //FileId, FileId
         Dictionary<Guid, HashSet<Guid>> existingSimilars;
         int finishedFileCount = 0;
@@ -29,7 +29,7 @@ namespace SecretNest.ImageStore.SimilarFile
         float imageComparedThreshold;
         int comparingThreadLimit;
 
-        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles, Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared, Dictionary<Guid, HashSet<Guid>> existingSimilars,
+        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles, Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int, string>> filesToBeCompared, Dictionary<Guid, HashSet<Guid>> existingSimilars,
             int comparingThreadLimit, BlockingCollection<Tuple<bool, string>> outputs, ConcurrentBag<ErrorRecord> exceptions)
         {
             this.imageComparedThreshold = imageComparedThreshold;
@@ -66,12 +66,12 @@ namespace SecretNest.ImageStore.SimilarFile
         }
 
 
-        void ProcessOneFile(KeyValuePair<Guid , Tuple<Guid, string, byte[], CompareImageWith, int>> one)
+        void ProcessOneFile(KeyValuePair<Guid , Tuple<Guid, string, byte[], CompareImageWith, int, string>> one)
         {
-            ProcessOneFile(one.Key, one.Value.Item1, one.Value.Item2, one.Value.Item3, one.Value.Item4, one.Value.Item5);
+            ProcessOneFile(one.Key, one.Value.Item1, one.Value.Item2, one.Value.Item3, one.Value.Item4, one.Value.Item5, one.Value.Item6);
         }
 
-        void ProcessOneFile(Guid fileId, Guid fileFolderId, string filePath, byte[] imageHash, CompareImageWith compareImageWith, int sequence)
+        void ProcessOneFile(Guid fileId, Guid fileFolderId, string filePath, byte[] imageHash, CompareImageWith compareImageWith, int sequence, string fullPath)
         {
             existingSimilars.TryGetValue(fileId, out HashSet<Guid> existingSimilar);
 
@@ -111,7 +111,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            dbJobs.Add(new InsertSimilarFileJobs(fileId, results));
+            dbJobs.Add(new InsertSimilarFileJobs(fileId, fullPath, results));
         }
 
         void ProcessOneFileTargetsInFolder(int sequence, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>> filesInFolder, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
@@ -147,29 +147,29 @@ namespace SecretNest.ImageStore.SimilarFile
             }
         }
 
-        void OutputOneFileFinished()
-        {
-            var now = Interlocked.Increment(ref finishedFileCount);
-            var percent = Math.Floor(now * 10000 / totalFileCount) / 10000;
-            outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent)));
-        }
+        //void OutputOneFileFinished()
+        //{
+        //    var now = Interlocked.Increment(ref finishedFileCount);
+        //    var percent = Math.Floor(now * 10000 / totalFileCount) / 10000;
+        //    outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent)));
+        //}
 
-        void OutputOneFileFinished(int count)
+        void OutputOneFileFinished(int count, string fullPath)
         {
             var now = Interlocked.Increment(ref finishedFileCount);
             var percent = Math.Floor(now * 10000 / totalFileCount) / 10000;
             string text;
             if (count == 0)
             {
-                text = string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent);
+                text = string.Format("{2:P} ({0} of {1} {3}) is processed.", now, totalFileText, percent, fullPath);
             }
             else if (count == 1)
             {
-                text = string.Format("{2:P} ({0} of {1}) processed. One similar file is found.", now.ToString(), totalFileText, percent);
+                text = string.Format("{2:P} ({0} of {1} {3}) is processed. One similar file is found.", now, totalFileText, percent, fullPath);
             }
             else
             {
-                text = string.Format("{2:P} ({0} of {1}) processed. {3} similar files are found.", now.ToString(), totalFileText, percent, count);
+                text = string.Format("{2:P} ({0} of {1} {4}) is processed. {3} similar files are found.", now, totalFileText, percent, count, fullPath);
             }
             outputs.Add(new Tuple<bool, string>(false, text));
         }
@@ -181,9 +181,11 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             public Guid File1Id { get; }
             public List<InsertSimilarFileJob> Jobs { get; }
-            public InsertSimilarFileJobs(Guid file1Id, List<InsertSimilarFileJob> jobs)
+            public string FullPath { get; }
+            public InsertSimilarFileJobs(Guid file1Id, string fullPath, List<InsertSimilarFileJob> jobs)
             {
                 File1Id = file1Id;
+                FullPath = fullPath;
                 Jobs = jobs;
             }
         }
@@ -272,7 +274,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     finally
                     {
-                        OutputOneFileFinished(targetCount);
+                        OutputOneFileFinished(targetCount, item.FullPath);
                     }
                 }
             }

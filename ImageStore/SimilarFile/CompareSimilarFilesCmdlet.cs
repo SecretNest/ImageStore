@@ -1,4 +1,6 @@
-﻿using SecretNest.ImageStore.Folder;
+﻿using SecretNest.ImageStore.Extension;
+using SecretNest.ImageStore.File;
+using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,6 +47,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
             WriteVerbose("Loading folders and files data into memory...");
             PrepareFolders();
+            PrepareExtensions();
             PrepareFiles();
             var filesToBeCompareCount = filesToBeCompared.Count;
             if (filesToBeCompareCount == 0)
@@ -103,26 +106,37 @@ namespace SecretNest.ImageStore.SimilarFile
             }
         }
 
-        Dictionary<Guid, CompareImageWith> folders = new Dictionary<Guid, CompareImageWith>();
+        Dictionary<Guid, Tuple<CompareImageWith, string>> folders = new Dictionary<Guid, Tuple<CompareImageWith, string>>(); //string: path
         void PrepareFolders()
         {
             var records = FolderHelper.GetAllFolders();
             foreach(var record in records)
             {
-                folders.Add(record.Id, record.CompareImageWith);
+                string folderPath = record.Path;
+                if (!folderPath.EndsWith(DirectorySeparatorString.Value))
+                    folderPath += DirectorySeparatorString.Value;
+                folders.Add(record.Id, new Tuple<CompareImageWith, string>(record.CompareImageWith, folderPath));
             }
+        }
+
+        Dictionary<Guid, string> extensions = new Dictionary<Guid, string>();
+        void PrepareExtensions()
+        {
+            extensions = new Dictionary<Guid, string>();
+            foreach (var ext in ExtensionHelper.GetAllExtensions())
+                extensions.Add(ext.Id, ext.Extension);
         }
 
         //FolderId, Path, FileId, ImageHash, sequence
         Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>>();
-        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence
-        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared = new Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>>();
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence, fullPath
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int, string>> filesToBeCompared = new Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int, string>>();
         //FileId, FileId
         Dictionary<Guid, HashSet<Guid>> existingSimilars = new Dictionary<Guid, HashSet<Guid>>();
         void PrepareFiles()
         {
             var connection = DatabaseConnection.Current;
-            var sqlCommandTextGetNewFiles = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
+            var sqlCommandTextGetNewFiles = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold],[FileName],[ExtensionId] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
             using (var command = new SqlCommand(sqlCommandTextGetNewFiles, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
@@ -141,11 +155,16 @@ namespace SecretNest.ImageStore.SimilarFile
                     var fileId = (Guid)reader[2];
                     var imageHash = (byte[])reader[3];
                     var threshold = (float)reader[4];
+                    var fileName = (string)reader[5];
+                    var extensionId = (Guid)reader[6];
+
+                    var folder = folders[folderId];
+                    var fullPath = FileHelper.GetFullFilePath(folder.Item2, path, fileName, extensions[extensionId]);
 
                     if (threshold < ImageComparedThreshold)
                     {
                         currentSequence = sequence++;
-                        filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith, int>(folderId, path, imageHash, folders[folderId], currentSequence));
+                        filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith, int, string>(folderId, path, imageHash, folder.Item1, currentSequence, fullPath));
                     }
                     else
                     {

@@ -69,7 +69,7 @@ namespace SecretNest.ImageStore.File
 
             using (var computer = new MeasureFileHelper())
             {
-                var fullFilePath = MeasureFileHelper.GetFullFilePath(folder, File.Path, File.FileName, extension);
+                var fullFilePath = FileHelper.GetFullFilePath(folder, File.Path, File.FileName, extension);
                 var ex = computer.ProcessFile(fullFilePath, extensionIsImage, out imageHash, out sha1Hash, out fileSize, out fileState);
                 if (ex != null)
                 {

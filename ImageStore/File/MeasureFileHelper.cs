@@ -37,11 +37,6 @@ namespace SecretNest.ImageStore.File
             }
         }
 
-        internal static string GetFullFilePath(string folder, string path, string fileName, string extension)
-        {
-            if (path == "") return folder + fileName + "." + extension;
-            else return folder + path + DirectorySeparatorString.Value + fileName + "." + extension;
-        }
 
         internal ErrorRecord ProcessFile(string filePath, bool isImage, out Digest imageHash, out byte[] sha1Hash, out int fileSize, out FileState fileState)
         {

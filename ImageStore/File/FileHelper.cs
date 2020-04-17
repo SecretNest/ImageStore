@@ -9,6 +9,12 @@ namespace SecretNest.ImageStore.File
 {
     static class FileHelper
     {
+        internal static string GetFullFilePath(string folder, string path, string fileName, string extension)
+        {
+            if (path == "") return folder + fileName + "." + extension;
+            else return folder + path + DirectorySeparatorString.Value + fileName + "." + extension;
+        }
+
         internal static string GetFileName(Guid fileId, out string folderPath, out string path, out string fileNameWithoutPath, out bool isFolderSealed, out Guid folderId)
         {
             var connection = DatabaseConnection.Current;
