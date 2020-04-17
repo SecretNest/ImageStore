@@ -135,6 +135,10 @@ namespace SecretNest.ImageStore.File
         BlockingCollection<Tuple<Guid, byte[], byte[], int, FileState, bool>> toWrite = null; //id, imagehash, sha1hash, size, state, isnew
         ConcurrentBag<ErrorRecord> exceptions = new ConcurrentBag<ErrorRecord>();
         BlockingCollection<Tuple<int, string>> outputs = null; //0: file finished; 1: file failed; 2: other exception
+        int filesCount;
+        float filesCountSingle;
+        string filesCountText;
+        int finishedCount;
         int Compute(ImageStoreFolder folder, int? limit, bool remeasuringDisabled, bool remeasuringComputed, bool remeasuringNotImage, bool remeasuringNotReadable, bool remeasuringSizeZero)
         {
             WriteInformation("Measuring folder: " + folder.Name, new string[] { "MeasureFiles", "MeasureFolder" });
@@ -163,7 +167,9 @@ namespace SecretNest.ImageStore.File
                 files.Add(new Tuple<string, bool, Guid, bool>(fullPath, extension.IsImage, file.Id, file.FileState == FileState.New));
             }
 
-            int filesCount = files.Count;
+            filesCount = files.Count;
+            filesCountSingle = filesCount;
+            filesCountText = files.Count.ToString();
             if (filesCount == 0)
             {
                 files = null;
@@ -176,14 +182,14 @@ namespace SecretNest.ImageStore.File
             }
             else
             {
-                WriteVerbose(files.Count.ToString() + " records are read from database.");
+                WriteVerbose(filesCountText + " records are read from database.");
             }
 
             WriteVerbose("Starting measuring...");
 
             outputs = new BlockingCollection<Tuple<int, string>>();
 
-            int finishedCount = 0;
+            finishedCount = 0;
 
             Thread writing = new Thread(WriteDatabase);
 
@@ -205,17 +211,15 @@ namespace SecretNest.ImageStore.File
                         }
                         else
                         {
-                            var text = string.Format("({0}/{1}) {2}", ++finishedCount, filesCount, itemToDisplay.Item2);
-
                             if (itemToDisplay.Item1 == 0)
                             {
                                 //file finished
-                                WriteVerbose(text);
+                                WriteVerbose(itemToDisplay.Item2);
                             }
                             else //1
                             {
                                 //file failed
-                                WriteWarning(text);
+                                WriteWarning(itemToDisplay.Item2);
                             }
                         }
                     }
@@ -230,6 +234,22 @@ namespace SecretNest.ImageStore.File
             files = null;
 
             return filesCount;
+        }
+
+        void OutputOneFileFinished(string fullPath)
+        {
+            var now = Interlocked.Increment(ref finishedCount);
+            var percent = Math.Floor(now * 10000 / filesCountSingle) / 10000;
+            string text = string.Format("{2:P} ({0} of {1}) {3} is processed.", now, filesCountText, percent, fullPath);
+            outputs.Add(new Tuple<int, string>(0, text));
+        }
+
+        void OutputOneFileFailed(string fullPath, string errorText)
+        {
+            var now = Interlocked.Increment(ref finishedCount);
+            var percent = Math.Floor(now * 10000 / filesCountSingle) / 10000;
+            string text = string.Format("{2:P} ({0} of {1}) {3} processing is failed. Error: {4}", now, filesCountText, percent, fullPath, errorText);
+            outputs.Add(new Tuple<int, string>(1, text));
         }
 
         void ComputeAll()
@@ -263,12 +283,12 @@ namespace SecretNest.ImageStore.File
             var ex = helper.ProcessFile(fullPath, isImage, out var imageHash, out var sha1Hash, out var fileSize, out var fileState);
             if (ex != null)
             {
-                outputs.Add(new Tuple<int, string>(1, "Exception in measuring " + fullPath + ": " + ex.FullyQualifiedErrorId + " - " + ex.Exception.Message));
+                OutputOneFileFailed(fullPath, ex.FullyQualifiedErrorId + " - " + ex.Exception.Message);
                 exceptions.Add(ex);
             }
             else
             {
-                outputs.Add(new Tuple<int, string>(0, "Measuring of " + fullPath + " is completed."));
+                OutputOneFileFinished(fullPath);
             }
             toWrite.Add(new Tuple<Guid, byte[], byte[], int, FileState, bool>(fileId, imageHash?.Coefficients, sha1Hash, fileSize, fileState, isNew));
 

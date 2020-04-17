@@ -161,15 +161,15 @@ namespace SecretNest.ImageStore.SimilarFile
             string text;
             if (count == 0)
             {
-                text = string.Format("{2:P} ({0} of {1} {3}) is processed.", now, totalFileText, percent, fullPath);
+                text = string.Format("{2:P} ({0} of {1}) {3} is processed.", now, totalFileText, percent, fullPath);
             }
             else if (count == 1)
             {
-                text = string.Format("{2:P} ({0} of {1} {3}) is processed. One similar file is found.", now, totalFileText, percent, fullPath);
+                text = string.Format("{2:P} ({0} of {1}) {3} is processed. One similar file is found.", now, totalFileText, percent, fullPath);
             }
             else
             {
-                text = string.Format("{2:P} ({0} of {1} {4}) is processed. {3} similar files are found.", now, totalFileText, percent, count, fullPath);
+                text = string.Format("{2:P} ({0} of {1}) {4} is processed. {3} similar files are found.", now, totalFileText, percent, count, fullPath);
             }
             outputs.Add(new Tuple<bool, string>(false, text));
         }
