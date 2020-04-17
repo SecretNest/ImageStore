@@ -13,10 +13,10 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     class CompareSimilarFileHelper
     {
-        //FolderId, Path, FileId, ImageHash
-        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles;
-        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
-        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared;
+        //FolderId, Path, FileId, ImageHash, sequence
+        Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles;
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared;
         //FileId, FileId
         Dictionary<Guid, HashSet<Guid>> existingSimilars;
         int finishedFileCount = 0;
@@ -29,7 +29,7 @@ namespace SecretNest.ImageStore.SimilarFile
         float imageComparedThreshold;
         int comparingThreadLimit;
 
-        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles, Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared, Dictionary<Guid, HashSet<Guid>> existingSimilars,
+        internal CompareSimilarFileHelper(float imageComparedThreshold, Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles, Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared, Dictionary<Guid, HashSet<Guid>> existingSimilars,
             int comparingThreadLimit, BlockingCollection<Tuple<bool, string>> outputs, ConcurrentBag<ErrorRecord> exceptions)
         {
             this.imageComparedThreshold = imageComparedThreshold;
@@ -66,12 +66,12 @@ namespace SecretNest.ImageStore.SimilarFile
         }
 
 
-        void ProcessOneFile(KeyValuePair<Guid , Tuple<Guid, string, byte[], CompareImageWith>> one)
+        void ProcessOneFile(KeyValuePair<Guid , Tuple<Guid, string, byte[], CompareImageWith, int>> one)
         {
-            ProcessOneFile(one.Key, one.Value.Item1, one.Value.Item2, one.Value.Item3, one.Value.Item4);
+            ProcessOneFile(one.Key, one.Value.Item1, one.Value.Item2, one.Value.Item3, one.Value.Item4, one.Value.Item5);
         }
 
-        void ProcessOneFile(Guid fileId, Guid fileFolderId, string filePath, byte[] imageHash, CompareImageWith compareImageWith)
+        void ProcessOneFile(Guid fileId, Guid fileFolderId, string filePath, byte[] imageHash, CompareImageWith compareImageWith, int sequence)
         {
             existingSimilars.TryGetValue(fileId, out HashSet<Guid> existingSimilar);
 
@@ -81,7 +81,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 foreach (var folder in allFiles)
                 {
-                    ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
+                    ProcessOneFileTargetsInFolder(sequence, folder.Value, existingSimilar, imageHash, results);
                 }
             }
             else if (compareImageWith == CompareImageWith.FilesInOtherDirectories)
@@ -93,12 +93,12 @@ namespace SecretNest.ImageStore.SimilarFile
                         foreach (var path in folder.Value)
                         {
                             if (string.Compare(path.Key, filePath, true) == 0) continue;
-                            else ProcessOneFileTargetsInPath(fileId, path.Value, existingSimilar, imageHash, results);
+                            else ProcessOneFileTargetsInPath(sequence, path.Value, existingSimilar, imageHash, results);
                         }
                     }
                     else
                     {
-                        ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
+                        ProcessOneFileTargetsInFolder(sequence, folder.Value, existingSimilar, imageHash, results);
                     }
                 }
             }
@@ -107,39 +107,39 @@ namespace SecretNest.ImageStore.SimilarFile
                 foreach (var folder in allFiles)
                 {
                     if (folder.Key == fileFolderId) continue;
-                    else ProcessOneFileTargetsInFolder(fileId, folder.Value, existingSimilar, imageHash, results);
+                    else ProcessOneFileTargetsInFolder(sequence, folder.Value, existingSimilar, imageHash, results);
                 }
             }
 
             dbJobs.Add(new InsertSimilarFileJobs(fileId, results));
         }
 
-        void ProcessOneFileTargetsInFolder(Guid fileId, Dictionary<string, Dictionary<Guid, byte[]>> filesInFolder, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
+        void ProcessOneFileTargetsInFolder(int sequence, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>> filesInFolder, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
         {
             foreach (var path in filesInFolder)
             {
-                ProcessOneFileTargetsInPath(fileId, path.Value, existingSimilar, imageHash, result);
+                ProcessOneFileTargetsInPath(sequence, path.Value, existingSimilar, imageHash, result);
             }
         }
 
-        void ProcessOneFileTargetsInPath(Guid fileId, Dictionary<Guid, byte[]> filesInPath, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
+        void ProcessOneFileTargetsInPath(int sequence, Dictionary<Guid, Tuple<byte[], int>> filesInPath, HashSet<Guid> existingSimilar, byte[] imageHash, List<InsertSimilarFileJob> result)
         {
             foreach (var file in filesInPath)
             {
+                if (sequence <= file.Value.Item2)
+                {
+                    // = : same file
+                    // < : leave this job when processing file.Key one.
+                    //file.Value.Item2=-1 when the file is not in filesToBeCompared.
+                    continue;
+                }
+
                 if (existingSimilar != null && existingSimilar.Contains(file.Key))
                 {
                     continue;
                 }
 
-                if (filesToBeCompared.ContainsKey(file.Key))
-                {
-                    if (Comparer<Guid>.Default.Compare(fileId, file.Key) > 0) //fileId is larger than file.Key => leave this job when processing file.Key one.
-                    {
-                        continue;
-                    }
-                }
-
-                float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(imageHash, file.Value);
+                float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(imageHash, file.Value.Item1);
                 if (cross <= imageComparedThreshold)
                 {
                     result.Add(new InsertSimilarFileJob(file.Key, cross));
@@ -150,7 +150,28 @@ namespace SecretNest.ImageStore.SimilarFile
         void OutputOneFileFinished()
         {
             var now = Interlocked.Increment(ref finishedFileCount);
-            outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, now / totalFileCount)));
+            var percent = Math.Floor(now * 100 / totalFileCount) / 100;
+            outputs.Add(new Tuple<bool, string>(false, string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent)));
+        }
+
+        void OutputOneFileFinished(int count)
+        {
+            var now = Interlocked.Increment(ref finishedFileCount);
+            var percent = Math.Floor(now * 100 / totalFileCount) / 100;
+            string text;
+            if (count == 0)
+            {
+                text = string.Format("{2:P} ({0} of {1}) processed.", now.ToString(), totalFileText, percent);
+            }
+            else if (count == 1)
+            {
+                text = string.Format("{2:P} ({0} of {1}) processed. One similar file is found.", now.ToString(), totalFileText, percent);
+            }
+            else
+            {
+                text = string.Format("{2:P} ({0} of {1}) processed. {3} similar files are found.", now.ToString(), totalFileText, percent, count);
+            }
+            outputs.Add(new Tuple<bool, string>(false, text));
         }
 
         #region DB Job and Output
@@ -206,10 +227,10 @@ namespace SecretNest.ImageStore.SimilarFile
                         break;
                     }
 
+                    bool failed = false;
+                    var targetCount = item.Jobs.Count;
                     try
                     {
-                        bool failed = false;
-                        var targetCount = item.Jobs.Count;
                         if (targetCount > 0)
                         {
                             commandInserting.Parameters[1].Value = item.File1Id;
@@ -251,7 +272,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     finally
                     {
-                        OutputOneFileFinished();
+                        OutputOneFileFinished(targetCount);
                     }
                 }
             }

@@ -113,10 +113,10 @@ namespace SecretNest.ImageStore.SimilarFile
             }
         }
 
-        //FolderId, Path, FileId, ImageHash
-        Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, byte[]>>>();
-        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile
-        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>> filesToBeCompared = new Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith>>();
+        //FolderId, Path, FileId, ImageHash, sequence
+        Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>> allFiles = new Dictionary<Guid, Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>>();
+        //Key = FileId; Value = FolderId, Path, ImageHash, CompareImageWith, SimilarRecordTargetFile, sequence
+        Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>> filesToBeCompared = new Dictionary<Guid, Tuple<Guid, string, byte[], CompareImageWith, int>>();
         //FileId, FileId
         Dictionary<Guid, HashSet<Guid>> existingSimilars = new Dictionary<Guid, HashSet<Guid>>();
         void PrepareFiles()
@@ -128,8 +128,11 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 Guid lastFolderKey = Guid.Empty;
                 string lastPathKey = null;
-                Dictionary<string, Dictionary<Guid, byte[]>> lastFolder = null;
-                Dictionary<Guid, byte[]> lastPath = null;
+                Dictionary<string, Dictionary<Guid, Tuple<byte[], int> >> lastFolder = null;
+                Dictionary<Guid, Tuple<byte[], int>> lastPath = null;
+
+                int sequence = 0;
+                int currentSequence;
 
                 while (reader.Read())
                 {
@@ -139,21 +142,29 @@ namespace SecretNest.ImageStore.SimilarFile
                     var imageHash = (byte[])reader[3];
                     var threshold = (float)reader[4];
 
+                    if (threshold < ImageComparedThreshold)
+                    {
+                        currentSequence = sequence++;
+                        filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith, int>(folderId, path, imageHash, folders[folderId], currentSequence));
+                    }
+                    else
+                    {
+                        currentSequence = -1;
+                    }
+
                     if (folderId != lastFolderKey)
                     {
                         lastFolderKey = folderId;
-                        lastFolder = new Dictionary<string, Dictionary<Guid, byte[]>>(StringComparer.OrdinalIgnoreCase);
+                        lastFolder = new Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>(StringComparer.OrdinalIgnoreCase);
                         allFiles.Add(lastFolderKey, lastFolder);
                     }
                     if (string.Compare(path, lastPathKey, true) != 0)
                     {
                         lastPathKey = path;
-                        lastPath = new Dictionary<Guid, byte[]>();
+                        lastPath = new Dictionary<Guid, Tuple<byte[], int>>();
                         lastFolder.Add(lastPathKey, lastPath);
                     }
-                    lastPath.Add(fileId, imageHash);
-                    if (threshold < ImageComparedThreshold)
-                        filesToBeCompared.Add(fileId, new Tuple<Guid, string, byte[], CompareImageWith>(folderId, path, imageHash, folders[folderId]));
+                    lastPath.Add(fileId, new Tuple<byte[], int>(imageHash, currentSequence));
                 }
                 reader.Close();
             }
@@ -170,7 +181,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 command.ExecuteNonQuery();
             }
 
-            var sqlCommandTextSelectSimilar = "Select [File1Id],[File1Id] from [SimilarFile] where [File1Id] in (Select [Id] from #filesToBeCompared) or [File2Id] in (Select [Id] from #filesToBeCompared)";
+            var sqlCommandTextSelectSimilar = "Select [File1Id],[File2Id] from [SimilarFile] where [File1Id] in (Select [Id] from #filesToBeCompared) or [File2Id] in (Select [Id] from #filesToBeCompared)";
             using (var command = new SqlCommand(sqlCommandTextSelectSimilar, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
