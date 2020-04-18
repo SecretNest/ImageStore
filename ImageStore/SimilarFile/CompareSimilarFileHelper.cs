@@ -62,7 +62,7 @@ namespace SecretNest.ImageStore.SimilarFile
             dbJobs.CompleteAdding();
             dbOperator.Wait();
 
-            outputs.CompleteAdding();
+            dbJobs.Dispose();
         }
 
 

@@ -185,6 +185,7 @@
     <Compile Include="SimilarFile\LoadImageHelper.cs" />
     <Compile Include="SimilarFile\RemoveSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResetSimilarFilesCmdlet.cs" />
+    <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.GroupMode.cs" />
     <Compile Include="SimilarFile\SearchSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\SetThumbprintCacheFolderCmdlet.cs" />

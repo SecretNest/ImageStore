@@ -229,7 +229,9 @@ namespace SecretNest.ImageStore.File
                 measuring.Wait();
                 writing.Join();
             }
+            toWrite.Dispose();
             toWrite = null;
+            outputs.Dispose();
             outputs = null;
             files = null;
 

@@ -26,8 +26,8 @@ namespace SecretNest.ImageStore.SimilarFile
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
         public SwitchParameter SuppressTimeWarning { get; set; }
 
-        BlockingCollection<Tuple<bool, string>> outputs = new BlockingCollection<Tuple<bool, string>>();
-        ConcurrentBag<ErrorRecord> exceptions = new ConcurrentBag<ErrorRecord>();
+        BlockingCollection<Tuple<bool, string>> outputs;
+        ConcurrentBag<ErrorRecord> exceptions;
 
         protected override void ProcessRecord()
         {
@@ -64,7 +64,8 @@ namespace SecretNest.ImageStore.SimilarFile
                 WriteInformation(filesToBeCompareCount.ToString() + " files are found to be compared.", new string[] { "CompareSimilarFile" });
             }
 
-
+            outputs = new BlockingCollection<Tuple<bool, string>>();
+            exceptions = new ConcurrentBag<ErrorRecord>();
             CompareSimilarFileHelper helper = new CompareSimilarFileHelper(ImageComparedThreshold, allFiles, filesToBeCompared, existingSimilars, ComparingThreadLimit, outputs, exceptions);
 
             Task job = new Task(helper.Process, TaskCreationOptions.LongRunning);
@@ -86,6 +87,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
                 catch (InvalidOperationException)
                 {
+                    outputs.Dispose();
                     break;
                 }
             }
