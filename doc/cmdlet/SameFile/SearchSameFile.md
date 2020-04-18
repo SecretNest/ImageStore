@@ -7,9 +7,9 @@ Alias: SearchSameFile
 |Name|Type|Description|Optional|
 |---|---|---|---|
 |Sha1Hash|byte[]|Filters records by using file hashing result.|Yes|
-|IncludeIgnored|*switch*|Includes records marked as ignored.|-|
+|IncludesIgnored|*switch*|Includes records marked as ignored.|-|
 |OnlyIgnored|*switch*|Returns only ignored records.|-|
-|IncludeObsoleted|*switch*|Includes records from the same file groups which have only one record.|-|
+|IncludesObsoleted|*switch*|Includes records from the same file groups which have only one record.|-|
 
 From Pipeline: Sha1Hash
 

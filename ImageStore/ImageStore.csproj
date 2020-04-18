@@ -171,6 +171,12 @@
     <Compile Include="SimilarFile\ClearImageStoreThumbprintCacheFolderCmdlet.cs" />
     <Compile Include="SimilarFile\CompareSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\CompareSimilarFileHelper.cs" />
+    <Compile Include="SimilarFile\DoublePictureBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SimilarFile\DoublePictureBox.Designer.cs">
+      <DependentUpon>DoublePictureBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="SimilarFile\FileInfo.cs" />
     <Compile Include="SimilarFile\GetSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\HideSimilarFileCmdlet.cs" />
@@ -222,6 +228,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SameFile\SameFileManager.resx">
       <DependentUpon>SameFileManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimilarFile\DoublePictureBox.resx">
+      <DependentUpon>DoublePictureBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SimilarFile\SimilarFileManager.resx">
       <DependentUpon>SimilarFileManager.cs</DependentUpon>

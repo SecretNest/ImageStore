@@ -64,12 +64,36 @@ namespace SecretNest.ImageStore.DatabaseShared
             }
         }
 
+        internal void AddIntInRangeCause(string columnName, List<int> values)
+        {
+            if (values == null || values.Count == 0)
+                return;
+
+            if (values.Count == 1)
+            {
+                AddIntComparingCause(columnName, values[0]);
+            }
+
+            WhereCauseBuilder inner = new WhereCauseBuilder(parameters, false);
+            for (int index = 0; index < values.Count; index++)
+            {
+                var parameterName = columnName + index.ToString();
+                inner.AddIntComparingCause(columnName, values[index], parameterName);
+            }
+            whereCauses.Add("(" + inner.ToString() + ")");
+        }
+
         internal void AddIntComparingCause(string columnName, int? value)
+        {
+            AddIntComparingCause(columnName, value, columnName);
+        }
+
+        internal void AddIntComparingCause(string columnName, int? value, string parameterName)
         {
             if (value.HasValue)
             {
-                whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.Int) { Value = value.Value });
+                whereCauses.Add(string.Format("[{0}] = @{1}", columnName, parameterName));
+                parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.Int) { Value = value.Value });
             }
         }
 

@@ -25,7 +25,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public float? DifferenceDegree { get; set; }
 
         [Parameter(Position = 1)]
-        public SwitchParameter BuildDisconnectedGroup { get; set; }
+        public SwitchParameter BuildsDisconnectedGroup { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -76,6 +76,7 @@ namespace SecretNest.ImageStore.SimilarFile
                         }
                         else if (result == System.Windows.Forms.DialogResult.Cancel)
                         {
+                            WriteVerbose("Canceled."); 
                             WriteObject(null);
                             break;
                         }
@@ -183,7 +184,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             var insertCommand = "insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
-            if (!BuildDisconnectedGroup.IsPresent) //skip while loading to memory
+            if (!BuildsDisconnectedGroup.IsPresent) //skip while loading to memory
             {
                 insertCommand += " and [IgnoredMode]<>2";
             }
@@ -290,7 +291,7 @@ namespace SecretNest.ImageStore.SimilarFile
             groupedRecords = new Dictionary<int, List<Guid>>();
             groupedFiles = new Dictionary<int, Dictionary<Guid, List<Guid>>>();
 
-            if (BuildDisconnectedGroup)
+            if (BuildsDisconnectedGroup)
             {
                 var disconnectedGroup = new List<Guid>();
                 var disconnectedFiles = new Dictionary<Guid, List<Guid>>();

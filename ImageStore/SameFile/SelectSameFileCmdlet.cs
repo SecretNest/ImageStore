@@ -60,7 +60,7 @@ namespace SecretNest.ImageStore.SameFile
         public Color IgnoredForeColor { get; set; } = Color.FromArgb(224, 224, 224);
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 8)]
-        public SwitchParameter UseSystemColor { get; set; }
+        public SwitchParameter UsesSystemColor { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 9)]
         public UserInteraction UserInteraction { get; set; } = UserInteraction.Auto;
@@ -75,7 +75,7 @@ namespace SecretNest.ImageStore.SameFile
 
         protected override void ProcessRecord()
         {
-            if (UseSystemColor.IsPresent)
+            if (UsesSystemColor.IsPresent)
             {
                 OddGroupLinesBackColor = Color.FromKnownColor(KnownColor.Window);
                 EvenGroupLinesBackColor = Color.FromKnownColor(KnownColor.Window);

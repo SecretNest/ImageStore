@@ -11,13 +11,16 @@ Alias: SearchSimilarFile
 |DifferenceDegree|float?|Filters records by the difference degree exactly.|Yes|
 |DifferenceDegreeGreaterOrEqual|float?|Returns relations which are equal or larger than this difference degree. Will be ignored when DifferenceDegree is present.|Yes|
 |DifferenceDegreeLessOrEqual|float?|Returns relations which are equal or smaller than this difference degree. Will be ignored when DifferenceDegree is present.|Yes|
-|IgnoredModes|[IgnoredModes](#ignored-modes)|Filters records by state. Default value is 1 (Effective).|Yes|
+|IncludesEffective|*switch*|Returns records with [IgnoreMode](../../type/ImageStoreSimilarFile.md#Ignored-mode) is set as Effective.|Yes(*2)|
+|IncludesHiddenButConnected|*switch*|Returns records with [IgnoreMode](../../type/ImageStoreSimilarFile.md#Ignored-mode) is set as HiddenButConnected.|Yes(*2)|
+|IncludesHiddenAndDisconnected|*switch*|Returns records with [IgnoreMode](../../type/ImageStoreSimilarFile.md#Ignored-mode) is set as HiddenAndDisconnected.|Yes(*2)|
 |Top|int?|Limits the count of the results.|Yes|
-|OrderByDifferenceDegree|*switch*|Orders results by difference degree.|Yes|
+|OrdersByDifferenceDegree|*switch*|Orders results by difference degree.|Yes|
 
 From Pipeline: FileId
 
-*1: When both present, only returns the record related between these 2 files.
+*1: When both present, only returns the record related between these 2 files. AnotherFileId will be ignored when FileId absent.
+*2: When these 3 switches are all not set, only returns records with [IgnoreMode](../../type/ImageStoreSimilarFile.md#Ignored-mode) is set as Effective.
 
 Conditions will be ignored if not provided or set as null.
 

@@ -52,21 +52,33 @@ namespace SecretNest.ImageStore.File
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 12)]
         public int? FileSizeLessOrEqual { get; set; }
-        
+
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 13)]
-        public FileState? FileState { get; set; }
+        public SwitchParameter IncludesNewFile { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 14)]
-        public float? ImageComparedThreshold { get; set; }
+        public SwitchParameter IncludesNotImage { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 15)]
+        public SwitchParameter IncludesNotReadable { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 16)]
+        public SwitchParameter IncludesSizeZero { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 17)]
+        public SwitchParameter IncludesComputed { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 18)]
+        public float? ImageComparedThreshold { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 19)]
         public float? ImageComparedThresholdGreaterOrEqual { get; set; }
 
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 16)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 20)]
         public float? ImageComparedThresholdLessOrEqual { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 17)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 21)]
         public int? Top { get; set; }
 
         protected override void ProcessRecord()
@@ -94,7 +106,21 @@ namespace SecretNest.ImageStore.File
                 whereCauseBuilder.AddBinaryComparingCause("ImageHash", ImageHash, ImageHashIsNull.IsPresent, 40);
                 whereCauseBuilder.AddBinaryComparingCause("Sha1Hash", Sha1Hash, Sha1HashIsNull.IsPresent, 20);
                 whereCauseBuilder.AddIntComparingCause("FileSize", FileSize, FileSizeGreaterOrEqual, FileSizeLessOrEqual);
-                whereCauseBuilder.AddIntComparingCause("FileState", (int?)FileState);
+
+                List<int> fileStates = new List<int>();
+                if (IncludesNewFile.IsPresent)
+                    fileStates.Add(0);
+                if (IncludesNotImage.IsPresent)
+                    fileStates.Add(1); 
+                if (IncludesNotReadable.IsPresent)
+                    fileStates.Add(2); 
+                if (IncludesSizeZero.IsPresent)
+                    fileStates.Add(254);
+                if (IncludesComputed.IsPresent)
+                    fileStates.Add(255);
+                if (fileStates.Count != 5)
+                    whereCauseBuilder.AddIntInRangeCause("FileState", fileStates);
+
                 whereCauseBuilder.AddRealComparingCause("ImageComparedThreshold", ImageComparedThreshold, ImageComparedThresholdGreaterOrEqual, ImageComparedThresholdLessOrEqual);
 
                 command.CommandText += whereCauseBuilder.ToFullWhereCommand();

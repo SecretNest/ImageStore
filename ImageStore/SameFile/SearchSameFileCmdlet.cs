@@ -17,11 +17,11 @@ namespace SecretNest.ImageStore.SameFile
         public byte[] Sha1Hash { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
-        public SwitchParameter IncludeIgnored { get; set; }
+        public SwitchParameter IncludesIgnored { get; set; }
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
         public SwitchParameter OnlyIgnored { get; set; }
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 3)]
-        public SwitchParameter IncludeObsoleted { get; set; }
+        public SwitchParameter IncludesObsoleted { get; set; }
 
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 4)]
@@ -52,14 +52,14 @@ namespace SecretNest.ImageStore.SameFile
                     command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = Sha1Hash });
                     if (OnlyIgnored.IsPresent)
                         text += " and [IsIgnored]=1";
-                    else if (!IncludeIgnored.IsPresent)
+                    else if (!IncludesIgnored.IsPresent)
                         text += " and [IsIgnored]=0";
                 }
-                else if (IncludeObsoleted.IsPresent)
+                else if (IncludesObsoleted.IsPresent)
                 {
                     if (OnlyIgnored.IsPresent)
                         text += "where [IsIgnored]=1";
-                    else if (!IncludeIgnored.IsPresent)
+                    else if (!IncludesIgnored.IsPresent)
                         text += "where [IsIgnored]=0";
                 }
                 else
@@ -67,7 +67,7 @@ namespace SecretNest.ImageStore.SameFile
                     text += "Where [Sha1Hash] in (Select [Sha1Hash] From [SameFile] ";
                     if (OnlyIgnored.IsPresent)
                         text += "where [IsIgnored]=1 ";
-                    else if (!IncludeIgnored.IsPresent)
+                    else if (!IncludesIgnored.IsPresent)
                         text += "where [IsIgnored]=0 ";
                     text += "Group by [Sha1Hash] Having Count([Id]) > 1)";
                 }
@@ -91,7 +91,7 @@ namespace SecretNest.ImageStore.SameFile
                     reader.Close();
                 }
 
-                if (Sha1Hash != null && IncludeObsoleted.IsPresent && result.Count == 1)
+                if (Sha1Hash != null && IncludesObsoleted.IsPresent && result.Count == 1)
                 {
                     WriteObject(new List<ImageStoreSameFile>());
                 }

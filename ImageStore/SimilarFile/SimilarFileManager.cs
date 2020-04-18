@@ -36,8 +36,8 @@ namespace SecretNest.ImageStore.SimilarFile
             this.allRecords = allRecords;
             this.fileToRecords = fileToRecords;
             this.markIgnoreCallback = markIgnoreCallback;
+            doublePictureBox1.AutoResizePictures = checkBox3.Checked;
         }
-        bool autoResize = true;
         bool hideHidden = true;
 
         string IgnoredModeToString(IgnoredMode ignoredMode)
@@ -224,7 +224,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 button12.Enabled = false;
                 button11.Enabled = false;
                 button10.Enabled = false;
-                ClearPictures();
+                doublePictureBox1.ClearPictures();
             }
         }
         
@@ -242,7 +242,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
             listView3.Items.Clear();
             fileModeFile1SelectedFileId = Guid.Empty;
-            ClearPictures();
+            doublePictureBox1.ClearPictures();
         }
 
         private void listView2_ItemChecked(object sender, ItemCheckedEventArgs e)
@@ -344,9 +344,9 @@ namespace SecretNest.ImageStore.SimilarFile
                 fileModeSimilarFile1IsFile1 = tag.Item3;
 
                 if (fileModeSimilarFile1IsFile1)
-                    LoadPictures(selectedFileModeSimilarFileRecord.File1Id, selectedFileModeSimilarFileRecord.File2Id);
+                    doublePictureBox1.LoadPictures(allFileInfo[selectedFileModeSimilarFileRecord.File1Id], allFileInfo[selectedFileModeSimilarFileRecord.File2Id]);
                 else
-                    LoadPictures(selectedFileModeSimilarFileRecord.File2Id, selectedFileModeSimilarFileRecord.File1Id);
+                    doublePictureBox1.LoadPictures(allFileInfo[selectedFileModeSimilarFileRecord.File2Id], allFileInfo[selectedFileModeSimilarFileRecord.File1Id]);
 
                 button16.Enabled = true;
                 button15.Enabled = true;
@@ -370,7 +370,7 @@ namespace SecretNest.ImageStore.SimilarFile
             fileModeFile2SelectedFileId = Guid.Empty;
             selectedFileModeSimilarFileRecord = null;
             selectedFileModeFile2RowIndex = -1;
-            ClearPictures();
+            doublePictureBox1.ClearPictures();
         }
 
         private void listView3_ItemChecked(object sender, ItemCheckedEventArgs e)
@@ -400,7 +400,7 @@ namespace SecretNest.ImageStore.SimilarFile
             fileModeFile1Changing = true;
             foreach (ListViewItem row in listView2.Items)
             {
-                var grouped = groupedRecords[selectedGroupId];
+                //var grouped = groupedRecords[selectedGroupId];
                 var fileId = (Guid)row.Tag;
                 var selected = selectedFiles.Contains(fileId);
                 if (selected != row.Checked)
@@ -602,7 +602,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
             else
             {
-                ClearPictures();
+                doublePictureBox1.ClearPictures();
             }
         }
 
@@ -648,7 +648,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 var similarFileId = (Guid)row.Tag;
                 selectedRelationModeSimilarFileRecord = allRecords[similarFileId];
 
-                LoadPictures(selectedRelationModeSimilarFileRecord.File1Id, selectedRelationModeSimilarFileRecord.File2Id);
+                doublePictureBox1.LoadPictures(allFileInfo[selectedRelationModeSimilarFileRecord.File1Id], allFileInfo[selectedRelationModeSimilarFileRecord.File2Id]);
 
                 button1.Enabled = true;
                 button2.Enabled = true;
@@ -669,7 +669,7 @@ namespace SecretNest.ImageStore.SimilarFile
             button9.Enabled = false;
             selectedRalationModeRowIndex = -1;
             selectedRelationModeSimilarFileRecord = null;
-            ClearPictures();
+            doublePictureBox1.ClearPictures();
         }
 
         void RelationModeChangeSelection(bool select1st, bool select2nd)
@@ -777,170 +777,14 @@ namespace SecretNest.ImageStore.SimilarFile
         }
         #endregion
 
-        #region Image
-        Image originalImage1, originalImage2;
-        Guid loadedFileId1, loadedFileId2;
-
-        void ClearPictures()
-        {
-            textBox1.Text = "";
-            textBox2.Text = "";
-            loadedFileId1 = Guid.Empty;
-            loadedFileId2 = Guid.Empty;
-            DisposeOldImage1();
-            DisposeOldImage2();
-        }
-
-        void DisposeOldImage1()
-        {
-            if (autoResize)
-            {
-                if (pictureBox1.Image != null)
-                {
-                    var img = pictureBox1.Image;
-                    pictureBox1.Image = null;
-                    img.Dispose();
-                    img = null;
-                }
-            }
-            else
-            {
-                pictureBox1.Image = null;
-            }
-            if (originalImage1 != null)
-            {
-                originalImage1.Dispose();
-                originalImage1 = null;
-            }
-        }
-
-        void DisposeOldImage2()
-        {
-            if (autoResize)
-            {
-                if (pictureBox2.Image != null)
-                {
-                    var img = pictureBox2.Image;
-                    pictureBox2.Image = null;
-                    img.Dispose();
-                    img = null;
-                }
-            }
-            else
-            {
-                pictureBox2.Image = null;
-            }
-            if (originalImage2 != null)
-            {
-                originalImage2.Dispose();
-                originalImage2 = null;
-            }
-        }
-
-        void LoadPictures(Guid file1Id, Guid file2Id)
-        {
-            var needReload = false;
-            if (file1Id != loadedFileId1)
-            {
-                DisposeOldImage1();
-
-                var fileInfo1 = allFileInfo[file1Id];
-                textBox1.Text = fileInfo1.FileNameWithExtension + " (" + fileInfo1.PathToDirectory + ")";
-                originalImage1 = LoadImageHelper.LoadFromFile(fileInfo1.FilePath, out bool succeeded);
-                if (!succeeded)
-                    textBox1.Text = "(Error) " + textBox1.Text;
-                needReload = true;
-            }
-            if (file2Id != loadedFileId2)
-            {
-                DisposeOldImage2();
-
-                var fileInfo2 = allFileInfo[file2Id];
-                textBox2.Text = fileInfo2.FileNameWithExtension + " (" + fileInfo2.PathToDirectory + ")";
-                originalImage2 = LoadImageHelper.LoadFromFile(fileInfo2.FilePath, out bool succeeded);
-                if (!succeeded)
-                    textBox2.Text = "(Error) " + textBox2.Text;
-                needReload = true;
-            }
-
-            if (needReload)
-                ReloadPictures();
-        }
-
-        void ReloadPictures()
-        {
-            if (autoResize)
-            {
-                RefreshResizedImage();
-            }
-            else
-            {
-                pictureBox1.Image = originalImage1;
-                pictureBox2.Image = originalImage2;
-            }
-        }
-
-        void RefreshResizedImage()
-        {
-            if (originalImage1 != null && originalImage2 != null)
-            {
-                float resizePercent = LoadImageHelper.GetResizePercent(originalImage1, originalImage2, pictureBox1.Size, pictureBox2.Size);
-                pictureBox1.Image = LoadImageHelper.ResizeImage(originalImage1, pictureBox1.Size, resizePercent);
-                pictureBox2.Image = LoadImageHelper.ResizeImage(originalImage2, pictureBox2.Size, resizePercent);
-            }
-        }
-
-        private void splitContainer2_Resize(object sender, EventArgs e)
-        {
-            if (autoResize)
-            {
-                pictureBox1.Size = panel1.Size;
-                pictureBox2.Size = panel2.Size;
-
-                RefreshResizedImage();
-            }
-        }
-
-        private void pictureBox1_DoubleClick(object sender, EventArgs e)
-        {
-            var path = pictureBox1.Image?.Tag;
-            if (path != null)
-                System.Diagnostics.Process.Start((string)path);
-        }
-
-        private void pictureBox2_DoubleClick(object sender, EventArgs e)
-        {
-            var path = pictureBox2.Image?.Tag;
-            if (path != null)
-                System.Diagnostics.Process.Start((string)path);
-        }
-
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
-            autoResize = checkBox3.Checked;
-            pictureBox1.Top = 0;
-            pictureBox1.Left = 0;
-            pictureBox2.Top = 0;
-            pictureBox2.Left = 0;
-            if (autoResize)
-            {
-                pictureBox1.SizeMode = PictureBoxSizeMode.Normal;
-                pictureBox2.SizeMode = PictureBoxSizeMode.Normal;
-                pictureBox1.Size = panel1.Size;
-                pictureBox2.Size = panel2.Size;
-            }
-            else
-            {
-                pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
-                pictureBox2.SizeMode = PictureBoxSizeMode.AutoSize;
-            }
-            ReloadPictures();
+            doublePictureBox1.AutoResizePictures = checkBox3.Checked;
         }
-        #endregion
 
         private void SimilarFileManager_FormClosing(object sender, FormClosingEventArgs e)
         {
-            ClearPictures();
+            doublePictureBox1.ClearPictures();
         }
 
 

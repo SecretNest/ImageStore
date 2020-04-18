@@ -9,7 +9,7 @@ Alias: ResolveSimilarFiles
 |Name|Type|Description|Optional|
 |---|---|---|---|
 |DifferenceDegree|float?|The maximum difference degree of records to be viewed in this time.|Yes|
-|BuildDisconnectedGroup|*switch*|Collect all disconnected records into a special group.|-|
+|BuildsDisconnectedGroup|*switch*|Collects all disconnected records into a special group.|-|
 
 If DifferenceDegree is absent or larger than the minimum ImageComparedThreshold of file records, the latter data will be used in place.
 

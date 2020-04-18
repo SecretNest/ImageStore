@@ -38,7 +38,7 @@ UI window will use different back colors for odd and even groups, as well as dif
 |NormalForeColor|System.Drawing.Color|Defines the fore color of the normal items.|Yes|
 |SelectedForeColor|System.Drawing.Color|Defines the fore color of the items selected for returning.|Yes|
 |IgnoredForeColor|System.Drawing.Color|Defines the fore color of the items set as ignored.|Yes|
-|UseSystemColor|*switch*|Uses system defined colors instead. Will suppress all others color parameters above.|-|
+|UsesSystemColor|*switch*|Uses system defined colors instead. Will suppress all others color parameters above.|-|
 
 # User Interaction
 The condition of user interaction UI showing up.

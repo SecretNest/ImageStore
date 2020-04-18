@@ -19,13 +19,19 @@ Alias: SearchFile
 |FileSize|int?|Filters records by the file size.|Yes|
 |FileSizeGreaterOrEqual|int?|Returns files which are equal or larger than the size. Will be ignored when FileSize is present.|Yes|
 |FileSizeLessOrEqual|int?|Returns files which are equal or smaller than the size. Will be ignored when FileSize is present.|Yes|
-|FileState|[FileState](../../type/ImageStoreFile.md#file-state)?|Filters records by state.|Yes|
+|IncludesNewFile|*switch*|Returns records with [FileState](../../type/ImageStoreFile.md#file-state) is set as New.|Yes(*1)|
+|IncludesNotImage|*switch*|Returns records with [FileState](../../type/ImageStoreFile.md#file-state) is set as NotImage.|Yes(*1)|
+|IncludesNotReadable|*switch*|Returns records with [FileState](../../type/ImageStoreFile.md#file-state) is set as NotReadable.|Yes(*1)|
+|IncludesSizeZero|*switch*|Returns records with [FileState](../../type/ImageStoreFile.md#file-state) is set as SizeZero.|Yes(*1)|
+|IncludesComputed|*switch*|Returns records with [FileState](../../type/ImageStoreFile.md#file-state) is set as Computed.|Yes(*1)|
 |ImageComparedThreshold|float?|Filters records by the maximum ImageComparedThreshold used in [Compare-ImageStoreSimilarFiles](../SimilarFile/CompareSimilarFiles.md) on this file.|Yes|
 |ImageComparedThresholdGreaterOrEqual|float?|Returns files which ImageComparedThreshold are equal or greater than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
 |ImageComparedThresholdLessOrEqual|float?|Returns files which ImageComparedThreshold are equal or less than this value. Will be ignored when ImageComparedThreshold is present.|Yes|
 |Top|int?|Limits the count of the results.|Yes|
 
 From Pipeline: Path
+
+*1: When these 5 switches are all not set, [FileState](../../type/ImageStoreFile.md#file-state) will be ignored.
 
 Conditions will be ignored if not provided or set as null.
 

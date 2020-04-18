@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SecretNest.ImageStore.DatabaseShared;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
@@ -8,18 +9,6 @@ using System.Threading.Tasks;
 
 namespace SecretNest.ImageStore.SimilarFile
 {
-    [Flags]
-    public enum IgnoredModes : int
-    {
-        Effective = 1,
-        HiddenButConnected = 2,
-        HiddenAndDisconnected = 4,
-        
-        All = 7,
-        AllHidden = 6,
-        AllConnected = 3
-    }
-
     [Cmdlet(VerbsCommon.Search, "ImageStoreSimilarFile")]
     [Alias("SearchSimilarFile")]
     [OutputType(typeof(List<ImageStoreSimilarFile>))]
@@ -43,13 +32,19 @@ namespace SecretNest.ImageStore.SimilarFile
         public float? DifferenceDegreeLessOrEqual { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 5)]
-        public IgnoredModes IgnoredModes { get; set; } = IgnoredModes.Effective;
-        
+        public SwitchParameter IncludesEffective { get; set; }
+
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 6)]
-        public int? Top { get; set; }
+        public SwitchParameter IncludesHiddenButConnected { get; set; }
 
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 7)]
-        public SwitchParameter OrderByDifferenceDegree { get; set; }
+        public SwitchParameter IncludesHiddenAndDisconnected { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 8)]
+        public int? Top { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 9)]
+        public SwitchParameter OrdersByDifferenceDegree { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -60,89 +55,57 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             var connection = DatabaseConnection.Current;
+            string commandPart = " [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile]";
 
-            using (var command = new SqlCommand(" [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile]"))
+            using (var command = new SqlCommand() { CommandTimeout = 0 })
             {
                 command.Connection = connection;
-                command.CommandTimeout = 0;
                 if (Top.HasValue)
                 {
-                    command.CommandText = "SELECT TOP " + Top.Value.ToString() + command.CommandText;
+                    command.CommandText = "SELECT TOP " + Top.Value.ToString() + commandPart;
                 }
                 else
                 {
-                    command.CommandText = "SELECT" + command.CommandText;
+                    command.CommandText = "SELECT" + commandPart;
                 }
 
-                List<string> where = new List<string>();
+
+                WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
 
                 if (FileId.HasValue)
                 {
                     if (AnotherFileId.HasValue)
                     {
-                        where.Add("(([File1Id] = @File1Id and [File2Id] = @File2Id) or ([File2Id] = @File1Id and [File1Id] = @File2Id))");
+                        whereCauseBuilder.AddPlainCause("(([File1Id] = @File1Id and [File2Id] = @File2Id) or ([File2Id] = @File1Id and [File1Id] = @File2Id))");
                         command.Parameters.Add(new SqlParameter("@File1Id", System.Data.SqlDbType.UniqueIdentifier) { Value = FileId.Value });
                         command.Parameters.Add(new SqlParameter("@File2Id", System.Data.SqlDbType.UniqueIdentifier) { Value = AnotherFileId.Value });
                     }
                     else
                     {
-                        where.Add("([File1Id] = @FileId or [File2Id] = @FileId)");
+                        whereCauseBuilder.AddPlainCause("([File1Id] = @FileId or [File2Id] = @FileId)");
                         command.Parameters.Add(new SqlParameter("@FileId", System.Data.SqlDbType.UniqueIdentifier) { Value = FileId.Value });
                     }
                 }
 
-                if (DifferenceDegree.HasValue)
-                {
-                    where.Add("[DifferenceDegree] = @DifferenceDegree");
-                    command.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real) { Value = DifferenceDegree.Value });
-                }
-                else
-                {
-                    if (DifferenceDegreeGreaterOrEqual.HasValue)
-                    {
-                        where.Add("[DifferenceDegree] >= @DifferenceDegreeGreaterOrEqual");
-                        command.Parameters.Add(new SqlParameter("@DifferenceDegreeGreaterOrEqual", System.Data.SqlDbType.Real) { Value = DifferenceDegreeGreaterOrEqual.Value });
-                    }
+                whereCauseBuilder.AddRealComparingCause("DifferenceDegree", DifferenceDegree, DifferenceDegreeGreaterOrEqual, DifferenceDegreeLessOrEqual);
 
-                    if (DifferenceDegreeLessOrEqual.HasValue)
-                    {
-                        where.Add("[DifferenceDegree] <= @DifferenceDegreeLessOrEqual");
-                        command.Parameters.Add(new SqlParameter("@DifferenceDegreeLessOrEqual", System.Data.SqlDbType.Real) { Value = DifferenceDegreeLessOrEqual.Value });
-                    }
+                List<int> ignoredModes = new List<int>();
+                if (IncludesEffective.IsPresent)
+                    ignoredModes.Add(0);
+                if (IncludesHiddenButConnected.IsPresent)
+                    ignoredModes.Add(1);
+                if (IncludesHiddenAndDisconnected.IsPresent)
+                    ignoredModes.Add(2);
+                if (ignoredModes.Count != 3)
+                {
+                    if (ignoredModes.Count == 0)
+                        ignoredModes.Add(0);
+                    whereCauseBuilder.AddIntInRangeCause("IgnoredMode", ignoredModes);
                 }
 
-                if (IgnoredModes != IgnoredModes.All)
-                {
-                    List<string> ignoreCode = new List<string>();
-                    if (IgnoredModes.HasFlag(IgnoredModes.Effective))
-                    {
-                        ignoreCode.Add("[IgnoredMode] = 0");
-                    }
-                    if (IgnoredModes.HasFlag(IgnoredModes.HiddenButConnected))
-                    {
-                        ignoreCode.Add("[IgnoredMode] = 1");
-                    }
-                    if (IgnoredModes.HasFlag(IgnoredModes.HiddenAndDisconnected))
-                    {
-                        ignoreCode.Add("[IgnoredMode] = 2");
-                    }
+                command.CommandText += whereCauseBuilder.ToFullWhereCommand();
 
-                    if (ignoreCode.Count == 1)
-                    {
-                        where.Add(ignoreCode[0]);
-                    }
-                    else
-                    {
-                        where.Add("(" + string.Join(" or ", ignoreCode) + ")");
-                    }
-                }
-
-                if (where.Count > 0)
-                {
-                    command.CommandText += " where " + string.Join(" and ", where);
-                }
-
-                if (OrderByDifferenceDegree.IsPresent)
+                if (OrdersByDifferenceDegree.IsPresent)
                 {
                     command.CommandText += " order by [DifferenceDegree]";
                 }
