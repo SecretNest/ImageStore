@@ -239,7 +239,7 @@ namespace SecretNest.ImageStore.File
         void OutputOneFileFinished(string fullPath)
         {
             var now = Interlocked.Increment(ref finishedCount);
-            var percent = Math.Floor(now * 10000 / filesCountSingle) / 10000;
+            var percent = Math.Floor(now / filesCountSingle * 10000) / 10000;
             string text = string.Format("{2:P} ({0} of {1}) {3} is processed.", now, filesCountText, percent, fullPath);
             outputs.Add(new Tuple<int, string>(0, text));
         }
@@ -247,7 +247,7 @@ namespace SecretNest.ImageStore.File
         void OutputOneFileFailed(string fullPath, string errorText)
         {
             var now = Interlocked.Increment(ref finishedCount);
-            var percent = Math.Floor(now * 10000 / filesCountSingle) / 10000;
+            var percent = Math.Floor(now / filesCountSingle * 10000) / 10000;
             string text = string.Format("{2:P} ({0} of {1}) {3} processing is failed. Error: {4}", now, filesCountText, percent, fullPath, errorText);
             outputs.Add(new Tuple<int, string>(1, text));
         }
