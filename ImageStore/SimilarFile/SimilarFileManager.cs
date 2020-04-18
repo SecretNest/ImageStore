@@ -107,6 +107,10 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 if (listView1.Items.Count > 0)
                     listView1.Items[0].Selected = true;
+                else
+                {
+                    selectedGroupId = -2;
+                }
             }
             else
             {
@@ -115,9 +119,7 @@ namespace SecretNest.ImageStore.SimilarFile
             effectiveGroups = null;
             hiddenGroups = null;
 
-            TopMost = true;
             Focus();
-            TopMost = false;
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -137,7 +139,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     return;
                 }
             }
-            selectedGroupId = -1;
+            selectedGroupId = -2;
             ClearGroup();
         }
 
@@ -152,7 +154,7 @@ namespace SecretNest.ImageStore.SimilarFile
             fileModeFile2Changing = false;
         }
 
-        int selectedGroupId;
+        int selectedGroupId; //-1: disconnected; -2: none; else: group id
         bool relationMode;
         void LoadGroup(int groupId)
         {
@@ -189,22 +191,25 @@ namespace SecretNest.ImageStore.SimilarFile
             listView2.Items.Clear();
             listView3.Items.Clear();
             fileModeFile2Changing = false;
-            var grouped = groupedFiles[selectedGroupId];
-
-            List<ListViewItem> items = new List<ListViewItem>();
-            foreach(var file1 in grouped)
+            if (selectedGroupId != -2)
             {
-                var fileId = file1.Key;
-                var show = !hideHidden || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Effective);
-                if (show)
-                {
-                    var selected = selectedFiles.Contains(fileId);
-                    var fileInfo = allFileInfo[fileId];
-                    items.Add(new ListViewItem(new string[] { fileInfo.FileNameWithExtension, fileInfo.PathToDirectory, fileInfo.FileSize.ToString() }) { Checked = selected, Tag = fileId });
-                }
-            }
+                var grouped = groupedFiles[selectedGroupId];
 
-            listView2.Items.AddRange(items.OrderBy(i => i.SubItems[1].Text).ThenBy(i => i.SubItems[0].Text).ToArray());
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (var file1 in grouped)
+                {
+                    var fileId = file1.Key;
+                    var show = !hideHidden || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Effective);
+                    if (show)
+                    {
+                        var selected = selectedFiles.Contains(fileId);
+                        var fileInfo = allFileInfo[fileId];
+                        items.Add(new ListViewItem(new string[] { fileInfo.FileNameWithExtension, fileInfo.PathToDirectory, fileInfo.FileSize.ToString() }) { Checked = selected, Tag = fileId });
+                    }
+                }
+
+                listView2.Items.AddRange(items.OrderBy(i => i.SubItems[1].Text).ThenBy(i => i.SubItems[0].Text).ToArray());
+            }
             fileModeFile1Changing = false;
             if (listView2.Items.Count > 0)
             {
@@ -541,12 +546,21 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             dataGridView1.Rows.Clear();
 
-            var grouped = groupedRecords[selectedGroupId].ConvertAll(i => allRecords[i]);
-            if (hideHidden)
+            List<ImageStoreSimilarFile> grouped;
+            if (selectedGroupId != -2)
             {
-                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
+                grouped = groupedRecords[selectedGroupId].ConvertAll(i => allRecords[i]);
+                if (hideHidden)
+                {
+                    grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
+                }
             }
-            if (grouped.Count > 0)
+            else
+            {
+                grouped = null;
+            }
+
+            if (grouped?.Count > 0)
             {
                 DataGridViewRow[] rows = new DataGridViewRow[grouped.Count];
                 Parallel.For(0, grouped.Count, rowIndex =>
@@ -585,6 +599,10 @@ namespace SecretNest.ImageStore.SimilarFile
                 });
                 dataGridView1.Rows.AddRange(rows);
                 dataGridView1.Rows[0].Selected = true;
+            }
+            else
+            {
+                ClearPictures();
             }
         }
 
@@ -949,8 +967,13 @@ namespace SecretNest.ImageStore.SimilarFile
                 foreach (var item in hiddenGroups)
                     item.Group = listView1.Groups[1];
                 listView1.Items.AddRange(hiddenGroups);
+                if (listView1.SelectedItems.Count == 0 && listView1.Items.Count > 0)
+                {
+                    listView1.Items[0].Selected = true;
+                }
             }
             listView1.EndUpdate();
+
 
             if (shownHiddenChanging) return;
 

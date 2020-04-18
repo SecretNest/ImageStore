@@ -11,7 +11,7 @@ Alias: SearchSimilarFile
 |DifferenceDegree|float?|Filters records by the difference degree exactly.|Yes|
 |DifferenceDegreeGreaterOrEqual|float?|Returns relations which are equal or larger than this difference degree. Will be ignored when DifferenceDegree is present.|Yes|
 |DifferenceDegreeLessOrEqual|float?|Returns relations which are equal or smaller than this difference degree. Will be ignored when DifferenceDegree is present.|Yes|
-|IgnoredModes|[IgnoredModes](#ignored-modes)|Filters records by state.|Yes|
+|IgnoredModes|[IgnoredModes](#ignored-modes)|Filters records by state. Default value is 1 (Effective).|Yes|
 |Top|int?|Limits the count of the results.|Yes|
 |OrderByDifferenceDegree|*switch*|Orders results by difference degree.|Yes|
 

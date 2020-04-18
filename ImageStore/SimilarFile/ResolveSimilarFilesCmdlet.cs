@@ -24,6 +24,9 @@ namespace SecretNest.ImageStore.SimilarFile
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]
         public float? DifferenceDegree { get; set; }
 
+        [Parameter(Position = 1)]
+        public SwitchParameter BuildDisconnectedGroup { get; set; }
+
         protected override void BeginProcessing()
         {
             System.Windows.Forms.Application.EnableVisualStyles();
@@ -52,39 +55,74 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             WriteVerbose("Calculating similar files into groups... It may take several minutes to complete.");
+            selectedFiles = new HashSet<Guid>();
+            loadedThumbprints = new ConcurrentDictionary<Guid, Image>();
             while (true)
             {
                 Calculate();
 
-                WriteVerbose("Count of groups: " + groupedRecords.Count.ToString());
-
-                using (SimilarFileManager window = new SimilarFileManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedRecords, groupedFiles, allRecords, fileToRecords, IgnoreSimilarFileHelper.MarkIgnore))
+                var groupCount = groupedRecords.Count;
+                if (groupCount > 0)
                 {
-                    WriteVerbose("Please select all files you want to returned from the popped up window.");
-                    var result = window.ShowDialog();
-                    if (result == System.Windows.Forms.DialogResult.OK)
+                    WriteVerbose("Count of groups: " + groupCount.ToString());
+                    using (SimilarFileManager window = new SimilarFileManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedRecords, groupedFiles, allRecords, fileToRecords, IgnoreSimilarFileHelper.MarkIgnore))
                     {
-                        WriteObject(selectedFiles.Select(i => allFiles[i]).ToList());
-                        break;
+                        WriteVerbose("Please check all files you want to returned from the popped up window.");
+                        var result = window.ShowDialog();
+                        if (result == System.Windows.Forms.DialogResult.OK)
+                        {
+                            WriteOutput();
+                            break;
+                        }
+                        else if (result == System.Windows.Forms.DialogResult.Cancel)
+                        {
+                            WriteObject(null);
+                            break;
+                        }
                     }
-                    else if (result == System.Windows.Forms.DialogResult.Cancel)
-                    {
-                        WriteObject(null);
-                        break;
-                    }
+                    WriteVerbose("Refreshing groups...");
                 }
-                WriteVerbose("Refreshing groups...");
+                else
+                {
+                    WriteVerbose("No record is found.");
+                    WriteOutput();
+                    break;
+                }
             }
 
             Parallel.ForEach(loadedThumbprints.Values, i => i.Dispose());
         }
 
-        HashSet<Guid> selectedFiles = new HashSet<Guid>();
+        void WriteOutput()
+        {
+            var list = selectedFiles.Select(i => allFiles[i]).ToList();
+            var count = list.Count;
+            if (count == 0)
+            {
+                WriteVerbose("No file is checked.");
+            }
+            else if (count == 1)
+            {
+                var file = list[0];
+                string folder = allFolders[file.FolderId].Path;
+                if (!folder.EndsWith(DirectorySeparatorString.Value))
+                    folder += DirectorySeparatorString.Value;
+                string fileName = FileHelper.GetFullFilePath(folder, file.Path, file.FileName, allExtensionNames[file.ExtensionId]);
+                WriteVerbose("The checked file (" + fileName + ") is returned.");
+            }
+            else
+            {
+                WriteVerbose("The " + count.ToString() + " checked files are returned.");
+            }
+            WriteObject(list);
+        }
+
+        HashSet<Guid> selectedFiles;
         Dictionary<Guid, ImageStoreFile> allFiles = new Dictionary<Guid, ImageStoreFile>();
         Dictionary<Guid, FileInfo> allFileInfo = new Dictionary<Guid, FileInfo>();
-        ConcurrentDictionary<Guid, Image> loadedThumbprints = new ConcurrentDictionary<Guid, Image>();
-        Dictionary<Guid, ImageStoreFolder> allFolders = new Dictionary<Guid, ImageStoreFolder>();
-        Dictionary<Guid, string> allExtensionNames = new Dictionary<Guid, string>();
+        ConcurrentDictionary<Guid, Image> loadedThumbprints;
+        Dictionary<Guid, ImageStoreFolder> allFolders;
+        Dictionary<Guid, string> allExtensionNames;
 
         #region CheckDifferenceDegree
         void CheckDifferenceDegree()
@@ -137,12 +175,6 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void LoadToMemory()
         {
-            foreach (var folder in FolderHelper.GetAllFolders())
-                allFolders.Add(folder.Id, folder);
-
-            foreach (var extension in ExtensionHelper.GetAllExtensions())
-                allExtensionNames.Add(extension.Id, extension.Extension);
-
             var connection = DatabaseConnection.Current;
 
             using (var command = new SqlCommand("Create table #tempSimilarFile ([Id] uniqueidentifier, [File1Id] uniqueidentifier, [File2Id] uniqueidentifier, [DifferenceDegree] real, [IgnoredMode] int)", connection))
@@ -150,7 +182,12 @@ namespace SecretNest.ImageStore.SimilarFile
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree", connection) { CommandTimeout = 180 })
+            var insertCommand = "insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
+            if (!BuildDisconnectedGroup.IsPresent) //skip while loading to memory
+            {
+                insertCommand += " and [IgnoredMode]<>2";
+            }
+            using (var command = new SqlCommand(insertCommand, connection) { CommandTimeout = 180 })
             {
                 command.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real) { Value = DifferenceDegree });
                 command.ExecuteNonQuery();
@@ -221,12 +258,25 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
+
             using (var command = new SqlCommand("drop table #tempSimilarFileId", connection))
             {
                 command.ExecuteNonQuery();
             }
 
-            Parallel.ForEach(allFiles.Values, i => allFileInfo[i.Id].SetData(i, allFolders[i.FolderId], allExtensionNames[i.ExtensionId]));
+            if (allFiles.Count > 0)
+            {
+                allFolders = new Dictionary<Guid, ImageStoreFolder>();
+                allExtensionNames = new Dictionary<Guid, string>();
+
+                foreach (var folder in FolderHelper.GetAllFolders())
+                    allFolders.Add(folder.Id, folder);
+
+                foreach (var extension in ExtensionHelper.GetAllExtensions())
+                    allExtensionNames.Add(extension.Id, extension.Extension);
+
+                Parallel.ForEach(allFiles.Values, i => allFileInfo[i.Id].SetData(i, allFolders[i.FolderId], allExtensionNames[i.ExtensionId]));
+            }
         }
 
         Dictionary<int, List<Guid>> groupedRecords;
@@ -239,33 +289,45 @@ namespace SecretNest.ImageStore.SimilarFile
 
             groupedRecords = new Dictionary<int, List<Guid>>();
             groupedFiles = new Dictionary<int, Dictionary<Guid, List<Guid>>>();
-            var disconnectedGroup = new List<Guid>();
-            var disconnectedFiles = new Dictionary<Guid, List<Guid>>();
-            foreach (var record in allRecords)
+
+            if (BuildDisconnectedGroup)
             {
-                if (record.Value.IgnoredMode == IgnoredMode.HiddenAndDisconnected)
+                var disconnectedGroup = new List<Guid>();
+                var disconnectedFiles = new Dictionary<Guid, List<Guid>>();
+                foreach (var record in allRecords)
                 {
-                    disconnectedGroup.Add(record.Key);
-                    if (!disconnectedFiles.TryGetValue(record.Value.File1Id, out var list))
+                    if (record.Value.IgnoredMode == IgnoredMode.HiddenAndDisconnected)
                     {
-                        list = new List<Guid>();
-                        disconnectedFiles.Add(record.Value.File1Id, list);
+                        disconnectedGroup.Add(record.Key);
+                        if (!disconnectedFiles.TryGetValue(record.Value.File1Id, out var list))
+                        {
+                            list = new List<Guid>();
+                            disconnectedFiles.Add(record.Value.File1Id, list);
+                        }
+                        list.Add(record.Key);
+                        if (!disconnectedFiles.TryGetValue(record.Value.File2Id, out list))
+                        {
+                            list = new List<Guid>();
+                            disconnectedFiles.Add(record.Value.File2Id, list);
+                        }
+                        list.Add(record.Key);
                     }
-                    list.Add(record.Key);
-                    if (!disconnectedFiles.TryGetValue(record.Value.File2Id, out list))
-                    {
-                        list = new List<Guid>();
-                        disconnectedFiles.Add(record.Value.File2Id, list);
-                    }
-                    list.Add(record.Key);
+                    else
+                        leftRecords.Add(record.Key);
                 }
-                else
-                    leftRecords.Add(record.Key);
+                if (disconnectedGroup.Count > 0)
+                {
+                    groupedRecords.Add(-1, disconnectedGroup);
+                    groupedFiles.Add(-1, disconnectedFiles);
+                }
             }
-            if (disconnectedGroup.Count > 0)
+            else
             {
-                groupedRecords.Add(-1, disconnectedGroup);
-                groupedFiles.Add(-1, disconnectedFiles);
+                foreach (var record in allRecords)
+                {
+                    if (record.Value.IgnoredMode != IgnoredMode.HiddenAndDisconnected)
+                        leftRecords.Add(record.Key);
+                }
             }
 
             if (leftRecords.Count == 0) return;
