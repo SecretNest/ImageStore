@@ -212,6 +212,13 @@ namespace SecretNest.ImageStore.SimilarFile
             }
             else
             {
+                button16.Enabled = false;
+                button15.Enabled = false;
+                button14.Enabled = false;
+                button13.Enabled = false;
+                button12.Enabled = false;
+                button11.Enabled = false;
+                button10.Enabled = false;
                 ClearPictures();
             }
         }
