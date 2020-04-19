@@ -156,7 +156,7 @@ namespace SecretNest.ImageStore.SimilarFile
                             }
                         }
                     }
-
+                    
                     var sortedGroup = unsortedGroup.OrderByDescending(i => i.Values.Sum(j => j.Count(k => allRecords[k].IgnoredMode == IgnoredMode.Effective))); //order by descending: total effective records in group.
                     var groupIndex = 0;
                     foreach (var item in sortedGroup)
