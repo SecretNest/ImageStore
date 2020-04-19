@@ -173,13 +173,11 @@ namespace SecretNest.ImageStore.SimilarFile
                     needToPrepareThumbprints.Dispose();
                 }
             }
-            WriteVerbose("Step2");
 
             if (disconnectedFiles?.Count > 0)
             {
                 groupedFiles.Add(-1, disconnectedFiles);
             }
-            WriteVerbose("Step3");
         }
 
         void PreparingFileThumbprints(object parameter)
