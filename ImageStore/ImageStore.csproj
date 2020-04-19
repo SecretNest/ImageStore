@@ -185,16 +185,36 @@
     <Compile Include="SimilarFile\LoadImageHelper.cs" />
     <Compile Include="SimilarFile\RemoveSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResetSimilarFilesCmdlet.cs" />
+    <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.FileMode.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.GroupMode.cs" />
     <Compile Include="SimilarFile\SearchSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\SetThumbprintCacheFolderCmdlet.cs" />
     <Compile Include="SimilarFile\ShowSimilarFileCmdlet.cs" />
-    <Compile Include="SimilarFile\SimilarFileManager.cs">
+    <Compile Include="SimilarFile\SimilarFileCheck.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFileCheck.Designer.cs">
+      <DependentUpon>SimilarFileCheck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFileHelper.cs" />
+    <Compile Include="SimilarFile\SimilarFileInGroupManager.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SimilarFile\SimilarFileManager.Designer.cs">
-      <DependentUpon>SimilarFileManager.cs</DependentUpon>
+    <Compile Include="SimilarFile\SimilarFileInGroupManager.Designer.cs">
+      <DependentUpon>SimilarFileInGroupManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFileOneManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFileOneManager.Designer.cs">
+      <DependentUpon>SimilarFileOneManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFilesManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SimilarFile\SimilarFilesManager.Designer.cs">
+      <DependentUpon>SimilarFilesManager.cs</DependentUpon>
     </Compile>
     <Compile Include="SimilarFile\UpdateSimilarFileCmdlet.cs" />
     <Compile Include="StringPropertyComparingModes.cs" />
@@ -233,8 +253,17 @@
     <EmbeddedResource Include="SimilarFile\DoublePictureBox.resx">
       <DependentUpon>DoublePictureBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SimilarFile\SimilarFileManager.resx">
-      <DependentUpon>SimilarFileManager.cs</DependentUpon>
+    <EmbeddedResource Include="SimilarFile\SimilarFileCheck.resx">
+      <DependentUpon>SimilarFileCheck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimilarFile\SimilarFileInGroupManager.resx">
+      <DependentUpon>SimilarFileInGroupManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimilarFile\SimilarFileOneManager.resx">
+      <DependentUpon>SimilarFileOneManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SimilarFile\SimilarFilesManager.resx">
+      <DependentUpon>SimilarFilesManager.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

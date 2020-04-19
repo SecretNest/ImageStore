@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace SecretNest.ImageStore.SimilarFile
 {
-    partial class SimilarFileManager : Form
+    partial class SimilarFileInGroupManager : Form
     {
 
         HashSet<Guid> selectedFiles;
@@ -20,12 +20,10 @@ namespace SecretNest.ImageStore.SimilarFile
         Dictionary<int, List<Guid>> groupedRecords;
         Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles;
         Dictionary<Guid, ImageStoreSimilarFile> allRecords;
-        Dictionary<Guid, List<Guid>> fileToRecords;
         Func<Guid, IgnoredMode, bool> markIgnoreCallback;
-        public SimilarFileManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, Image> loadImage,
+        public SimilarFileInGroupManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, Image> loadImage,
             Dictionary<int, List<Guid>> groupedRecords, Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles,
-            Dictionary<Guid, ImageStoreSimilarFile> allRecords, Dictionary<Guid, List<Guid>> fileToRecords,
-            Func<Guid, IgnoredMode, bool> markIgnoreCallback)
+            Dictionary<Guid, ImageStoreSimilarFile> allRecords, Func<Guid, IgnoredMode, bool> markIgnoreCallback)
         {
             InitializeComponent();
             this.selectedFiles = selectedFiles;
@@ -34,21 +32,10 @@ namespace SecretNest.ImageStore.SimilarFile
             this.groupedRecords = groupedRecords;
             this.groupedFiles = groupedFiles;
             this.allRecords = allRecords;
-            this.fileToRecords = fileToRecords;
             this.markIgnoreCallback = markIgnoreCallback;
             doublePictureBox1.AutoResizePictures = checkBox3.Checked;
         }
         bool hideHidden = true;
-
-        string IgnoredModeToString(IgnoredMode ignoredMode)
-        {
-            if (ignoredMode == IgnoredMode.Effective)
-                return "";
-            else if (ignoredMode == IgnoredMode.HiddenButConnected)
-                return "Yes";
-            else
-                return "Disconnected";
-        }
 
         ListViewItem[] hiddenGroups;
         ListViewItem disconnectedGroupItem;
@@ -180,7 +167,6 @@ namespace SecretNest.ImageStore.SimilarFile
         bool fileModeFile1Changing = false;
         bool fileModeFile2Changing = false;
         Guid fileModeFile1SelectedFileId;
-        Guid fileModeFile2SelectedFileId;
         ImageStoreSimilarFile selectedFileModeSimilarFileRecord;
         int selectedFileModeFile2RowIndex;
         bool fileModeSimilarFile1IsFile1;
@@ -292,7 +278,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     items.Add(new ListViewItem(new string[] {
                         similarFileRecord.DifferenceDegree.ToString("0.0000"),
                         file.FileNameWithExtension, file.PathToDirectory, file.FileSize.ToString(),
-                        IgnoredModeToString(similarFileRecord.IgnoredMode)
+                        SimilarFileHelper.IgnoredModeToString(similarFileRecord.IgnoredMode)
                     })
                     {
                         Checked = selected,
@@ -340,7 +326,6 @@ namespace SecretNest.ImageStore.SimilarFile
                 Tuple<Guid, Guid, bool> tag = (Tuple<Guid, Guid, bool>)item.Tag;
                 selectedFileModeSimilarFileRecord = allRecords[tag.Item1];
                 selectedFileModeFile2RowIndex = item.Index;
-                fileModeFile2SelectedFileId = tag.Item2;
                 fileModeSimilarFile1IsFile1 = tag.Item3;
 
                 if (fileModeSimilarFile1IsFile1)
@@ -367,7 +352,7 @@ namespace SecretNest.ImageStore.SimilarFile
             button11.Enabled = false;
             button10.Enabled = false;
 
-            fileModeFile2SelectedFileId = Guid.Empty;
+            //fileModeFile2SelectedFileId = Guid.Empty;
             selectedFileModeSimilarFileRecord = null;
             selectedFileModeFile2RowIndex = -1;
             doublePictureBox1.ClearPictures();
@@ -489,7 +474,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     if (result)
                     {
                         record.IgnoredMode = mode;
-                        listViewItem.SubItems[4].Text = IgnoredModeToString(mode);
+                        listViewItem.SubItems[4].Text = SimilarFileHelper.IgnoredModeToString(mode);
                     }
                     lastSelected = listViewItem.Index;
                 }
@@ -593,7 +578,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.FileNameWithExtension + "\n" + file2.FileNameWithExtension });
                     row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.PathToDirectory + "\n" + file2.PathToDirectory });
                     row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.FileSize.ToString() + "\n" + file2.FileSize.ToString() });
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = IgnoredModeToString(similarFileRecord.IgnoredMode) });
+                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = SimilarFileHelper.IgnoredModeToString(similarFileRecord.IgnoredMode) });
                     row.Tag = similarFileRecord.Id;
                     rows[rowIndex] = row;
                 });
@@ -707,7 +692,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     if (result)
                     {
                         record.IgnoredMode = mode;
-                        row.Cells[5].Value = IgnoredModeToString(mode);
+                        row.Cells[5].Value = SimilarFileHelper.IgnoredModeToString(mode);
                     }
                     lastSelected = row.Index;
                 }

@@ -9,7 +9,7 @@ Alias: ResolveSimilarFiles
 |Name|Type|Description|Optional|
 |---|---|---|---|
 |DifferenceDegree|float?|The maximum difference degree of records to be viewed in this time.|Yes|
-|BuildsDisconnectedGroup|*switch*|Collects all disconnected records into a special group.|-|
+|IncludesDisconnected|*switch*|Includes all records marked as disconnected.|-|
 
 If DifferenceDegree is absent or larger than the minimum ImageComparedThreshold of file records, the latter data will be used in place.
 
@@ -18,19 +18,22 @@ From Pipeline: DifferenceDegree
 # UI
 A window for user dealing selection.
 
-## Groups (Left Panel)
+## Group Mode
+Puts similar files into groups. All files linked with similar records will be put into the same group.
+
+### Groups (Left Panel)
 Each group generated will be displayed here. One icon for each group. The label will display the number of files in this group.
 
-All disconnected relations will be grouped into a dedicated group displayed at bottom. Any group contains no effective records will be shown below the effective groups. By default, all hidden relations are not visible on screen.
+All disconnected relations will be grouped into a dedicated group displayed at bottom when IncludesDisconnected is specified. Any group contains no effective records will be shown below the effective groups. By default, all hidden relations are not visible on screen.
 
-## Relations (Upper Panel)
+### Relations (Upper Panel)
 You can choose the way to deal the relations within the group selected in the left panel.
   * By Files: All files in this group will be displayed in File 1 list. After you click any file from the list, all related files and the difference degree (Rate) will be displayed in File 2 list.
   * By Relations: Display all relations directly.
 
 User need to check all files which are intended to return.
 
-### Operations
+#### Operations
   * Button - Check None: Checks none file from this relation. Only the first selected record will be processed.
   * Button - Check Both: Checks both files from this relation. Only the first selected record will be processed.
   * Button - Check the 1st: Checks the 1st file from this relation. Only the first selected record will be processed. In "By Files" mode, the checking state of the 2nd one will not be changed; In "By Relations" mode, the 2nd one will be unchecked.
@@ -38,6 +41,10 @@ User need to check all files which are intended to return.
   * Mark as Effective: Marks the selected relations effective.
   * Mark as Hidden but Connected: Marks the selected relations hidden but connected.
   * Mark as Hidden and Disconnected: Marks the selected relations hidden and disconnected.
+
+## File Mode
+
+TODO
 
 ## Pictures (Lower Panel)
 Displays both files of the selected relation. Only the first selected record will be processed.

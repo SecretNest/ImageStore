@@ -12,6 +12,46 @@ namespace SecretNest.ImageStore.SimilarFile
     {
         Dictionary<int, List<Guid>> groupedRecords;
         Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles; //group, fileid, recordId
+
+
+        void ProcessInGroup()
+        {
+            WriteVerbose("Calculating similar files into groups... It may take several minutes to complete.");
+            while (true)
+            {
+                CalculateIntoGroup();
+
+                var groupCount = groupedRecords.Count;
+                if (groupCount > 0)
+                {
+                    WriteVerbose("Count of groups: " + groupCount.ToString());
+                    using (SimilarFileInGroupManager window = new SimilarFileInGroupManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedRecords, groupedFiles, allRecords, IgnoreSimilarFileHelper.MarkIgnore))
+                    {
+                        WriteVerbose("Please check all files you want to returned from the popped up window.");
+                        var result = window.ShowDialog();
+                        if (result == System.Windows.Forms.DialogResult.OK)
+                        {
+                            WriteOutput();
+                            break;
+                        }
+                        else if (result == System.Windows.Forms.DialogResult.Cancel)
+                        {
+                            WriteVerbose("Canceled.");
+                            WriteObject(null);
+                            break;
+                        }
+                    }
+                    WriteVerbose("Refreshing groups...");
+                }
+                else
+                {
+                    WriteVerbose("No record is found.");
+                    WriteOutput();
+                    break;
+                }
+            }
+        }
+
         void CalculateIntoGroup()
         {
             int groupId = 0;
@@ -21,7 +61,7 @@ namespace SecretNest.ImageStore.SimilarFile
             groupedRecords = new Dictionary<int, List<Guid>>();
             groupedFiles = new Dictionary<int, Dictionary<Guid, List<Guid>>>();
 
-            if (BuildsDisconnectedGroup)
+            if (IncludesDisconnected)
             {
                 var disconnectedGroup = new List<Guid>();
                 var disconnectedFiles = new Dictionary<Guid, List<Guid>>();

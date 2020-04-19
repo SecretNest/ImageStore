@@ -25,7 +25,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public float? DifferenceDegree { get; set; }
 
         [Parameter(Position = 1)]
-        public SwitchParameter BuildsDisconnectedGroup { get; set; }
+        public SwitchParameter IncludesDisconnected { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -37,7 +37,7 @@ namespace SecretNest.ImageStore.SimilarFile
             CheckDifferenceDegree();
 
             WriteVerbose("Loading records into memory...");
-            LoadToMemory();
+            LoadToMemory(Guid.Empty);
             var allRecordsCount = allRecords.Count;
             if (allRecordsCount == 0)
             {
@@ -57,40 +57,7 @@ namespace SecretNest.ImageStore.SimilarFile
             selectedFiles = new HashSet<Guid>();
             loadedThumbprints = new ConcurrentDictionary<Guid, Image>();
 
-            WriteVerbose("Calculating similar files into groups... It may take several minutes to complete.");
-            while (true)
-            {
-                CalculateIntoGroup();
-
-                var groupCount = groupedRecords.Count;
-                if (groupCount > 0)
-                {
-                    WriteVerbose("Count of groups: " + groupCount.ToString());
-                    using (SimilarFileManager window = new SimilarFileManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedRecords, groupedFiles, allRecords, fileToRecords, IgnoreSimilarFileHelper.MarkIgnore))
-                    {
-                        WriteVerbose("Please check all files you want to returned from the popped up window.");
-                        var result = window.ShowDialog();
-                        if (result == System.Windows.Forms.DialogResult.OK)
-                        {
-                            WriteOutput();
-                            break;
-                        }
-                        else if (result == System.Windows.Forms.DialogResult.Cancel)
-                        {
-                            WriteVerbose("Canceled."); 
-                            WriteObject(null);
-                            break;
-                        }
-                    }
-                    WriteVerbose("Refreshing groups...");
-                }
-                else
-                {
-                    WriteVerbose("No record is found.");
-                    WriteOutput();
-                    break;
-                }
-            }
+            ProcessInGroup();
 
             Parallel.ForEach(loadedThumbprints.Values, i => i.Dispose());
         }
@@ -175,7 +142,7 @@ namespace SecretNest.ImageStore.SimilarFile
         #region LoadToMemory
         Dictionary<Guid, ImageStoreSimilarFile> allRecords = new Dictionary<Guid, ImageStoreSimilarFile>();
         Dictionary<Guid, List<Guid>> fileToRecords = new Dictionary<Guid, List<Guid>>();
-        void LoadToMemory()
+        void LoadToMemory(Guid fileIdSpecified)
         {
             var connection = DatabaseConnection.Current;
 
@@ -185,13 +152,18 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             var insertCommand = "insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
-            if (!BuildsDisconnectedGroup.IsPresent) //skip while loading to memory
+            if (!IncludesDisconnected.IsPresent) //skip while loading to memory
             {
                 insertCommand += " and [IgnoredMode]<>2";
             }
             using (var command = new SqlCommand(insertCommand, connection) { CommandTimeout = 180 })
             {
                 command.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real) { Value = DifferenceDegree });
+                if (fileIdSpecified != Guid.Empty)
+                {
+                    command.CommandText += " and ([File1Id] = @FileId or [File2Id] = @FileId)";
+                    command.Parameters.Add(new SqlParameter("@FileId", System.Data.SqlDbType.UniqueIdentifier) { Value = fileIdSpecified });
+                }
                 command.ExecuteNonQuery();
             }
 
