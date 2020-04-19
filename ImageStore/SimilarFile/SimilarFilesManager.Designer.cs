@@ -34,13 +34,13 @@
             System.Windows.Forms.ListViewGroup listViewGroup3 = new System.Windows.Forms.ListViewGroup("Disconnected", System.Windows.Forms.HorizontalAlignment.Left);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.listView1 = new System.Windows.Forms.ListView();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.similarFileCheck1 = new SecretNest.ImageStore.SimilarFile.SimilarFileCheck();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,7 +54,7 @@
             this.groupBox1.Size = new System.Drawing.Size(139, 595);
             this.groupBox1.TabIndex = 12;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Files";
+            this.groupBox1.Text = "Files:";
             // 
             // listView1
             // 
@@ -77,6 +77,13 @@
             this.listView1.Size = new System.Drawing.Size(133, 576);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageList1.ImageSize = new System.Drawing.Size(64, 64);
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // checkBox4
             // 
@@ -151,12 +158,7 @@
             this.similarFileCheck1.Name = "similarFileCheck1";
             this.similarFileCheck1.Size = new System.Drawing.Size(807, 595);
             this.similarFileCheck1.TabIndex = 13;
-            // 
-            // imageList1
-            // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(64, 64);
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.similarFileCheck1.RequestingGotoFile += new System.EventHandler<SecretNest.ImageStore.SimilarFile.RequestingGotoFileEventArgs>(this.similarFileCheck1_RequestingGotoFile);
             // 
             // SimilarFilesManager
             // 

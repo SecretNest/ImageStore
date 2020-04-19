@@ -19,7 +19,7 @@ namespace SecretNest.ImageStore.SimilarFile
             Func<Guid, IgnoredMode, bool> markIgnoreCallback)
         {
             InitializeComponent();
-            similarFileCheck1.Initialize(selectedFiles, allFileInfo, markIgnoreCallback);
+            similarFileCheck1.Initialize(selectedFiles, allFileInfo, markIgnoreCallback, false);
             similarFileCheck1.AutoResizePictures = checkBox3.Checked;
             similarFileCheck1.AutoMoveNext = checkBox4.Checked;
             this.mainFileId = mainFileId;

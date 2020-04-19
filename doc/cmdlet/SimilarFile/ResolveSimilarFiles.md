@@ -10,8 +10,13 @@ Alias: ResolveSimilarFiles
 |---|---|---|---|
 |DifferenceDegree|float?|The maximum difference degree of records to be viewed in this time.|Yes|
 |IncludesDisconnected|*switch*|Includes all records marked as disconnected.|-|
+|NoGrouping|*switch*|Lists similar files for each file instead of grouping by similar relationships.|-|
+|File|[ImageStoreFile](../../type/ImageStoreFile.md)|Lists similar files for this file only.|Yes(*1)|
+|FileId|Guid|Lists similar files for this file only, specified by id.|Yes(*1)|
 
 If DifferenceDegree is absent or larger than the minimum ImageComparedThreshold of file records, the latter data will be used in place.
+
+*1: Only one could be provided. NoGrouping will be set if present.
 
 From Pipeline: DifferenceDegree
 
@@ -43,8 +48,28 @@ User need to check all files which are intended to return.
   * Mark as Hidden and Disconnected: Marks the selected relations hidden and disconnected.
 
 ## File Mode
+Checks similar files for each file.
 
-TODO
+### Files (Left Panel)
+Each file found will be displayed here. One icon for each file. The label will display the number of files similar to this file.
+
+This panel is visible in file mode when File or FileId presents.
+
+### Relations (Upper Panel)
+The main file is labeled in the check box above.
+All files related will be displayed in list below.
+
+User need to check all files which are intended to return.
+
+#### Operations
+  * Button - Check / Uncheck Main: Inverts checking status of the main file.
+  * Button - Check / Uncheck File: Inverts checking status of the files selected.
+  * Mark as Effective: Marks the selected relations effective.
+  * Mark as Hidden but Connected: Marks the selected relations hidden but connected.
+  * Mark as Hidden and Disconnected: Marks the selected relations hidden and disconnected.
+  * Go to selected file: Makes the selected file as the main file. Visible in file mode when File or FileId presents.
+  * Order by Rate: Orders the list by IgnoredMode, then rate.
+  * Order by Path: Orders the list by path, then file name.
 
 ## Pictures (Lower Panel)
 Displays both files of the selected relation. Only the first selected record will be processed.
@@ -52,7 +77,8 @@ Displays both files of the selected relation. Only the first selected record wil
 Double clicking the image will use system default viewer to open the file related.
 
 ## Functions (Bottom Zone)
-  * Button - Refresh Groups: Refreshes groups considering the newly state changed relations.
+  * Button - Refresh Groups: Refreshes groups considering the newly state changed relations. Visible in group mode.
+  * Button - Refresh Files: Refreshes  files considering the newly state changed relations. Visible in file mode when File and FileId absent.
   * Checkbox - Show Hidden Records: Makes hidden relations visible as well.
   * Checkbox - Auto Move Next: Moves to the next relation after [operation](#operations) processed.
   * Checkbox - Auto Resize: Resizes images to fit the screen.

@@ -16,16 +16,25 @@ using System.Threading.Tasks;
 
 namespace SecretNest.ImageStore.SimilarFile
 {
-    [Cmdlet(VerbsDiagnostic.Resolve, "ImageStoreSimilarFiles")]
+    [Cmdlet(VerbsDiagnostic.Resolve, "ImageStoreSimilarFiles", DefaultParameterSetName = "File")]
     [Alias("ResolveSimilarFiles")]
     [OutputType(typeof(List<ImageStoreFile>))]
     public partial class ResolveSimilarFilesCmdlet : Cmdlet
     {
-        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ValueFromPipeline = true)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 0)]
         public float? DifferenceDegree { get; set; }
 
-        [Parameter(Position = 1)]
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 1)]
         public SwitchParameter IncludesDisconnected { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 2)]
+        public SwitchParameter NoGrouping { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 3, ValueFromPipeline = true, ParameterSetName = "File")]
+        public ImageStoreFile File { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, Position = 3, ValueFromPipeline = true, ParameterSetName = "Id")]
+        public Guid FileId { get; set; }
 
         protected override void BeginProcessing()
         {
@@ -34,10 +43,24 @@ namespace SecretNest.ImageStore.SimilarFile
 
         protected override void ProcessRecord()
         {
+            bool noGrouping;
+
+            if (File != null)
+                FileId = File.Id;
+
+            if (FileId != Guid.Empty)
+            {
+                noGrouping = true;
+            }
+            else
+            {
+                noGrouping = NoGrouping.IsPresent;
+            }
+
             CheckDifferenceDegree();
 
             WriteVerbose("Loading records into memory...");
-            LoadToMemory(Guid.Empty);
+            LoadToMemory(FileId);//if not empty, load only this file.
             var allRecordsCount = allRecords.Count;
             if (allRecordsCount == 0)
             {
@@ -57,7 +80,10 @@ namespace SecretNest.ImageStore.SimilarFile
             selectedFiles = new HashSet<Guid>();
             loadedThumbprints = new ConcurrentDictionary<Guid, Image>();
 
-            ProcessInGroup();
+            if (noGrouping)
+                ProcessInUngroup();
+            else
+                ProcessInGroup();
 
             Parallel.ForEach(loadedThumbprints.Values, i => i.Dispose());
         }
@@ -255,13 +281,6 @@ namespace SecretNest.ImageStore.SimilarFile
         #endregion
 
         #region Thumb print
-        void PreparingFileThumbprints(object parameter)
-        {
-            BlockingCollection<Guid> needToPrepareThumbprints = (BlockingCollection<Guid>)parameter;
-            ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
-
-            Parallel.ForEach(needToPrepareThumbprints.GetConsumingEnumerable(), parallelOptions, i => GetFileThumbprint(i));
-        }
 
         Image GetFileThumbprint(Guid fileId)
         {

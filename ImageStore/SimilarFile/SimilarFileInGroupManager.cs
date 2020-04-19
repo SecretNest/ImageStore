@@ -17,19 +17,17 @@ namespace SecretNest.ImageStore.SimilarFile
         HashSet<Guid> selectedFiles;
         Dictionary<Guid, FileInfo> allFileInfo;
         Func<Guid, Image> loadImage;
-        Dictionary<int, List<Guid>> groupedRecords;
         Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles;
         Dictionary<Guid, ImageStoreSimilarFile> allRecords;
         Func<Guid, IgnoredMode, bool> markIgnoreCallback;
         public SimilarFileInGroupManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, Image> loadImage,
-            Dictionary<int, List<Guid>> groupedRecords, Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles,
+            Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles,
             Dictionary<Guid, ImageStoreSimilarFile> allRecords, Func<Guid, IgnoredMode, bool> markIgnoreCallback)
         {
             InitializeComponent();
             this.selectedFiles = selectedFiles;
             this.allFileInfo = allFileInfo;
             this.loadImage = loadImage;
-            this.groupedRecords = groupedRecords;
             this.groupedFiles = groupedFiles;
             this.allRecords = allRecords;
             this.markIgnoreCallback = markIgnoreCallback;
@@ -59,7 +57,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 var fileGroup = groupedFiles[i];
                 images[i] = loadImage(fileGroup.Keys.First());
-                bool isHiddenGroup = !groupedRecords[i].Any(id => allRecords[id].IgnoredMode == IgnoredMode.Effective);
+                bool isHiddenGroup = !fileGroup.Any(file => file.Value.Any(id => allRecords[id].IgnoredMode == IgnoredMode.Effective));
                 var listViewItem = new ListViewItem(string.Format("{0} files", fileGroup.Count), i) { Tag = i };
                 if (isHiddenGroup)
                 {
@@ -385,7 +383,6 @@ namespace SecretNest.ImageStore.SimilarFile
             fileModeFile1Changing = true;
             foreach (ListViewItem row in listView2.Items)
             {
-                //var grouped = groupedRecords[selectedGroupId];
                 var fileId = (Guid)row.Tag;
                 var selected = selectedFiles.Contains(fileId);
                 if (selected != row.Checked)
@@ -396,7 +393,6 @@ namespace SecretNest.ImageStore.SimilarFile
             fileModeFile2Changing = true;
             foreach (ListViewItem row in listView3.Items)
             {
-                var grouped = groupedRecords[selectedGroupId];
                 var fileId = ((Tuple<Guid, Guid, bool>)row.Tag).Item2;
                 var selected = selectedFiles.Contains(fileId);
                 if (selected != row.Checked)
@@ -531,13 +527,20 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             dataGridView1.Rows.Clear();
 
+            //Dictionary<Guid, List<ImageStoreSimilarFile>> grouped;
+            //Dictionary<Guid, List<Guid>> grouped;
+
             List<ImageStoreSimilarFile> grouped;
+
             if (selectedGroupId != -2)
             {
-                grouped = groupedRecords[selectedGroupId].ConvertAll(i => allRecords[i]);
                 if (hideHidden)
                 {
-                    grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i=>i.IgnoredMode == IgnoredMode.Effective).OrderBy(i => i.DifferenceDegree).ToList();
+                }
+                else
+                {
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
                 }
             }
             else
@@ -596,7 +599,6 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
-                var grouped = groupedRecords[selectedGroupId];
                 var similarFileId = (Guid)row.Tag;
                 var similarFileRecord = allRecords[similarFileId];
                 var selected1 = selectedFiles.Contains(similarFileRecord.File1Id);
@@ -629,7 +631,6 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 if (!row.Selected) continue;
                 selectedRalationModeRowIndex = row.Index;
-                var grouped = groupedRecords[selectedGroupId];
                 var similarFileId = (Guid)row.Tag;
                 selectedRelationModeSimilarFileRecord = allRecords[similarFileId];
 

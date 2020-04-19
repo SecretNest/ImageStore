@@ -49,11 +49,12 @@ namespace SecretNest.ImageStore.SimilarFile
         SimilarRecord[] similarRecords;
         Func<Guid, IgnoredMode, bool> markIgnoreCallback;
 
-        public void Initialize(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, IgnoredMode, bool> markIgnoreCallback)
+        public void Initialize(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, IgnoredMode, bool> markIgnoreCallback, bool enableGoto)
         {
             this.selectedFiles = selectedFiles;
             this.allFileInfo = allFileInfo;
             this.markIgnoreCallback = markIgnoreCallback;
+            button1.Visible = enableGoto;
         }
 
         public void LoadFile(Guid mainFileId, IEnumerable<ImageStoreSimilarFile> similarRecords)

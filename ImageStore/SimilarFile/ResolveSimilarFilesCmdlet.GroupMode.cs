@@ -10,9 +10,7 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     partial class ResolveSimilarFilesCmdlet
     {
-        Dictionary<int, List<Guid>> groupedRecords;
-        Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles; //group, fileid, recordId
-
+        Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles; //index (-1: disconnected), fileId, recordId
 
         void ProcessInGroup()
         {
@@ -21,11 +19,11 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 CalculateIntoGroup();
 
-                var groupCount = groupedRecords.Count;
+                var groupCount = groupedFiles.Count;
                 if (groupCount > 0)
                 {
                     WriteVerbose("Count of groups: " + groupCount.ToString());
-                    using (SimilarFileInGroupManager window = new SimilarFileInGroupManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedRecords, groupedFiles, allRecords, IgnoreSimilarFileHelper.MarkIgnore))
+                    using (SimilarFileInGroupManager window = new SimilarFileInGroupManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedFiles, allRecords, IgnoreSimilarFileHelper.MarkIgnore))
                     {
                         WriteVerbose("Please check all files you want to returned from the popped up window.");
                         var result = window.ShowDialog();
@@ -54,22 +52,19 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void CalculateIntoGroup()
         {
-            int groupId = 0;
             List<Guid> leftRecords = new List<Guid>();
             HashSet<Guid> filesProcessed = new HashSet<Guid>();
 
-            groupedRecords = new Dictionary<int, List<Guid>>();
             groupedFiles = new Dictionary<int, Dictionary<Guid, List<Guid>>>();
 
+            Dictionary<Guid, List<Guid>> disconnectedFiles = null;
             if (IncludesDisconnected)
             {
-                var disconnectedGroup = new List<Guid>();
-                var disconnectedFiles = new Dictionary<Guid, List<Guid>>();
+                disconnectedFiles = new Dictionary<Guid, List<Guid>>();
                 foreach (var record in allRecords)
                 {
                     if (record.Value.IgnoredMode == IgnoredMode.HiddenAndDisconnected)
                     {
-                        disconnectedGroup.Add(record.Key);
                         if (!disconnectedFiles.TryGetValue(record.Value.File1Id, out var list))
                         {
                             list = new List<Guid>();
@@ -86,11 +81,6 @@ namespace SecretNest.ImageStore.SimilarFile
                     else
                         leftRecords.Add(record.Key);
                 }
-                if (disconnectedGroup.Count > 0)
-                {
-                    groupedRecords.Add(-1, disconnectedGroup);
-                    groupedFiles.Add(-1, disconnectedFiles);
-                }
             }
             else
             {
@@ -101,72 +91,104 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            if (leftRecords.Count == 0) return;
-
-            BlockingCollection<Guid> needToPrepareThumbprints = new BlockingCollection<Guid>();
-            Thread preparingFileThumbprints = new Thread(PreparingFileThumbprints);
-            preparingFileThumbprints.Start(needToPrepareThumbprints);
-
-            while (leftRecords.Count > 0)
+            if (leftRecords.Count != 0)
             {
-                var firstRecord = allRecords[leftRecords[0]];
-                leftRecords.RemoveAt(0);
+                //FileId, SimilarRecordID
+                var unsortedGroup = new List<Dictionary<Guid, List<Guid>>>();
 
-                List<Guid> currentRecordsGroup = new List<Guid>();
-                Dictionary<Guid, List<Guid>> currentFilesGroup = new Dictionary<Guid, List<Guid>>();
-
-                groupedRecords.Add(groupId, currentRecordsGroup);
-                groupedFiles.Add(groupId++, currentFilesGroup);
-
-                Queue<Guid> filesToProcess = new Queue<Guid>();
-                currentRecordsGroup.Add(firstRecord.Id);
-                if (!filesProcessed.Contains(firstRecord.File1Id))
-                    filesToProcess.Enqueue(firstRecord.File1Id);
-                if (!filesProcessed.Contains(firstRecord.File1Id))
-                    filesToProcess.Enqueue(firstRecord.File2Id);
-                currentFilesGroup.Add(firstRecord.File1Id, new List<Guid>() { firstRecord.Id });
-                needToPrepareThumbprints.Add(firstRecord.File1Id);
-                currentFilesGroup.Add(firstRecord.File2Id, new List<Guid>() { firstRecord.Id });
-                needToPrepareThumbprints.Add(firstRecord.File2Id);
-
-                while (filesToProcess.Count > 0)
+                BlockingCollection<Guid> needToPrepareThumbprints = null;
+                Thread preparingFileThumbprints = null;
+                if (LoadImageHelper.cachePath != null)
                 {
-                    var fileToProcess = filesToProcess.Dequeue();
-                    filesProcessed.Add(fileToProcess);
+                    needToPrepareThumbprints = new BlockingCollection<Guid>();
+                    preparingFileThumbprints = new Thread(PreparingFileThumbprints);
+                    preparingFileThumbprints.Start(needToPrepareThumbprints);
+                }
 
-                    var records = fileToRecords[fileToProcess];
+                while (leftRecords.Count > 0)
+                {
+                    var firstRecord = allRecords[leftRecords[0]];
+                    leftRecords.RemoveAt(0);
 
-                    foreach (var recordId in records)
+                    Dictionary<Guid, List<Guid>> currentFilesGroup = new Dictionary<Guid, List<Guid>>();
+                    unsortedGroup.Add(currentFilesGroup);
+
+                    Queue<Guid> filesToProcess = new Queue<Guid>();
+                    if (!filesProcessed.Contains(firstRecord.File1Id))
+                        filesToProcess.Enqueue(firstRecord.File1Id);
+                    if (!filesProcessed.Contains(firstRecord.File1Id))
+                        filesToProcess.Enqueue(firstRecord.File2Id);
+                    currentFilesGroup.Add(firstRecord.File1Id, new List<Guid>() { firstRecord.Id });
+                    needToPrepareThumbprints?.Add(firstRecord.File1Id);
+                    currentFilesGroup.Add(firstRecord.File2Id, new List<Guid>() { firstRecord.Id });
+                    needToPrepareThumbprints?.Add(firstRecord.File2Id);
+
+                    while (filesToProcess.Count > 0)
                     {
-                        if (leftRecords.Remove(recordId))
+                        var fileToProcess = filesToProcess.Dequeue();
+                        filesProcessed.Add(fileToProcess);
+
+                        var records = fileToRecords[fileToProcess];
+
+                        foreach (var recordId in records)
                         {
-                            var record = allRecords[recordId];
-                            if (!filesProcessed.Contains(record.File1Id))
-                                filesToProcess.Enqueue(record.File1Id);
-                            if (!filesProcessed.Contains(record.File2Id))
-                                filesToProcess.Enqueue(record.File2Id);
-                            currentRecordsGroup.Add(recordId);
-                            if (!currentFilesGroup.TryGetValue(record.File1Id, out var list))
+                            if (leftRecords.Remove(recordId))
                             {
-                                list = new List<Guid>();
-                                currentFilesGroup.Add(record.File1Id, list);
-                                needToPrepareThumbprints.Add(record.File1Id);
+                                var record = allRecords[recordId];
+                                if (!filesProcessed.Contains(record.File1Id))
+                                    filesToProcess.Enqueue(record.File1Id);
+                                if (!filesProcessed.Contains(record.File2Id))
+                                    filesToProcess.Enqueue(record.File2Id);
+                                if (!currentFilesGroup.TryGetValue(record.File1Id, out var list))
+                                {
+                                    list = new List<Guid>();
+                                    currentFilesGroup.Add(record.File1Id, list);
+                                    needToPrepareThumbprints?.Add(record.File1Id);
+                                }
+                                list.Add(record.Id);
+                                if (!currentFilesGroup.TryGetValue(record.File2Id, out list))
+                                {
+                                    list = new List<Guid>();
+                                    currentFilesGroup.Add(record.File2Id, list);
+                                    needToPrepareThumbprints?.Add(record.File2Id);
+                                }
+                                list.Add(record.Id);
                             }
-                            list.Add(record.Id);
-                            if (!currentFilesGroup.TryGetValue(record.File2Id, out list))
-                            {
-                                list = new List<Guid>();
-                                currentFilesGroup.Add(record.File2Id, list);
-                                needToPrepareThumbprints.Add(record.File2Id);
-                            }
-                            list.Add(record.Id);
                         }
                     }
+
+                    var sortedGroup = unsortedGroup.OrderByDescending(i => i.Values.Sum(j => j.Count(k => allRecords[k].IgnoredMode == IgnoredMode.Effective))); //order by descending: total effective records in group.
+                    var groupIndex = 0;
+                    foreach (var item in sortedGroup)
+                    {
+                        groupedFiles.Add(groupIndex++, item);
+                    }
+                }
+
+                if (LoadImageHelper.cachePath != null)
+                {
+                    needToPrepareThumbprints.CompleteAdding();
+
+                    preparingFileThumbprints.Join();
+                    needToPrepareThumbprints.Dispose();
                 }
             }
-            needToPrepareThumbprints.CompleteAdding();
-            preparingFileThumbprints.Join();
-            needToPrepareThumbprints.Dispose();
+            WriteVerbose("Step2");
+
+            if (disconnectedFiles?.Count > 0)
+            {
+                groupedFiles.Add(-1, disconnectedFiles);
+            }
+            WriteVerbose("Step3");
         }
+
+        void PreparingFileThumbprints(object parameter)
+        {
+            BlockingCollection<Guid> needToPrepareThumbprints = (BlockingCollection<Guid>)parameter;
+            ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+            Parallel.ForEach(needToPrepareThumbprints.GetConsumingEnumerable(), parallelOptions, i => LoadImageHelper.BuildCache(i, allFileInfo[i].FilePath));
+        }
+
     }
 }
