@@ -16,7 +16,7 @@ Alias: ResolveSimilarFiles
 
 If DifferenceDegree is absent or larger than the minimum ImageComparedThreshold of file records, the latter data will be used in place.
 
-*1: Only one could be provided. NoGrouping will be set if present.
+*1: No more than one parameter within this group should be provided. NoGrouping will be set if present.
 
 From Pipeline: DifferenceDegree
 
