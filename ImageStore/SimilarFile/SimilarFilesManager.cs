@@ -45,6 +45,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public void LoadMainFiles()
         {
             listView1.BeginUpdate();
+            listView1.Items.Clear();
             indicesOfListViewItems = new Dictionary<Guid, int>();
             var fileCount = allRecords.Count;
 
