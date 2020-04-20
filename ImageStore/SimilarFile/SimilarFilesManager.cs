@@ -94,7 +94,15 @@ namespace SecretNest.ImageStore.SimilarFile
                 {
                     int index = (int)item.Tag;
                     var selected = allRecords[index];
-                    similarFileCheck1.LoadFile(selected.Item1, selected.Item2);
+                    var showHidden = checkBox2.Checked;
+                    if (showHidden)
+                    {
+                        similarFileCheck1.LoadFile(selected.Item1, selected.Item2);
+                    }
+                    else
+                    {
+                        similarFileCheck1.LoadFile(selected.Item1, selected.Item2.Where(i => i.IgnoredMode == IgnoredMode.Effective));
+                    }
                     return;
                 }
             }
