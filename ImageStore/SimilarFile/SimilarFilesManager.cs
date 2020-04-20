@@ -37,7 +37,20 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
+            var selectedMainFileId = similarFileCheck1.MainFileId;
+
             LoadMainFiles();
+
+            if (selectedMainFileId == null || !indicesOfListViewItems.TryGetValue(selectedMainFileId.Value, out var index))
+            {
+                if (listView1.Items.Count > 0)
+                    listView1.Items[0].Selected = true;
+            }
+            else
+            {
+                listView1.Items[index].Selected = true;
+                listView1.EnsureVisible(index);
+            }
         }
 
         public void LoadThumbs(Image[] images)
@@ -45,7 +58,7 @@ namespace SecretNest.ImageStore.SimilarFile
             imageList1.Images.AddRange(images);
         }
 
-        public void LoadMainFiles()
+        void LoadMainFiles()
         {
             listView1.BeginUpdate();
             listView1.Items.Clear();
@@ -79,10 +92,6 @@ namespace SecretNest.ImageStore.SimilarFile
             listView1.Items.AddRange(listViewItems.ToArray());
 
             listView1.EndUpdate();
-
-            listView1.Items[0].Selected = true;
-
-            Focus();
         }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
@@ -118,6 +127,11 @@ namespace SecretNest.ImageStore.SimilarFile
         private void SimilarFilesManager_Load(object sender, EventArgs e)
         {
             LoadMainFiles();
+
+            if (listView1.Items.Count > 0)
+                listView1.Items[0].Selected = true;
+
+            Focus();
         }
     }
 }

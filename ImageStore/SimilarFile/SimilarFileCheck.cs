@@ -29,6 +29,8 @@ namespace SecretNest.ImageStore.SimilarFile
         Dictionary<Guid, FileInfo> allFileInfo;
         FileInfo mainFile;
 
+        public Guid? MainFileId => mainFile?.FileId;
+
         class SimilarRecord
         {
             public Guid SimilarRecordId => ImageStoreSimilarFile.Id;
