@@ -112,6 +112,7 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var index = indicesOfListViewItems[e.TargetFileId];
             listView1.Items[index].Selected = true;
+            listView1.EnsureVisible(index);
         }
 
         private void SimilarFilesManager_Load(object sender, EventArgs e)
