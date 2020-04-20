@@ -31,20 +31,28 @@ namespace SecretNest.ImageStore.SimilarFile
 
         class SimilarRecord
         {
-            public Guid SimilarRecordId { get; set; }
-            public Guid FileId { get; set; }
-            public bool IsFile1IsMain { get; set; }
-            public float DifferenceDegree { get; set; }
-            public string FileNameWithExtension { get; set; }
-            public string PathToDirectory { get; set; }
-            public int FileSize { get; set; }
-            public int IgnoredModeCode { get; set; }
+            public Guid SimilarRecordId => ImageStoreSimilarFile.Id;
+            public Guid FileId => FileInfo.FileId;
+            //public bool IsFile1IsMain { get;  }
+            public float DifferenceDegree => ImageStoreSimilarFile.DifferenceDegree;
+            public string FileNameWithExtension => FileInfo.FileNameWithExtension;
+            public string PathToDirectory => FileInfo.PathToDirectory;
+            public int FileSize => FileInfo.FileSize;
+            public int IgnoredModeCode => ImageStoreSimilarFile.IgnoredModeCode;
             public IgnoredMode IgnoredMode
             {
-                get => (IgnoredMode)IgnoredModeCode;
-                set => IgnoredModeCode = (int)value;
+                get => ImageStoreSimilarFile.IgnoredMode;
+                set => ImageStoreSimilarFile.IgnoredMode = value;
             }
-            public FileInfo FileInfo { get; set; }
+
+            public ImageStoreSimilarFile ImageStoreSimilarFile { get; }
+            public FileInfo FileInfo { get; }
+
+            public SimilarRecord(ImageStoreSimilarFile similarRecord, FileInfo fileInfo)
+            {
+                ImageStoreSimilarFile = similarRecord;
+                FileInfo = fileInfo;
+            }
         }
         SimilarRecord[] similarRecords;
         Func<Guid, IgnoredMode, bool> markIgnoreCallback;
@@ -56,6 +64,8 @@ namespace SecretNest.ImageStore.SimilarFile
             this.markIgnoreCallback = markIgnoreCallback;
             button1.Visible = enableGoto;
         }
+
+        
 
         public void LoadFile(Guid mainFileId, IEnumerable<ImageStoreSimilarFile> similarRecords)
         {
@@ -72,18 +82,7 @@ namespace SecretNest.ImageStore.SimilarFile
                         file = allFileInfo[similarFileRecord.File2Id];
                     else
                         file = allFileInfo[similarFileRecord.File1Id];
-                    return new SimilarRecord
-                    {
-                        SimilarRecordId = similarFileRecord.Id,
-                        FileId = file.FileId,
-                        IsFile1IsMain = isFile1IsMain,
-                        DifferenceDegree = similarFileRecord.DifferenceDegree,
-                        FileNameWithExtension = file.FileNameWithExtension,
-                        PathToDirectory = file.PathToDirectory,
-                        FileSize = file.FileSize,
-                        IgnoredModeCode = similarFileRecord.IgnoredModeCode,
-                        FileInfo = file
-                    };
+                    return new SimilarRecord(similarFileRecord, file);
                 }).ToArray();
             }
 
@@ -285,7 +284,6 @@ namespace SecretNest.ImageStore.SimilarFile
             }
             MoveNext(lastIndex);
         }
-
         void ChangeIgnoredMode(IgnoredMode ignoredMode)
         {
             int lastIndex = -1;
