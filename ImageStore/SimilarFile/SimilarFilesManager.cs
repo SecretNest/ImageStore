@@ -14,15 +14,13 @@ namespace SecretNest.ImageStore.SimilarFile
     {
         List<Tuple<Guid, List<ImageStoreSimilarFile>>> allRecords;
         Dictionary<Guid, int> indicesOfListViewItems;
-        Func<Guid, Image> loadImage;
-        public SimilarFilesManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, Image> loadImage,
+        public SimilarFilesManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo,
             List<Tuple<Guid, List<ImageStoreSimilarFile>>> allRecords, //fileId, similarRecords
             Func<Guid, IgnoredMode, bool> markIgnoreCallback)
         {
             InitializeComponent();
             similarFileCheck1.Initialize(selectedFiles, allFileInfo, markIgnoreCallback, true);
             this.allRecords = allRecords;
-            this.loadImage = loadImage;
             similarFileCheck1.AutoResizePictures = checkBox3.Checked;
             similarFileCheck1.AutoMoveNext = checkBox4.Checked;
         }
@@ -42,6 +40,11 @@ namespace SecretNest.ImageStore.SimilarFile
             LoadMainFiles();
         }
 
+        public void LoadThumbs(Image[] images)
+        {
+            imageList1.Images.AddRange(images);
+        }
+
         public void LoadMainFiles()
         {
             listView1.BeginUpdate();
@@ -59,7 +62,6 @@ namespace SecretNest.ImageStore.SimilarFile
                 return;
             }
 
-            List<Image> images = new List<Image>();
             List<ListViewItem> listViewItems = new List<ListViewItem>();
             var showHidden = checkBox2.Checked;
 
@@ -69,14 +71,11 @@ namespace SecretNest.ImageStore.SimilarFile
                 var file = allRecords[indexOfAllRecords];
                 if (showHidden || file.Item2.Any(i => i.IgnoredMode == IgnoredMode.Effective))
                 {
-                    images.Add(loadImage(file.Item1));
-                    listViewItems.Add(new ListViewItem(string.Format("{0} files", file.Item2.Count), indexOfListView) { Tag = indexOfAllRecords });
+                    listViewItems.Add(new ListViewItem(string.Format("{0} files", file.Item2.Count), indexOfAllRecords) { Tag = indexOfAllRecords });
                     indicesOfListViewItems.Add(file.Item1, indexOfListView++);
                 }
             }
 
-            imageList1.Images.AddRange(images.ToArray());
-            images = null;
             listView1.Items.AddRange(listViewItems.ToArray());
 
             listView1.EndUpdate();

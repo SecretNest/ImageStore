@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -50,8 +51,17 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
                 else
                 {
-                    using (SimilarFilesManager window = new SimilarFilesManager(selectedFiles, allFileInfo, LoadFileThumb, ungroupedFiles, IgnoreSimilarFileHelper.MarkIgnore))
+                    using (SimilarFilesManager window = new SimilarFilesManager(selectedFiles, allFileInfo, ungroupedFiles, IgnoreSimilarFileHelper.MarkIgnore))
                     {
+                        Image[] images = new Image[ungroupedFiles.Count];
+                        for (int i = 0; i < images.Length; i++)
+                        {
+                            images[i] = LoadFileThumb(ungroupedFiles[i].Item1);
+                        }
+                        window.LoadThumbs(images);
+                        images = null;
+
+                        WriteVerbose("Please check all files you want to returned from the popped up window.");
                         var result = window.ShowDialog(); 
                         if (result == System.Windows.Forms.DialogResult.OK)
                         {
