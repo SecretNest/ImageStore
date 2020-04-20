@@ -147,7 +147,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-
+            listView1_SelectedIndexChanged(sender, e); //reload records
         }
     }
 }
