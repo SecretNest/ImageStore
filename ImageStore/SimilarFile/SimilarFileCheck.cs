@@ -148,6 +148,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 checkBox1.Text = "";
                 checkBox1.Checked = false;
+                doublePictureBox1.ClearPictures();
             }
 
             listView3.EndUpdate();
