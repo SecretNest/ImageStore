@@ -14,7 +14,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void ProcessInUngroup()
         {
-            WriteVerbose("Calculating similar files into groups... It may take several minutes to complete.");
+            WriteVerbose("Preparing... It may take several minutes to complete.");
             while (true)
             {
                 CalculateIntoUngroup();
@@ -50,10 +50,9 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
                 else
                 {
-                    using (SimilarFilesManager window = new SimilarFilesManager(selectedFiles, allFileInfo, GetFileThumbprint, ungroupedFiles, IgnoreSimilarFileHelper.MarkIgnore))
+                    using (SimilarFilesManager window = new SimilarFilesManager(selectedFiles, allFileInfo, LoadFileThumb, ungroupedFiles, IgnoreSimilarFileHelper.MarkIgnore))
                     {
-                        WriteVerbose("Please check all files you want to returned from the popped up window.");
-                        var result = window.ShowDialog();
+                        var result = window.ShowDialog(); 
                         if (result == System.Windows.Forms.DialogResult.OK)
                         {
                             WriteOutput();
@@ -89,11 +88,8 @@ namespace SecretNest.ImageStore.SimilarFile
                     .OrderByDescending(i => i.Item2.Count).ToList();
             }
 
-            if (LoadImageHelper.cachePath != null)
-            {
-                ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(ungroupedFiles.Select(i=>i.Item1), parallelOptions, i => LoadImageHelper.BuildCache(i, allFileInfo[i].FilePath));
-            }
+            ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            Parallel.ForEach(ungroupedFiles.Select(i => i.Item1), parallelOptions, i => PrepareFileThumb(i));
         }
     }
 }

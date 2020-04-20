@@ -108,6 +108,7 @@ namespace SecretNest.ImageStore.SimilarFile
         void LoadSimilarRecords()
         {
             fileListChanging = true;
+            listView3.BeginUpdate();
             listView3.Items.Clear();
 
             if (similarRecords != null && similarRecords.Length > 0)
@@ -141,7 +142,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     });
                 }
 
-                listView3.Items.AddRange(items.OrderBy(i => i.SubItems[2].Text).ThenBy(i => i.SubItems[0].Text).ThenBy(i => i.SubItems[1].Text).ToArray());
+                listView3.Items.AddRange(items.ToArray());
                 listView3.Items[0].Selected = true;
             }
             else
@@ -150,6 +151,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 checkBox1.Checked = false;
             }
 
+            listView3.EndUpdate();
             fileListChanging = false;
         }
 
@@ -185,10 +187,12 @@ namespace SecretNest.ImageStore.SimilarFile
 
                 SimilarRecord tag = (SimilarRecord)item.Tag;
 
-                if (tag.IsFile1IsMain)
-                    doublePictureBox1.LoadPictures(mainFile, tag.FileInfo);
-                else
-                    doublePictureBox1.LoadPictures(tag.FileInfo, mainFile);
+                //Because this UI is for dealing with main file, the main file should be fixed at one panel.
+
+                //if (tag.IsFile1IsMain)
+                doublePictureBox1.LoadPictures(mainFile, tag.FileInfo);
+                //else
+                //    doublePictureBox1.LoadPictures(tag.FileInfo, mainFile);
 
                 button16.Enabled = true;
                 button14.Enabled = true;

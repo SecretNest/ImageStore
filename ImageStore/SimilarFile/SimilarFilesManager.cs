@@ -42,12 +42,7 @@ namespace SecretNest.ImageStore.SimilarFile
             LoadMainFiles();
         }
 
-        private void SimilarFilesManager_Load(object sender, EventArgs e)
-        {
-            LoadMainFiles();
-        }
-
-        void LoadMainFiles()
+        public void LoadMainFiles()
         {
             listView1.BeginUpdate();
             indicesOfListViewItems = new Dictionary<Guid, int>();
@@ -109,6 +104,11 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var index = indicesOfListViewItems[e.TargetFileId];
             listView1.Items[index].Selected = true;
+        }
+
+        private void SimilarFilesManager_Load(object sender, EventArgs e)
+        {
+            LoadMainFiles();
         }
     }
 }

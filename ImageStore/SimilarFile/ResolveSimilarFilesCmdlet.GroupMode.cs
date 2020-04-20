@@ -23,7 +23,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 if (groupCount > 0)
                 {
                     WriteVerbose("Count of groups: " + groupCount.ToString());
-                    using (SimilarFileInGroupManager window = new SimilarFileInGroupManager(selectedFiles, allFileInfo, GetFileThumbprint, groupedFiles, allRecords, IgnoreSimilarFileHelper.MarkIgnore))
+                    using (SimilarFileInGroupManager window = new SimilarFileInGroupManager(selectedFiles, allFileInfo, LoadFileThumb, groupedFiles, allRecords, IgnoreSimilarFileHelper.MarkIgnore))
                     {
                         WriteVerbose("Please check all files you want to returned from the popped up window.");
                         var result = window.ShowDialog();
@@ -98,12 +98,10 @@ namespace SecretNest.ImageStore.SimilarFile
 
                 BlockingCollection<Guid> needToPrepareThumbprints = null;
                 Thread preparingFileThumbprints = null;
-                if (LoadImageHelper.cachePath != null)
-                {
-                    needToPrepareThumbprints = new BlockingCollection<Guid>();
-                    preparingFileThumbprints = new Thread(PreparingFileThumbprints);
-                    preparingFileThumbprints.Start(needToPrepareThumbprints);
-                }
+
+                needToPrepareThumbprints = new BlockingCollection<Guid>();
+                preparingFileThumbprints = new Thread(PreparingFileThumbprints);
+                preparingFileThumbprints.Start(needToPrepareThumbprints);
 
                 while (leftRecords.Count > 0)
                 {
@@ -165,13 +163,10 @@ namespace SecretNest.ImageStore.SimilarFile
                     groupedFiles.Add(groupIndex++, item);
                 }
 
-                if (LoadImageHelper.cachePath != null)
-                {
-                    needToPrepareThumbprints.CompleteAdding();
+                needToPrepareThumbprints.CompleteAdding();
 
-                    preparingFileThumbprints.Join();
-                    needToPrepareThumbprints.Dispose();
-                }
+                preparingFileThumbprints.Join();
+                needToPrepareThumbprints.Dispose();
             }
 
             if (disconnectedFiles?.Count > 0)
@@ -185,7 +180,7 @@ namespace SecretNest.ImageStore.SimilarFile
             BlockingCollection<Guid> needToPrepareThumbprints = (BlockingCollection<Guid>)parameter;
             ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
-            Parallel.ForEach(needToPrepareThumbprints.GetConsumingEnumerable(), parallelOptions, i => LoadImageHelper.BuildCache(i, allFileInfo[i].FilePath));
+            Parallel.ForEach(needToPrepareThumbprints.GetConsumingEnumerable(), parallelOptions, i => PrepareFileThumb(i));
         }
 
     }

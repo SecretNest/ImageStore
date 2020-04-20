@@ -90,19 +90,19 @@ namespace SecretNest.ImageStore.SimilarFile
 
         }
 
-        public static void BuildCache(Guid fileId, string path)
-        {
-            var cacheFile = Path.Combine(cachePath, string.Format("{0:N}.png", fileId));
-            if (System.IO.File.Exists(cacheFile))
-                return;
+        //public static void BuildCache(Guid fileId, string path)
+        //{
+        //    var cacheFile = Path.Combine(cachePath, string.Format("{0:N}.png", fileId));
+        //    if (System.IO.File.Exists(cacheFile))
+        //        return;
 
-            using (var image = LoadFromFile(path, out bool succeeded))
-            {
-                var thumbprint = GenerateThumbprint(image);
-                if (succeeded) thumbprint.Save(cacheFile);
-                return;
-            }
-        }
+        //    using (var image = LoadFromFile(path, out bool succeeded))
+        //    {
+        //        var thumbprint = GenerateThumbprint(image);
+        //        if (succeeded) thumbprint.Save(cacheFile);
+        //        return;
+        //    }
+        //}
 
         public static Image GetThumbprintImage(Guid fileId, string path)
         {

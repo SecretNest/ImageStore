@@ -187,6 +187,7 @@
     <Compile Include="SimilarFile\ResetSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.FileMode.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.GroupMode.cs" />
+    <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.Thumb.cs" />
     <Compile Include="SimilarFile\SearchSimilarFileCmdlet.cs" />
     <Compile Include="SimilarFile\ResolveSimilarFilesCmdlet.cs" />
     <Compile Include="SimilarFile\SetThumbprintCacheFolderCmdlet.cs" />
