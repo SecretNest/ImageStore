@@ -21,5 +21,14 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             return thumbs[fileId];
         }
+
+        void ClearThumbs()
+        {
+            foreach(var item in thumbs)
+            {
+                item.Value.Dispose();
+            }
+            thumbs = null;
+        }
     }
 }

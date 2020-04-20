@@ -78,14 +78,13 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             selectedFiles = new HashSet<Guid>();
-            loadedThumbprints = new ConcurrentDictionary<Guid, Image>();
 
             if (noGrouping)
                 ProcessInUngroup();
             else
                 ProcessInGroup();
 
-            Parallel.ForEach(loadedThumbprints.Values, i => i.Dispose());
+            ClearThumbs();
         }
 
         void WriteOutput()
@@ -115,7 +114,6 @@ namespace SecretNest.ImageStore.SimilarFile
         HashSet<Guid> selectedFiles;
         Dictionary<Guid, ImageStoreFile> allFiles = new Dictionary<Guid, ImageStoreFile>();
         Dictionary<Guid, FileInfo> allFileInfo = new Dictionary<Guid, FileInfo>();
-        ConcurrentDictionary<Guid, Image> loadedThumbprints;
         Dictionary<Guid, ImageStoreFolder> allFolders;
         Dictionary<Guid, string> allExtensionNames;
 
@@ -277,14 +275,6 @@ namespace SecretNest.ImageStore.SimilarFile
 
                 Parallel.ForEach(allFiles.Values, i => allFileInfo[i.Id].SetData(i, allFolders[i.FolderId], allExtensionNames[i.ExtensionId]));
             }
-        }
-        #endregion
-
-        #region Thumb print
-
-        Image GetFileThumbprint(Guid fileId)
-        {
-            return loadedThumbprints.GetOrAdd(fileId, i => LoadImageHelper.GetThumbprintImage(fileId, allFileInfo[i].FilePath));
         }
         #endregion
     }
