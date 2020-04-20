@@ -67,7 +67,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (fileCount > 0) //cannot be 1 due to relation is two-way.
             {
-                groupBox1.Text += string.Format(" {0} files", fileCount);
+                groupBox1.Text = string.Format("Files: {0}", fileCount);
             }
             else
             {

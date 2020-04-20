@@ -45,7 +45,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
             listView1.BeginUpdate();
             var groupCount = groupedFiles.Count;
-            groupBox1.Text += string.Format(" {0} groups", groupCount);
+            groupBox1.Text = string.Format("Groups: {0}", groupCount);
             if (groupedFiles.ContainsKey(-1))
             {
                 groupCount--;
