@@ -25,6 +25,11 @@ namespace SecretNest.ImageStore.SimilarFile
             InitializeComponent();
         }
 
+        public void ClearPictures()
+        {
+            doublePictureBox1.ClearPictures();
+        }
+
         HashSet<Guid> selectedFiles;
         Dictionary<Guid, FileInfo> allFileInfo;
         FileInfo mainFile;

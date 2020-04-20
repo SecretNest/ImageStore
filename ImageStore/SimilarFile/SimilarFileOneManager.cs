@@ -53,5 +53,10 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             LoadFile();
         }
+
+        private void SimilarFileOneManager_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            similarFileCheck1.ClearPictures();
+        }
     }
 }

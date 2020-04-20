@@ -172,6 +172,7 @@
             this.Name = "SimilarFilesManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Similar File Manager - Check the files to return";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SimilarFilesManager_FormClosing);
             this.Load += new System.EventHandler(this.SimilarFilesManager_Load);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);

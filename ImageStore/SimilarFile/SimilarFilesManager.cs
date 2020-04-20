@@ -133,5 +133,10 @@ namespace SecretNest.ImageStore.SimilarFile
 
             Focus();
         }
+
+        private void SimilarFilesManager_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            similarFileCheck1.ClearPictures();
+        }
     }
 }
