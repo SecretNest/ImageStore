@@ -112,7 +112,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (similarRecords != null && similarRecords.Length > 0)
             {
-                checkBox1.Text = mainFile.FileNameWithExtension + " (" + mainFile.PathToDirectory + ")";
+                checkBox1.Text = mainFile.FileNameWithExtension + " (" + mainFile.PathToDirectory + ") Size: "+mainFile.FileSize.ToString();
                 checkBox1.Checked = selectedFiles.Contains(mainFile.FileId);
 
                 List<ListViewItem> items = new List<ListViewItem>();
