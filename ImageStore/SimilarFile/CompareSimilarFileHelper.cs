@@ -139,7 +139,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     continue;
                 }
 
-                float cross = 1 - Shipwreck.Phash.CrossCorrelation.GetCrossCorrelation(imageHash, file.Value.Item1);
+                float cross = 1 - Shipwreck.Phash.ImagePhash.GetCrossCorrelation(imageHash, file.Value.Item1);
                 if (cross <= imageComparedThreshold)
                 {
                     result.Add(new InsertSimilarFileJob(file.Key, cross));

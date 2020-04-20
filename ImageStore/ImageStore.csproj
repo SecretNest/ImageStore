@@ -54,10 +54,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Shipwreck.Phash.Bitmaps.dll</HintPath>
     </Reference>
-    <Reference Include="Shipwreck.Phash.CrossCorrelation, Version=0.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Shipwreck.Phash.CrossCorrelation.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -221,7 +217,6 @@
     <Compile Include="StringPropertyComparingModes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Shipwreck.Phash.CrossCorrelation.dll" />
     <Content Include="System.Buffers.dll" />
     <Content Include="System.Memory.dll" />
     <Content Include="System.Numerics.Vectors.dll" />
