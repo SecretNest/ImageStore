@@ -24,6 +24,10 @@ After PowerShell started, enter these commands:
 
     ```SetThumbprintCacheFolder "D:\ImageStoreDatabase\Cache"```
 
+To start PowerShell from windows and apply commands above, you can enter this in one line like:
+
+    ```powershell -noexit -command "import-module .\ImageStore.dll; open-imagestoredatabase \"server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\ImageStoreDatabase\DataStore.mdf;Integrated Security=True\"; $InformationPreference=\"Continue\"; $VerbosePreference=\"Continue\"; SetThumbprintCacheFolder \"D:\ImageStoreDatabase\Cache\""```
+
 # Preparation
 ## Folders
 I have 4 folders created for managing the collection.
