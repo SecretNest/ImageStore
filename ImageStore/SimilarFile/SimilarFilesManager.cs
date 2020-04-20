@@ -44,7 +44,10 @@ namespace SecretNest.ImageStore.SimilarFile
             if (selectedMainFileId == null || !indicesOfListViewItems.TryGetValue(selectedMainFileId.Value, out var index))
             {
                 if (listView1.Items.Count > 0)
+                {
                     listView1.Items[0].Selected = true;
+                    listView1.EnsureVisible(0);
+                }
             }
             else
             {
@@ -102,7 +105,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 {
                     int index = (int)item.Tag;
                     var selected = allRecords[index];
-                    var showHidden = checkBox2.Checked;
+                    var showHidden = checkBox1.Checked;
                     if (showHidden)
                     {
                         similarFileCheck1.LoadFile(selected.Item1, selected.Item2);
@@ -129,7 +132,10 @@ namespace SecretNest.ImageStore.SimilarFile
             LoadMainFiles();
 
             if (listView1.Items.Count > 0)
+            {
                 listView1.Items[0].Selected = true;
+                listView1.EnsureVisible(0);
+            }
 
             Focus();
         }
@@ -137,6 +143,11 @@ namespace SecretNest.ImageStore.SimilarFile
         private void SimilarFilesManager_FormClosing(object sender, FormClosingEventArgs e)
         {
             similarFileCheck1.ClearPictures();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

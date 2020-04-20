@@ -79,6 +79,8 @@ Double clicking the image will use system default viewer to open the file relate
 ## Functions (Bottom Zone)
   * Button - Refresh Groups: Refreshes groups considering the newly state changed relations. Visible in group mode.
   * Button - Refresh Files: Refreshes  files considering the newly state changed relations. Visible in file mode when File and FileId absent.
+  * Checkbox - Show Hidden Groups: Makes groups with only hidden relations visible at left panel as well. Visible in group mode.
+  * Checkbox - Show Hidden Files: Makes files with only hidden relations visible at left panel as well. Visible in file mode when File and FileId absent.
   * Checkbox - Show Hidden Records: Makes hidden relations visible as well.
   * Checkbox - Auto Move Next: Moves to the next relation after [operation](#operations) processed.
   * Checkbox - Auto Resize: Resizes images to fit the screen.

@@ -33,7 +33,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.markIgnoreCallback = markIgnoreCallback;
             doublePictureBox1.AutoResizePictures = checkBox3.Checked;
         }
-        bool hideHidden = true;
+        bool hideHiddenGroup = true;
 
         ListViewItem[] hiddenGroups;
         ListViewItem disconnectedGroupItem;
@@ -114,7 +114,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 if (item.Selected)
                 {
                     int tag = (int)item.Tag;
-                    if (tag == -1 && hideHidden)
+                    if (tag == -1 && hideHiddenGroup)
                     {
                         shownHiddenChanging = true;
                         checkBox2.Checked = false;
@@ -175,6 +175,7 @@ namespace SecretNest.ImageStore.SimilarFile
             listView2.Items.Clear();
             listView3.Items.Clear();
             fileModeFile2Changing = false;
+            var showHiddenRecord = checkBox1.Checked;
             if (selectedGroupId != -2)
             {
                 var grouped = groupedFiles[selectedGroupId];
@@ -183,7 +184,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 foreach (var file1 in grouped)
                 {
                     var fileId = file1.Key;
-                    var show = !hideHidden || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Effective);
+                    var show = showHiddenRecord || file1.Value.Select(i => allRecords[i]).Any(i => i.IgnoredMode == IgnoredMode.Effective);
                     if (show)
                     {
                         var selected = selectedFiles.Contains(fileId);
@@ -257,7 +258,7 @@ namespace SecretNest.ImageStore.SimilarFile
             listView3.Items.Clear();
             var relatedRecords = groupedFiles[selectedGroupId][fileModeFile1SelectedFileId];
             var grouped = relatedRecords.ConvertAll(i => allRecords[i]);
-            if (hideHidden)
+            if (hideHiddenGroup)
             {
                 grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
             }
@@ -526,6 +527,7 @@ namespace SecretNest.ImageStore.SimilarFile
         void LoadToRelationTab()
         {
             dataGridView1.Rows.Clear();
+            var showHiddenRecord = checkBox1.Checked;
 
             //Dictionary<Guid, List<ImageStoreSimilarFile>> grouped;
             //Dictionary<Guid, List<Guid>> grouped;
@@ -534,13 +536,13 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (selectedGroupId != -2)
             {
-                if (hideHidden)
+                if (showHiddenRecord)
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i=>i.IgnoredMode == IgnoredMode.Effective).Distinct().OrderBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Distinct().OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
                 }
                 else
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Distinct().OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i => i.IgnoredMode == IgnoredMode.Effective).Distinct().OrderBy(i => i.DifferenceDegree).ToList();
                 }
             }
             else
@@ -777,10 +779,10 @@ namespace SecretNest.ImageStore.SimilarFile
         bool shownHiddenChanging = false;
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            hideHidden = !checkBox2.Checked;
+            hideHiddenGroup = !checkBox2.Checked;
 
             listView1.BeginUpdate();
-            if (hideHidden)
+            if (hideHiddenGroup)
             {
                 if (disconnectedGroupItem != null)
                     listView1.Items.Remove(disconnectedGroupItem);
@@ -807,6 +809,11 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (shownHiddenChanging) return;
 
+            RefreshWhenHiddenVisibleChanged();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
             RefreshWhenHiddenVisibleChanged();
         }
     }

@@ -38,6 +38,7 @@
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.similarFileCheck1 = new SecretNest.ImageStore.SimilarFile.SimilarFileCheck();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,7 +49,7 @@
             this.groupBox1.Controls.Add(this.listView1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(139, 587);
+            this.groupBox1.Size = new System.Drawing.Size(139, 470);
             this.groupBox1.TabIndex = 12;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Files:";
@@ -61,7 +62,7 @@
             this.listView1.Location = new System.Drawing.Point(3, 16);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(133, 568);
+            this.listView1.Size = new System.Drawing.Size(133, 451);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
@@ -78,10 +79,10 @@
             this.checkBox4.AutoSize = true;
             this.checkBox4.Checked = true;
             this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox4.Location = new System.Drawing.Point(552, 613);
+            this.checkBox4.Location = new System.Drawing.Point(540, 496);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(103, 17);
-            this.checkBox4.TabIndex = 16;
+            this.checkBox4.TabIndex = 3;
             this.checkBox4.Text = "Auto &Move Next";
             this.checkBox4.UseVisualStyleBackColor = true;
             this.checkBox4.CheckedChanged += new System.EventHandler(this.checkBox4_CheckedChanged);
@@ -92,10 +93,10 @@
             this.checkBox3.AutoSize = true;
             this.checkBox3.Checked = true;
             this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(677, 613);
+            this.checkBox3.Location = new System.Drawing.Point(665, 496);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(83, 17);
-            this.checkBox3.TabIndex = 17;
+            this.checkBox3.TabIndex = 4;
             this.checkBox3.Text = "Auto &Resize";
             this.checkBox3.UseVisualStyleBackColor = true;
             this.checkBox3.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
@@ -104,11 +105,11 @@
             // 
             this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(221, 613);
+            this.checkBox2.Location = new System.Drawing.Point(221, 496);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(133, 17);
-            this.checkBox2.TabIndex = 15;
-            this.checkBox2.Text = "Show &Hidden Records";
+            this.checkBox2.Size = new System.Drawing.Size(114, 17);
+            this.checkBox2.TabIndex = 1;
+            this.checkBox2.Text = "Sho&w Hidden Files";
             this.checkBox2.UseVisualStyleBackColor = true;
             this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
@@ -116,10 +117,10 @@
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button4.DialogResult = System.Windows.Forms.DialogResult.Retry;
-            this.button4.Location = new System.Drawing.Point(12, 605);
+            this.button4.Location = new System.Drawing.Point(12, 488);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(203, 30);
-            this.button4.TabIndex = 14;
+            this.button4.TabIndex = 0;
             this.button4.Text = "Refresh Files";
             this.button4.UseVisualStyleBackColor = true;
             // 
@@ -127,10 +128,10 @@
             // 
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button5.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button5.Location = new System.Drawing.Point(761, 605);
+            this.button5.Location = new System.Drawing.Point(749, 488);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(203, 30);
-            this.button5.TabIndex = 18;
+            this.button5.TabIndex = 5;
             this.button5.Text = "&OK";
             this.button5.UseVisualStyleBackColor = true;
             // 
@@ -144,15 +145,28 @@
             this.similarFileCheck1.Location = new System.Drawing.Point(157, 12);
             this.similarFileCheck1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.similarFileCheck1.Name = "similarFileCheck1";
-            this.similarFileCheck1.Size = new System.Drawing.Size(807, 587);
+            this.similarFileCheck1.Size = new System.Drawing.Size(795, 470);
             this.similarFileCheck1.TabIndex = 13;
             this.similarFileCheck1.RequestingGotoFile += new System.EventHandler<SecretNest.ImageStore.SimilarFile.RequestingGotoFileEventArgs>(this.similarFileCheck1_RequestingGotoFile);
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(341, 496);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(133, 17);
+            this.checkBox1.TabIndex = 2;
+            this.checkBox1.Text = "Show &Hidden Records";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // SimilarFilesManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(976, 647);
+            this.ClientSize = new System.Drawing.Size(964, 530);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.checkBox2);
@@ -160,6 +174,7 @@
             this.Controls.Add(this.button5);
             this.Controls.Add(this.similarFileCheck1);
             this.Controls.Add(this.groupBox1);
+            this.MinimumSize = new System.Drawing.Size(980, 569);
             this.Name = "SimilarFilesManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Similar File Manager - Check the files to return";
@@ -182,5 +197,6 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
