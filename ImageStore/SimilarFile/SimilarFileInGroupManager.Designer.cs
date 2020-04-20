@@ -85,7 +85,7 @@
             this.Column5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.doublePictureBox1 = new DoublePictureBox();
+            doublePictureBox1 = new DoublePictureBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -121,7 +121,7 @@
             this.listView1.Location = new System.Drawing.Point(3, 16);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(133, 587);
+            this.listView1.Size = new System.Drawing.Size(133, 572);
             this.listView1.TabIndex = 0;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
@@ -136,7 +136,7 @@
             // 
             this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(221, 632);
+            this.checkBox2.Location = new System.Drawing.Point(221, 617);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(133, 17);
             this.checkBox2.TabIndex = 1;
@@ -148,7 +148,7 @@
             // 
             this.button4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.button4.DialogResult = System.Windows.Forms.DialogResult.Retry;
-            this.button4.Location = new System.Drawing.Point(12, 624);
+            this.button4.Location = new System.Drawing.Point(12, 609);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(203, 30);
             this.button4.TabIndex = 0;
@@ -159,7 +159,7 @@
             // 
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button5.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button5.Location = new System.Drawing.Point(786, 624);
+            this.button5.Location = new System.Drawing.Point(786, 609);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(203, 30);
             this.button5.TabIndex = 5;
@@ -173,7 +173,7 @@
             this.groupBox1.Controls.Add(this.listView1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(139, 606);
+            this.groupBox1.Size = new System.Drawing.Size(139, 591);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Groups:";
@@ -184,7 +184,7 @@
             this.checkBox3.AutoSize = true;
             this.checkBox3.Checked = true;
             this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(702, 632);
+            this.checkBox3.Location = new System.Drawing.Point(702, 617);
             this.checkBox3.Name = "checkBox3";
             this.checkBox3.Size = new System.Drawing.Size(83, 17);
             this.checkBox3.TabIndex = 4;
@@ -198,7 +198,7 @@
             this.checkBox4.AutoSize = true;
             this.checkBox4.Checked = true;
             this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox4.Location = new System.Drawing.Point(577, 632);
+            this.checkBox4.Location = new System.Drawing.Point(577, 617);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(103, 17);
             this.checkBox4.TabIndex = 3;
@@ -222,8 +222,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.doublePictureBox1);
-            this.splitContainer1.Size = new System.Drawing.Size(832, 615);
-            this.splitContainer1.SplitterDistance = 220;
+            this.splitContainer1.Size = new System.Drawing.Size(832, 600);
+            this.splitContainer1.SplitterDistance = 214;
             this.splitContainer1.TabIndex = 13;
             // 
             // tabControl1
@@ -234,7 +234,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(832, 220);
+            this.tabControl1.Size = new System.Drawing.Size(832, 214);
             this.tabControl1.TabIndex = 13;
             this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
@@ -251,7 +251,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(824, 194);
+            this.tabPage1.Size = new System.Drawing.Size(824, 188);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "By Files";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -348,7 +348,7 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.groupBox3);
-            this.splitContainer3.Size = new System.Drawing.Size(592, 194);
+            this.splitContainer3.Size = new System.Drawing.Size(592, 188);
             this.splitContainer3.SplitterDistance = 251;
             this.splitContainer3.TabIndex = 1;
             // 
@@ -358,7 +358,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(0, 0);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(251, 194);
+            this.groupBox2.Size = new System.Drawing.Size(251, 188);
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "File 1";
@@ -378,7 +378,7 @@
             this.listView2.Location = new System.Drawing.Point(3, 16);
             this.listView2.MultiSelect = false;
             this.listView2.Name = "listView2";
-            this.listView2.Size = new System.Drawing.Size(245, 175);
+            this.listView2.Size = new System.Drawing.Size(245, 169);
             this.listView2.TabIndex = 0;
             this.listView2.UseCompatibleStateImageBehavior = false;
             this.listView2.View = System.Windows.Forms.View.Details;
@@ -405,7 +405,7 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Location = new System.Drawing.Point(0, 0);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(337, 194);
+            this.groupBox3.Size = new System.Drawing.Size(337, 188);
             this.groupBox3.TabIndex = 0;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "File 2";
@@ -426,7 +426,7 @@
             this.listView3.HideSelection = false;
             this.listView3.Location = new System.Drawing.Point(3, 16);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(331, 175);
+            this.listView3.Size = new System.Drawing.Size(331, 169);
             this.listView3.TabIndex = 1;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.View = System.Windows.Forms.View.Details;
@@ -662,7 +662,7 @@
             this.doublePictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.doublePictureBox1.Location = new System.Drawing.Point(0, 0);
             this.doublePictureBox1.Name = "doublePictureBox1";
-            this.doublePictureBox1.Size = new System.Drawing.Size(832, 391);
+            this.doublePictureBox1.Size = new System.Drawing.Size(832, 382);
             this.doublePictureBox1.TabIndex = 0;
             // 
             // SimilarFileInGroupManager
@@ -670,7 +670,7 @@
             this.AcceptButton = this.button5;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1001, 666);
+            this.ClientSize = new System.Drawing.Size(1001, 651);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.checkBox3);

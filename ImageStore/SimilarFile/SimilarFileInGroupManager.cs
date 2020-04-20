@@ -536,11 +536,11 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 if (hideHidden)
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i=>i.IgnoredMode == IgnoredMode.Effective).OrderBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i=>i.IgnoredMode == IgnoredMode.Effective).Distinct().OrderBy(i => i.DifferenceDegree).ToList();
                 }
                 else
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Distinct().OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
                 }
             }
             else

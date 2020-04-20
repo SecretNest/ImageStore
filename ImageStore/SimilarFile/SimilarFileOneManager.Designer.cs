@@ -43,9 +43,9 @@
             this.similarFileCheck1.AutoMoveNext = false;
             this.similarFileCheck1.AutoResizePictures = false;
             this.similarFileCheck1.Location = new System.Drawing.Point(0, 0);
-            this.similarFileCheck1.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
+            this.similarFileCheck1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.similarFileCheck1.Name = "similarFileCheck1";
-            this.similarFileCheck1.Size = new System.Drawing.Size(1218, 691);
+            this.similarFileCheck1.Size = new System.Drawing.Size(812, 470);
             this.similarFileCheck1.TabIndex = 0;
             // 
             // checkBox4
@@ -54,10 +54,9 @@
             this.checkBox4.AutoSize = true;
             this.checkBox4.Checked = true;
             this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox4.Location = new System.Drawing.Point(589, 714);
-            this.checkBox4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBox4.Location = new System.Drawing.Point(388, 484);
             this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(147, 24);
+            this.checkBox4.Size = new System.Drawing.Size(103, 17);
             this.checkBox4.TabIndex = 7;
             this.checkBox4.Text = "Auto Move &Next";
             this.checkBox4.UseVisualStyleBackColor = true;
@@ -69,10 +68,9 @@
             this.checkBox3.AutoSize = true;
             this.checkBox3.Checked = true;
             this.checkBox3.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox3.Location = new System.Drawing.Point(772, 714);
-            this.checkBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBox3.Location = new System.Drawing.Point(513, 484);
             this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(122, 24);
+            this.checkBox3.Size = new System.Drawing.Size(83, 17);
             this.checkBox3.TabIndex = 8;
             this.checkBox3.Text = "Auto Re&size";
             this.checkBox3.UseVisualStyleBackColor = true;
@@ -82,10 +80,9 @@
             // 
             this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox2.AutoSize = true;
-            this.checkBox2.Location = new System.Drawing.Point(18, 714);
-            this.checkBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.checkBox2.Location = new System.Drawing.Point(12, 484);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(194, 24);
+            this.checkBox2.Size = new System.Drawing.Size(133, 17);
             this.checkBox2.TabIndex = 6;
             this.checkBox2.Text = "Show &Hidden Records";
             this.checkBox2.UseVisualStyleBackColor = true;
@@ -95,10 +92,9 @@
             // 
             this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button5.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.button5.Location = new System.Drawing.Point(903, 700);
-            this.button5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.button5.Location = new System.Drawing.Point(602, 476);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(304, 46);
+            this.button5.Size = new System.Drawing.Size(203, 30);
             this.button5.TabIndex = 9;
             this.button5.Text = "&OK";
             this.button5.UseVisualStyleBackColor = true;
@@ -106,16 +102,15 @@
             // SimilarFileOneManager
             // 
             this.AcceptButton = this.button5;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1218, 757);
+            this.ClientSize = new System.Drawing.Size(812, 513);
             this.Controls.Add(this.checkBox4);
             this.Controls.Add(this.checkBox3);
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.similarFileCheck1);
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.MinimumSize = new System.Drawing.Size(1231, 787);
+            this.MinimumSize = new System.Drawing.Size(826, 525);
             this.Name = "SimilarFileOneManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Similar File Manager - Check the files to return";
