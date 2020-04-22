@@ -177,7 +177,7 @@ namespace SecretNest.ImageStore.DatabaseShared
                     {
                         whereCauses.Add(string.Format("[{0}] = @{1}", columnName, parameterName));
                         parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3)
-                        { Value = SqlServerLikeValueBuilder.Escape(value) });
+                        { Value = SqlServerLikeValueBuilder.EscapeForEquals(value) });
                     }
                     else if (comparingModes == StringPropertyComparingModes.StartsWith)
                     {

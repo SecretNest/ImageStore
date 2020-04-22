@@ -17,5 +17,10 @@ namespace SecretNest.ImageStore
         {
             return value.Replace("'", "''").Replace("[", "[[]").Replace("%", "[%]").Replace("_", "[_]");
         }
+
+        internal static string EscapeForEquals(string value)
+        {
+            return value.Replace("'", "''");
+        }
     }
 }
