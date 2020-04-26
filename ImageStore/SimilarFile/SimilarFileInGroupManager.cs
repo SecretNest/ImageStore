@@ -254,15 +254,21 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void FileModeLoadSimilarRecords()
         {
+            var showHiddenRecord = checkBox1.Checked;
             fileModeFile2Changing = true;
             listView3.Items.Clear();
             var relatedRecords = groupedFiles[selectedGroupId][fileModeFile1SelectedFileId];
-            var grouped = relatedRecords.ConvertAll(i => allRecords[i]);
-            if (hideHiddenGroup)
+            ImageStoreSimilarFile[] grouped;
+            if (showHiddenRecord)
             {
-                grouped = grouped.Where(i => i.IgnoredMode == IgnoredMode.Effective).ToList();
+                grouped = relatedRecords.ConvertAll(i => allRecords[i]).OrderBy(i => i.DifferenceDegree).ToArray();
             }
-            if (grouped.Count > 0)
+            else
+            {
+                grouped = relatedRecords.ConvertAll(i => allRecords[i]).Where(i => i.IgnoredMode == IgnoredMode.Effective).OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
+            }
+
+            if (grouped.Length > 0)
             {
                 List<ListViewItem> items = new List<ListViewItem>();
                 foreach (var similarFileRecord in grouped)
