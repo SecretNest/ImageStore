@@ -107,9 +107,15 @@ namespace SecretNest.ImageStore.Folder
                 //Skip any ignored
                 if (ignoredDirectories.Remove(directoryName))
                 {
-                    subFoldersIndex++;
-                    originalDirectoryName = subFolders[subFoldersIndex];
-                    directoryName = originalDirectoryName.Substring(folderPathLength);
+                    if (++subFoldersIndex == subFoldersLength)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        originalDirectoryName = subFolders[subFoldersIndex];
+                        directoryName = originalDirectoryName.Substring(folderPathLength);
+                    }
 
                     continue;
                 }
@@ -125,9 +131,15 @@ namespace SecretNest.ImageStore.Folder
                 }
                 if (needContinue)
                 {
-                    subFoldersIndex++;
-                    originalDirectoryName = subFolders[subFoldersIndex];
-                    directoryName = originalDirectoryName.Substring(folderPathLength);
+                    if (++subFoldersIndex == subFoldersLength)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        originalDirectoryName = subFolders[subFoldersIndex];
+                        directoryName = originalDirectoryName.Substring(folderPathLength);
+                    }
 
                     continue;
                 }
