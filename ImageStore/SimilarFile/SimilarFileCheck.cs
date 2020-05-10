@@ -77,6 +77,7 @@ namespace SecretNest.ImageStore.SimilarFile
         public void LoadFile(Guid mainFileId, IEnumerable<ImageStoreSimilarFile> similarRecords)
         {
             mainFile = allFileInfo[mainFileId];
+
             if (similarRecords == null)
                 this.similarRecords = null;
             else
@@ -117,44 +118,62 @@ namespace SecretNest.ImageStore.SimilarFile
             listView3.BeginUpdate();
             listView3.Items.Clear();
 
-            if (similarRecords != null && similarRecords.Length > 0)
+            if (mainFile != null)
             {
-                checkBox1.Text = mainFile.FileNameWithExtension + " (" + mainFile.PathToDirectory + ") Size: "+mainFile.FileSize.ToString();
+                checkBox1.Enabled = true;
+                checkBox1.Text = mainFile.FileNameWithExtension + " (" + mainFile.PathToDirectory + ") Size: " + mainFile.FileSize.ToString();
                 checkBox1.Checked = selectedFiles.Contains(mainFile.FileId);
 
-                List<ListViewItem> items = new List<ListViewItem>();
+                if (similarRecords != null && similarRecords.Length > 0)
+                {
+                    List<ListViewItem> items = new List<ListViewItem>();
 
-                IEnumerable<SimilarRecord> sorted;
-                if (sortByRate)
-                {
-                    sorted = similarRecords.OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree);
-                }
-                else
-                {
-                    sorted = similarRecords.OrderBy(i => i.PathToDirectory).ThenBy(i => i.FileNameWithExtension);
-                }
+                    IEnumerable<SimilarRecord> sorted;
+                    if (sortByRate)
+                    {
+                        sorted = similarRecords.OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree);
+                    }
+                    else
+                    {
+                        sorted = similarRecords.OrderBy(i => i.PathToDirectory).ThenBy(i => i.FileNameWithExtension);
+                    }
 
-                foreach (var similarFileRecord in sorted)
-                {
-                    var selected = selectedFiles.Contains(similarFileRecord.FileId);
-                    items.Add(new ListViewItem(new string[] {
+                    foreach (var similarFileRecord in sorted)
+                    {
+                        var selected = selectedFiles.Contains(similarFileRecord.FileId);
+                        items.Add(new ListViewItem(new string[] {
                                 similarFileRecord.DifferenceDegree.ToString("0.0000"),
                                 similarFileRecord.FileNameWithExtension, similarFileRecord.PathToDirectory, similarFileRecord.FileSize.ToString(),
                                 SimilarFileHelper.IgnoredModeToString(similarFileRecord.IgnoredMode)
                             })
-                    {
-                        Checked = selected,
-                        Tag = similarFileRecord
-                    });
-                }
+                        {
+                            Checked = selected,
+                            Tag = similarFileRecord
+                        });
+                    }
 
-                listView3.Items.AddRange(items.ToArray());
-                listView3.Items[0].Selected = true;
+                    listView3.Items.AddRange(items.ToArray());
+                    listView3.Items[0].Selected = true;
+                }
+                else
+                {
+                    doublePictureBox1.ClearPictures();
+                }
             }
             else
             {
-                checkBox1.Text = "";
+                checkBox1.Enabled = false;
                 checkBox1.Checked = false;
+                checkBox1.Text = "<Main File>";
+                button16.Enabled = false;
+                button14.Enabled = false;
+                button12.Enabled = false;
+                button11.Enabled = false;
+                button10.Enabled = false;
+                button1.Enabled = false;
+                button2.Enabled = false;
+                button3.Enabled = false;
+
                 doublePictureBox1.ClearPictures();
             }
 

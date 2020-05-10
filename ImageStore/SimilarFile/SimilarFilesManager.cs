@@ -41,18 +41,22 @@ namespace SecretNest.ImageStore.SimilarFile
 
             LoadMainFiles();
 
-            if (selectedMainFileId == null || !indicesOfListViewItems.TryGetValue(selectedMainFileId.Value, out var index))
+            if (listView1.Items.Count == 0)
             {
-                if (listView1.Items.Count > 0)
+                similarFileCheck1.ClearFile();
+            }    
+            else
+            {
+                if (selectedMainFileId == null || !indicesOfListViewItems.TryGetValue(selectedMainFileId.Value, out var index))
                 {
                     listView1.Items[0].Selected = true;
                     listView1.EnsureVisible(0);
                 }
-            }
-            else
-            {
-                listView1.Items[index].Selected = true;
-                listView1.EnsureVisible(index);
+                else
+                {
+                    listView1.Items[index].Selected = true;
+                    listView1.EnsureVisible(index);
+                }
             }
         }
 
@@ -135,6 +139,10 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 listView1.Items[0].Selected = true;
                 listView1.EnsureVisible(0);
+            }
+            else
+            {
+                similarFileCheck1.ClearFile();
             }
 
             Focus();
