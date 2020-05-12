@@ -66,6 +66,7 @@ namespace SecretNest.ImageStore.Folder
                 commandDropTable.ExecuteNonQuery();
 
                 commandDeleteFolder.Connection = connection;
+                commandDeleteFolder.Transaction = transation;
                 commandDeleteFolder.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
                 int result = commandDeleteFolder.ExecuteNonQuery();
 
