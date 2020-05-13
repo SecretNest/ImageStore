@@ -24,22 +24,6 @@ From Pipeline: FileId
 
 Conditions will be ignored if not provided or set as null.
 
-# Ignored Modes
-State of this record of file.
-
-Enum: SecretNest.ImageStore.SimilarFile.IgnoredModes
-
-|Element|Value|Description|
-|---|---|---|
-|Effective|1|Marked as effective, not ignored.|
-|HiddenButConnected|2|Marked as Hidden but Connected.|
-|HiddenAndDisconnected|4|Marked as Hidden and Disconnected.|
-|All|7|All states|
-|AllHidden|6|All hidden|
-|AllConnected|3|All connected, no matter hidden or effective|
-
-*Note: This is a flag enum. Use ```Or``` to link multiple comparing modes you need. With multiple modes chosen, records matched with any mode provided will be included.*
-
 # Return
 The list of the records which matches the conditions provided.
 
