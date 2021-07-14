@@ -75,8 +75,11 @@ namespace SecretNest.ImageStore.Folder
                 if (string.Compare(lastPath, file.Path, StringComparison.OrdinalIgnoreCase) != 0)
                 {
                     lastPath = file.Path;
-                    filesInDirectory = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
-                    dbFiles.Add(lastPath, filesInDirectory);
+                    if (!dbFiles.TryGetValue(lastPath, out filesInDirectory))
+                    {
+                        filesInDirectory = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+                        dbFiles.Add(lastPath, filesInDirectory);
+                    }
                 }
                 filesInDirectory.Add(fileNameWithExtension, file.Id);
             }
