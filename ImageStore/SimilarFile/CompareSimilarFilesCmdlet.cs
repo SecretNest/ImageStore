@@ -176,14 +176,20 @@ namespace SecretNest.ImageStore.SimilarFile
                     if (folderId != lastFolderKey)
                     {
                         lastFolderKey = folderId;
-                        lastFolder = new Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>(StringComparer.OrdinalIgnoreCase);
-                        allFiles.Add(lastFolderKey, lastFolder);
+                        if (!allFiles.TryGetValue(lastFolderKey, out lastFolder))
+                        {
+                            lastFolder = new Dictionary<string, Dictionary<Guid, Tuple<byte[], int>>>(StringComparer.OrdinalIgnoreCase);
+                            allFiles.Add(lastFolderKey, lastFolder);
+                        }
                     }
-                    if (string.Compare(path, lastPathKey, true) != 0)
+                    if (string.Compare(path, lastPathKey, StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         lastPathKey = path;
-                        lastPath = new Dictionary<Guid, Tuple<byte[], int>>();
-                        lastFolder.Add(lastPathKey, lastPath);
+                        if (!lastFolder.TryGetValue(lastPathKey, out lastPath))
+                        {
+                            lastPath = new Dictionary<Guid, Tuple<byte[], int>>();
+                            lastFolder.Add(lastPathKey, lastPath);
+                        }
                     }
                     lastPath.Add(fileId, new Tuple<byte[], int>(imageHash, currentSequence));
                 }
