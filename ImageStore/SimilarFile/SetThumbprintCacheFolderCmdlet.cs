@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Reflection;
@@ -21,6 +22,7 @@ namespace SecretNest.ImageStore.SimilarFile
             var path = new Uri(assembly.CodeBase).LocalPath;
             var assemblyFolder = System.IO.Path.GetDirectoryName(path);
             LoadImageHelper.cachePath = System.IO.Path.Combine(assemblyFolder, Path);
+            Directory.CreateDirectory(LoadImageHelper.cachePath);
         }
     }
 }
