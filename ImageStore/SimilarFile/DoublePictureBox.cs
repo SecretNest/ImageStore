@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace SecretNest.ImageStore.SimilarFile
 {
@@ -168,15 +170,21 @@ namespace SecretNest.ImageStore.SimilarFile
         private void pictureBox1_DoubleClick(object sender, EventArgs e)
         {
             var path = pictureBox1.Image?.Tag;
-            if (path != null)
-                System.Diagnostics.Process.Start((string)path);
+            OpenFile((string)path);
         }
 
         private void pictureBox2_DoubleClick(object sender, EventArgs e)
         {
-            var path = pictureBox2.Image?.Tag;
+            var path = pictureBox2.Image?.Tag; 
+            OpenFile((string)path);
+        }
+
+        private void OpenFile(string path)
+        {
             if (path != null)
-                System.Diagnostics.Process.Start((string)path);
+            {
+                Process.Start("explorer", "\"" + path + "\"");
+            }
         }
     }
 }

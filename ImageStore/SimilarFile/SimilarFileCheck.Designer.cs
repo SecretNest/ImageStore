@@ -44,7 +44,6 @@
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.doublePictureBox1 = new DoublePictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -55,6 +54,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -75,16 +75,19 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.doublePictureBox1);
-            this.splitContainer1.Size = new System.Drawing.Size(801, 675);
-            this.splitContainer1.SplitterDistance = 253;
+            this.splitContainer1.Panel2MinSize = 50;
+            this.splitContainer1.Size = new System.Drawing.Size(1602, 1298);
+            this.splitContainer1.SplitterDistance = 486;
+            this.splitContainer1.SplitterWidth = 8;
             this.splitContainer1.TabIndex = 0;
             // 
             // button3
             // 
             this.button3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button3.Location = new System.Drawing.Point(689, 222);
+            this.button3.Location = new System.Drawing.Point(1378, 426);
+            this.button3.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(109, 28);
+            this.button3.Size = new System.Drawing.Size(218, 54);
             this.button3.TabIndex = 32;
             this.button3.Text = "Order by &Path";
             this.button3.UseVisualStyleBackColor = true;
@@ -93,9 +96,10 @@
             // button2
             // 
             this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(578, 222);
+            this.button2.Location = new System.Drawing.Point(1156, 426);
+            this.button2.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(109, 28);
+            this.button2.Size = new System.Drawing.Size(218, 54);
             this.button2.TabIndex = 31;
             this.button2.Text = "Order by &Rate";
             this.button2.UseVisualStyleBackColor = true;
@@ -104,9 +108,10 @@
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(578, 188);
+            this.button1.Location = new System.Drawing.Point(1156, 361);
+            this.button1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(220, 28);
+            this.button1.Size = new System.Drawing.Size(440, 54);
             this.button1.TabIndex = 30;
             this.button1.Text = "&Go to selected file";
             this.button1.UseVisualStyleBackColor = true;
@@ -115,9 +120,10 @@
             // button10
             // 
             this.button10.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button10.Location = new System.Drawing.Point(578, 139);
+            this.button10.Location = new System.Drawing.Point(1156, 267);
+            this.button10.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button10.Name = "button10";
-            this.button10.Size = new System.Drawing.Size(220, 28);
+            this.button10.Size = new System.Drawing.Size(440, 54);
             this.button10.TabIndex = 29;
             this.button10.Text = "Mark as Hidden and &Disconnected";
             this.button10.UseVisualStyleBackColor = true;
@@ -126,9 +132,10 @@
             // button11
             // 
             this.button11.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button11.Location = new System.Drawing.Point(578, 105);
+            this.button11.Location = new System.Drawing.Point(1156, 202);
+            this.button11.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(220, 28);
+            this.button11.Size = new System.Drawing.Size(440, 54);
             this.button11.TabIndex = 28;
             this.button11.Text = "Mark as Hidden but &Connected";
             this.button11.UseVisualStyleBackColor = true;
@@ -137,9 +144,10 @@
             // button12
             // 
             this.button12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button12.Location = new System.Drawing.Point(578, 71);
+            this.button12.Location = new System.Drawing.Point(1156, 137);
+            this.button12.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(220, 28);
+            this.button12.Size = new System.Drawing.Size(440, 54);
             this.button12.TabIndex = 27;
             this.button12.Text = "Mark as &Effective";
             this.button12.UseVisualStyleBackColor = true;
@@ -148,9 +156,10 @@
             // button14
             // 
             this.button14.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button14.Location = new System.Drawing.Point(578, 37);
+            this.button14.Location = new System.Drawing.Point(1156, 71);
+            this.button14.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(220, 28);
+            this.button14.Size = new System.Drawing.Size(440, 54);
             this.button14.TabIndex = 26;
             this.button14.Text = "Check / Uncheck &File";
             this.button14.UseVisualStyleBackColor = true;
@@ -159,9 +168,10 @@
             // button16
             // 
             this.button16.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button16.Location = new System.Drawing.Point(578, 3);
+            this.button16.Location = new System.Drawing.Point(1156, 6);
+            this.button16.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(220, 28);
+            this.button16.Size = new System.Drawing.Size(440, 54);
             this.button16.TabIndex = 25;
             this.button16.Text = "Check / Uncheck &Main";
             this.button16.UseVisualStyleBackColor = true;
@@ -183,9 +193,10 @@
             this.listView3.GridLines = true;
             this.listView3.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView3.HideSelection = false;
-            this.listView3.Location = new System.Drawing.Point(3, 26);
+            this.listView3.Location = new System.Drawing.Point(6, 50);
+            this.listView3.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.listView3.Name = "listView3";
-            this.listView3.Size = new System.Drawing.Size(569, 224);
+            this.listView3.Size = new System.Drawing.Size(1134, 426);
             this.listView3.TabIndex = 2;
             this.listView3.UseCompatibleStateImageBehavior = false;
             this.listView3.View = System.Windows.Forms.View.Details;
@@ -221,9 +232,10 @@
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(3, 3);
+            this.checkBox1.Location = new System.Drawing.Point(6, 6);
+            this.checkBox1.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(80, 17);
+            this.checkBox1.Size = new System.Drawing.Size(156, 29);
             this.checkBox1.TabIndex = 0;
             this.checkBox1.Text = "<Main File>";
             this.checkBox1.UseVisualStyleBackColor = true;
@@ -234,17 +246,19 @@
             this.doublePictureBox1.AutoResizePictures = false;
             this.doublePictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.doublePictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.doublePictureBox1.Margin = new System.Windows.Forms.Padding(12, 12, 12, 12);
             this.doublePictureBox1.Name = "doublePictureBox1";
-            this.doublePictureBox1.Size = new System.Drawing.Size(801, 418);
+            this.doublePictureBox1.Size = new System.Drawing.Size(1602, 804);
             this.doublePictureBox1.TabIndex = 0;
             // 
             // SimilarFileCheck
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
+            this.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.Name = "SimilarFileCheck";
-            this.Size = new System.Drawing.Size(801, 675);
+            this.Size = new System.Drawing.Size(1602, 1298);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
