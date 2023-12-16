@@ -78,6 +78,7 @@
             this.splitContainer1.Size = new System.Drawing.Size(801, 675);
             this.splitContainer1.SplitterDistance = 253;
             this.splitContainer1.TabIndex = 0;
+            this.splitContainer1.Panel2MinSize = 40;
             // 
             // button3
             // 
