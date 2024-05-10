@@ -225,7 +225,15 @@ namespace SecretNest.ImageStore.SimilarFile
                 return;
             }
 
+            button16.Enabled = false;
+            button15.Enabled = false;
+            button14.Enabled = false;
+            button13.Enabled = false;
+            button12.Enabled = false;
+            button11.Enabled = false;
+            button10.Enabled = false;
             listView3.Items.Clear();
+
             fileModeFile1SelectedFileId = Guid.Empty;
             doublePictureBox1.ClearPictures();
         }
@@ -256,6 +264,13 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var showHiddenRecord = checkBox1.Checked;
             fileModeFile2Changing = true;
+            button16.Enabled = false;
+            button15.Enabled = false;
+            button14.Enabled = false;
+            button13.Enabled = false;
+            button12.Enabled = false;
+            button11.Enabled = false;
+            button10.Enabled = false;
             listView3.Items.Clear();
             var relatedRecords = groupedFiles[selectedGroupId][fileModeFile1SelectedFileId];
             ImageStoreSimilarFile[] grouped;
