@@ -103,7 +103,7 @@ namespace SecretNest.ImageStore.File
                     }
                     else
                     {
-                        var newFile = GetFileCmdlet.GetFile(File.Id);
+                        var newFile = GetFileCmdlet.GetFile(Id);
                         WriteObject(newFile);
                     }
                 }
