@@ -12,7 +12,7 @@ Alias: RenameFile
 |Id|Guid|Id of the file record to be renamed|No(*1)|
 |NewFileName|string|New name of the file. Extension is not included. Set to empty string to remove the filename.|No|
 |NewExtension|[ImageStoreExtension](../../type/ImageStoreExtension.md)|New extension|No(*2)|
-|NewExtension|Id|Guid|Id of the extension record as the new one|No(*2)|
+|NewExtension|Guid|Id of the extension record as the new one|No(*2)|
 |SkipFile|*switch*|Skips the file renaming operating in file system.|-|
 |SkipReturn|*switch*|Returns null instead of the record of the renamed file.|-|
 |OverrideSealedFolder|*switch*|Overrides the IsSealed mark of the folder.|-|
