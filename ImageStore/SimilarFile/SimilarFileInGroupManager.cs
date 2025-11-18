@@ -40,12 +40,11 @@ namespace SecretNest.ImageStore.SimilarFile
         ListViewItem disconnectedGroupItem;
 
         private void SimilarFileManager_Load(object sender, EventArgs e)
-        {
-            ConcurrentQueue<ListViewItem> effectiveGroups = new ConcurrentQueue<ListViewItem>();
-            ConcurrentQueue<ListViewItem> hiddenGroups = new ConcurrentQueue<ListViewItem>();
-
+        { 
             listView1.BeginUpdate();
             var groupCount = groupedFiles.Count;
+            SortedList<int, ListViewItem> effectiveGroups = new SortedList<int, ListViewItem>(groupCount);
+            SortedList<int, ListViewItem> hiddenGroups = new SortedList<int, ListViewItem>(groupCount);
             groupBox1.Text = string.Format("Groups: {0}", groupCount);
             if (groupedFiles.ContainsKey(-1))
             {
@@ -62,20 +61,26 @@ namespace SecretNest.ImageStore.SimilarFile
                 var listViewItem = new ListViewItem(string.Format("{0} files", fileGroup.Count), i) { Tag = i };
                 if (isHiddenGroup)
                 {
-                    hiddenGroups.Enqueue(listViewItem);
+                    lock (hiddenGroups)
+                    {
+                        hiddenGroups[i] = listViewItem;
+                    }
                 }
                 else
                 {
                     listViewItem.Group = listView1.Groups[0];
-                    effectiveGroups.Enqueue(listViewItem);
+                    lock(effectiveGroups)
+                    {
+                        effectiveGroups[i] = listViewItem;
+                    }
                 }
             });
 
             imageList1.Images.AddRange(images);
             images = null;
 
-            listView1.Items.AddRange(effectiveGroups.ToArray());
-            this.hiddenGroups = hiddenGroups.ToArray();
+            listView1.Items.AddRange(effectiveGroups.Values.ToArray());
+            this.hiddenGroups = hiddenGroups.Values.ToArray();
 
             if (groupedFiles.TryGetValue(-1, out var disconnectedGroup))
             {
