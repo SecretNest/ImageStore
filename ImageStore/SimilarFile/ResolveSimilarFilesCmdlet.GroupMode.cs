@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void CalculateIntoGroup()
         {
-            List<Guid> leftRecords = new List<Guid>();
+            HashSet<Guid> leftRecords = new HashSet<Guid>();
             HashSet<Guid> filesProcessed = new HashSet<Guid>();
 
             groupedFiles = new Dictionary<int, Dictionary<Guid, List<Guid>>>();
@@ -93,33 +94,36 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (leftRecords.Count != 0)
             {
-                //FileId, SimilarRecordID
-                var unsortedGroup = new List<Dictionary<Guid, List<Guid>>>();
+                //FileId, (Count of Effective records, SimilarRecordID)
+                var unsortedGroup = new List<Tuple<int, Dictionary<Guid, List<Guid>>>>();
 
-                BlockingCollection<Guid> needToPrepareThumbprints = null;
-                Thread preparingFileThumbprints = null;
-
-                needToPrepareThumbprints = new BlockingCollection<Guid>();
-                preparingFileThumbprints = new Thread(PreparingFileThumbprints);
+                var needToPrepareThumbprints = new BlockingCollection<Guid>();
+                var preparingFileThumbprints = new Thread(PreparingFileThumbprints);
                 preparingFileThumbprints.Start(needToPrepareThumbprints);
 
-                while (leftRecords.Count > 0)
+                while (true)
                 {
-                    var firstRecord = allRecords[leftRecords[0]];
-                    leftRecords.RemoveAt(0);
+                    var processingRecordId = leftRecords.FirstOrDefault();
+                    if (processingRecordId == Guid.Empty) break;
 
+                    var processingRecord = allRecords[processingRecordId];
+                    leftRecords.Remove(processingRecordId);
+
+                    //FileId, SimilarRecordID
                     Dictionary<Guid, List<Guid>> currentFilesGroup = new Dictionary<Guid, List<Guid>>();
-                    unsortedGroup.Add(currentFilesGroup);
-
+                    var effectiveRecordCount = 0;
                     Queue<Guid> filesToProcess = new Queue<Guid>();
-                    if (!filesProcessed.Contains(firstRecord.File1Id))
-                        filesToProcess.Enqueue(firstRecord.File1Id);
-                    if (!filesProcessed.Contains(firstRecord.File1Id))
-                        filesToProcess.Enqueue(firstRecord.File2Id);
-                    currentFilesGroup.Add(firstRecord.File1Id, new List<Guid>() { firstRecord.Id });
-                    needToPrepareThumbprints?.Add(firstRecord.File1Id);
-                    currentFilesGroup.Add(firstRecord.File2Id, new List<Guid>() { firstRecord.Id });
-                    needToPrepareThumbprints?.Add(firstRecord.File2Id);
+
+                    if (!filesProcessed.Contains(processingRecord.File1Id))
+                        filesToProcess.Enqueue(processingRecord.File1Id);
+                    if (!filesProcessed.Contains(processingRecord.File2Id))
+                        filesToProcess.Enqueue(processingRecord.File2Id);
+                    currentFilesGroup.Add(processingRecord.File1Id, new List<Guid>() { processingRecord.Id });
+                    if (processingRecord.IgnoredMode == IgnoredMode.Effective) effectiveRecordCount++;
+                    needToPrepareThumbprints?.Add(processingRecord.File1Id);
+                    currentFilesGroup.Add(processingRecord.File2Id, new List<Guid>() { processingRecord.Id });
+                    if (processingRecord.IgnoredMode == IgnoredMode.Effective) effectiveRecordCount++;
+                    needToPrepareThumbprints?.Add(processingRecord.File2Id);
 
                     while (filesToProcess.Count > 0)
                     {
@@ -144,6 +148,7 @@ namespace SecretNest.ImageStore.SimilarFile
                                     needToPrepareThumbprints?.Add(record.File1Id);
                                 }
                                 list.Add(record.Id);
+                                if (record.IgnoredMode == IgnoredMode.Effective) effectiveRecordCount++;
                                 if (!currentFilesGroup.TryGetValue(record.File2Id, out list))
                                 {
                                     list = new List<Guid>();
@@ -151,16 +156,19 @@ namespace SecretNest.ImageStore.SimilarFile
                                     needToPrepareThumbprints?.Add(record.File2Id);
                                 }
                                 list.Add(record.Id);
+                                if (record.IgnoredMode == IgnoredMode.Effective) effectiveRecordCount++;
                             }
                         }
                     }
+
+                    unsortedGroup.Add(new Tuple<int, Dictionary<Guid, List<Guid>>>(effectiveRecordCount, currentFilesGroup));
                 }
 
-                var sortedGroup = unsortedGroup.OrderByDescending(i => i.Values.Sum(j => j.Count(k => allRecords[k].IgnoredMode == IgnoredMode.Effective))); //order by descending: total effective records in group.
+                var sortedGroup = unsortedGroup.OrderByDescending(i => i.Item1); //order by descending: total effective records in group.
                 var groupIndex = 0;
                 foreach (var item in sortedGroup)
                 {
-                    groupedFiles.Add(groupIndex++, item);
+                    groupedFiles.Add(groupIndex++, item.Item2);
                 }
 
                 needToPrepareThumbprints.CompleteAdding();

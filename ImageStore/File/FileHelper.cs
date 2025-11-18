@@ -285,12 +285,15 @@ namespace SecretNest.ImageStore.File
                 commandCreateTable.Connection = connection;
                 commandCreateTable.Transaction = transation;
                 commandSelect.Connection = connection;
+                commandSelect.CommandTimeout = 0;
                 commandSelect.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = folderId });
                 commandSelect.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256));
                 commandSelect.Transaction = transation;
                 commandDeleteSimilar.Connection = connection;
+                commandDeleteSimilar.CommandTimeout = 0;
                 commandDeleteSimilar.Transaction = transation;
                 commandDeleteFile.Connection = connection;
+                commandDeleteFile.CommandTimeout = 0;
                 commandDeleteFile.Transaction = transation;
                 commandDropTable.Connection = connection;
                 commandDropTable.Transaction = transation;

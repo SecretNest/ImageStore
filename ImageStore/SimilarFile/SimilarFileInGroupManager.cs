@@ -1,5 +1,6 @@
 ﻿using SecretNest.ImageStore.Properties;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -40,8 +41,8 @@ namespace SecretNest.ImageStore.SimilarFile
 
         private void SimilarFileManager_Load(object sender, EventArgs e)
         {
-            List<ListViewItem> effectiveGroups = new List<ListViewItem>();
-            List<ListViewItem> hiddenGroups = new List<ListViewItem>();
+            ConcurrentQueue<ListViewItem> effectiveGroups = new ConcurrentQueue<ListViewItem>();
+            ConcurrentQueue<ListViewItem> hiddenGroups = new ConcurrentQueue<ListViewItem>();
 
             listView1.BeginUpdate();
             var groupCount = groupedFiles.Count;
@@ -53,7 +54,7 @@ namespace SecretNest.ImageStore.SimilarFile
             Image[] images = new Image[groupCount];
             //Tuple<ListViewItem, bool>[] listViewItems = new Tuple<ListViewItem, bool>[groupCount];
 
-            for (int i = 0; i < groupCount; i++)
+            Parallel.For(0, groupCount, i =>
             {
                 var fileGroup = groupedFiles[i];
                 images[i] = loadImage(fileGroup.Keys.First());
@@ -61,14 +62,14 @@ namespace SecretNest.ImageStore.SimilarFile
                 var listViewItem = new ListViewItem(string.Format("{0} files", fileGroup.Count), i) { Tag = i };
                 if (isHiddenGroup)
                 {
-                    hiddenGroups.Add(listViewItem);
+                    hiddenGroups.Enqueue(listViewItem);
                 }
                 else
                 {
                     listViewItem.Group = listView1.Groups[0];
-                    effectiveGroups.Add(listViewItem);
+                    effectiveGroups.Enqueue(listViewItem);
                 }
-            }
+            });
 
             imageList1.Images.AddRange(images);
             images = null;
@@ -545,6 +546,29 @@ namespace SecretNest.ImageStore.SimilarFile
         #endregion
 
         #region RelationMode
+
+        private string GetSeletedStatusText(ImageStoreSimilarFile similarFileRecord)
+        {
+            var selected1 = selectedFiles.Contains(similarFileRecord.File1Id);
+            var selected2 = selectedFiles.Contains(similarFileRecord.File2Id);
+            string selectedText;
+            if (selected1)
+            {
+                if (selected2)
+                    selectedText = "✓ 1:\n✓ 2:";
+                else
+                    selectedText = "✓ 1:\n2:";
+            }
+            else
+            {
+                if (selected2)
+                    selectedText = "1:\n✓ 2:";
+                else
+                    selectedText = "1:\n2:";
+            }
+            return selectedText;
+        }
+
         void LoadToRelationTab()
         {
             dataGridView1.Rows.Clear();
@@ -553,17 +577,20 @@ namespace SecretNest.ImageStore.SimilarFile
             //Dictionary<Guid, List<ImageStoreSimilarFile>> grouped;
             //Dictionary<Guid, List<Guid>> grouped;
 
-            List<ImageStoreSimilarFile> grouped;
+            ImageStoreSimilarFile[] grouped;
 
             if (selectedGroupId != -2)
             {
                 if (showHiddenRecord)
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Distinct().OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))//.Distinct()
+                        .OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
                 }
                 else
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j])).Where(i => i.IgnoredMode == IgnoredMode.Effective).Distinct().OrderBy(i => i.DifferenceDegree).ToList();
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
+                        .Where(i => i.IgnoredMode == IgnoredMode.Effective)//.Distinct()
+                        .OrderBy(i => i.DifferenceDegree).ToArray();
                 }
             }
             else
@@ -571,40 +598,37 @@ namespace SecretNest.ImageStore.SimilarFile
                 grouped = null;
             }
 
-            if (grouped?.Count > 0)
+            var groupLengthLimited = grouped?.Length;
+            if (groupLengthLimited > 0)
             {
-                DataGridViewRow[] rows = new DataGridViewRow[grouped.Count];
-                Parallel.For(0, grouped.Count, rowIndex =>
+                if (groupLengthLimited > 1000)
+                {
+                    if (MessageBox.Show(this, @"The selected group contains more than 1000 similar file records to show. Displaying all records may cause the UI to freeze for a while.
+Press Yes to show all records, or No to show first 1000 instead.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                    {
+                        groupLengthLimited = 1000;
+                    }
+                }
+
+                DataGridViewRow[] rows = new DataGridViewRow[groupLengthLimited.Value];
+                Parallel.For(0, groupLengthLimited.Value, rowIndex =>
                 {
                     var similarFileRecord = grouped[rowIndex];
-                    var selected1 = selectedFiles.Contains(similarFileRecord.File1Id);
-                    var selected2 = selectedFiles.Contains(similarFileRecord.File2Id);
-                    string selectedText;
-                    if (selected1)
-                    {
-                        if (selected2)
-                            selectedText = "✓ 1:\n✓ 2:";
-                        else
-                            selectedText = "✓ 1:\n2:";
-                    }
-                    else
-                    {
-                        if (selected2)
-                            selectedText = "1:\n✓ 2:";
-                        else
-                            selectedText = "1:\n2:";
-                    }
+                    var selectedText = GetSeletedStatusText(similarFileRecord);
                     var file1 = allFileInfo[similarFileRecord.File1Id];
                     var file2 = allFileInfo[similarFileRecord.File2Id];
 
                     DataGridViewRow row = new DataGridViewRow();
                     row.Height = (int)(row.Height * 1.5);
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = similarFileRecord.DifferenceDegree.ToString("0.0000")});
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = selectedText });
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.FileNameWithExtension + "\n" + file2.FileNameWithExtension });
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.PathToDirectory + "\n" + file2.PathToDirectory });
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = file1.FileSize.ToString() + "\n" + file2.FileSize.ToString() });
-                    row.Cells.Add(new DataGridViewTextBoxCell() { Value = SimilarFileHelper.IgnoredModeToString(similarFileRecord.IgnoredMode) });
+                    row.Cells.AddRange(new DataGridViewTextBoxCell[]
+                        {
+                            new DataGridViewTextBoxCell() { Value = similarFileRecord.DifferenceDegree.ToString("0.0000")},
+                            new DataGridViewTextBoxCell() { Value = selectedText },
+                            new DataGridViewTextBoxCell() { Value = file1.FileNameWithExtension + "\n" + file2.FileNameWithExtension },
+                            new DataGridViewTextBoxCell() { Value = file1.PathToDirectory + "\n" + file2.PathToDirectory },
+                            new DataGridViewTextBoxCell() { Value = file1.FileSize.ToString() + "\n" + file2.FileSize.ToString() },
+                            new DataGridViewTextBoxCell() { Value = SimilarFileHelper.IgnoredModeToString(similarFileRecord.IgnoredMode) }
+                        });
                     row.Tag = similarFileRecord.Id;
                     rows[rowIndex] = row;
                 });
@@ -617,30 +641,13 @@ namespace SecretNest.ImageStore.SimilarFile
             }
         }
 
-
         void RelationModeReloadSelectedState()
         {
             foreach (DataGridViewRow row in dataGridView1.Rows)
             {
                 var similarFileId = (Guid)row.Tag;
                 var similarFileRecord = allRecords[similarFileId];
-                var selected1 = selectedFiles.Contains(similarFileRecord.File1Id);
-                var selected2 = selectedFiles.Contains(similarFileRecord.File2Id);
-                string selectedText;
-                if (selected1)
-                {
-                    if (selected2)
-                        selectedText = "✓ 1:\n✓ 2:";
-                    else
-                        selectedText = "✓ 1:\n2:";
-                }
-                else
-                {
-                    if (selected2)
-                        selectedText = "1:\n✓ 2:";
-                    else
-                        selectedText = "1:\n2:";
-                }
+                var selectedText = GetSeletedStatusText(similarFileRecord);
                 row.Cells[1].Value = selectedText;
             }
         }
