@@ -22,6 +22,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("Delete from [SameFile] where [Sha1Hash]=@Sha1Hash"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = Sha1Hash });
 
                 if (command.ExecuteNonQuery() == 0)

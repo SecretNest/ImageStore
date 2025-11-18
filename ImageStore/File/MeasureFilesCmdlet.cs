@@ -307,12 +307,13 @@ namespace SecretNest.ImageStore.File
             using (var command = new SqlCommand("Update [File] Set [ImageHash]=@ImageHash, [Sha1Hash]=@Sha1Hash, [FileSize]=@FileSize, [FileState]=@FileState, [ImageComparedThreshold]=0 where [Id]=@Id"))
             {
                 commandToDeleteSame.Connection = connection;
+                commandToDeleteSame.CommandTimeout = 0;
                 commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandToDeleteSame.CommandTimeout = 180;
                 commandToDeleteSimilar.Connection = connection;
+                commandToDeleteSimilar.CommandTimeout = 0;
                 commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandToDeleteSimilar.CommandTimeout = 180;
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
                 command.Parameters.Add(new SqlParameter("@ImageHash", System.Data.SqlDbType.Binary, 40));
                 command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20));

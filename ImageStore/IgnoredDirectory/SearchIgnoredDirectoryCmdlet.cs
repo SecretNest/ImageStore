@@ -34,6 +34,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
             using (var command = new SqlCommand("Select [Id],[FolderId],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory]"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
 
                 whereCauseBuilder.AddUniqueIdentifierComparingCause("FolderId", FolderId);

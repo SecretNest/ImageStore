@@ -15,6 +15,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("Update [SameFile] set [IsIgnored]=@IsIgnored where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@IsIgnored", System.Data.SqlDbType.Bit) { Value = state });
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = sameFileId });
 

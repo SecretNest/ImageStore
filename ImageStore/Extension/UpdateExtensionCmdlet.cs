@@ -25,6 +25,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Update [Extension] Set Extension=@Extension, IsImage=@IsImage, [Ignored]=@Ignored where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Extension.Id });
                 command.Parameters.Add(new SqlParameter("@Extension", System.Data.SqlDbType.NVarChar, 256) { Value = Extension.Extension });
                 command.Parameters.Add(new SqlParameter("@IsImage", System.Data.SqlDbType.Bit) { Value = Extension.IsImage });

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,16 +34,19 @@ namespace SecretNest.ImageStore.Extension
             using (var transation = connection.BeginTransaction())
             {
                 commandCreateTable.Connection = connection;
+                commandCreateTable.CommandTimeout = 0;
                 commandCreateTable.Transaction = transation;
                 commandCreateTable.ExecuteNonQuery();
 
                 commandSelect.Connection = connection;
+                commandSelect.CommandTimeout = 0;
                 commandSelect.Transaction = transation;
                 commandSelect.Parameters.Add(new SqlParameter("@ExtensionId", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
 
                 if (commandSelect.ExecuteNonQuery() != 0)
                 {
                     commandDeleteSimilar.Connection = connection;
+                    commandDeleteSimilar.CommandTimeout = 0;
                     commandDeleteSimilar.Transaction = transation;
                     commandDeleteSimilar.ExecuteNonQuery();
 
@@ -51,6 +55,7 @@ namespace SecretNest.ImageStore.Extension
                         using (var commandReadId = new SqlCommand("Select [Id] from #tempFileId"))
                         {
                             commandReadId.Connection = connection;
+                            commandReadId.CommandTimeout = 0;
                             commandReadId.Transaction = transation;
                             using (var reader = commandReadId.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                             {
@@ -62,10 +67,12 @@ namespace SecretNest.ImageStore.Extension
                     }
                 }
                 commandDropTable.Connection = connection;
+                commandDropTable.CommandTimeout = 0;
                 commandDropTable.Transaction = transation;
                 commandDropTable.ExecuteNonQuery();
 
                 commandDeleteExtension.Connection = connection;
+                commandDeleteExtension.CommandTimeout = 0;
                 commandDeleteExtension.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
                 int result = commandDeleteExtension.ExecuteNonQuery();
 

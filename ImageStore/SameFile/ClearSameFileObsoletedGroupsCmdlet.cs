@@ -19,6 +19,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("Delete from [SameFile] where [Sha1Hash] in (Select [Sha1Hash] From [SameFile] Group by [Sha1Hash] Having count([id]) = 1)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
 
                 var result = command.ExecuteNonQuery();
                 if (result == 0)

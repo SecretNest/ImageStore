@@ -60,6 +60,7 @@ namespace SecretNest.ImageStore.SimilarFile
             using (var command = new SqlCommand() { CommandTimeout = 0 })
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 if (Top.HasValue)
                 {
                     command.CommandText = "SELECT TOP " + Top.Value.ToString() + commandPart;

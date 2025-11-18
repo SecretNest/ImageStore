@@ -16,6 +16,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Select [Id],[Extension],[IsImage],[Ignored] from [Extension]"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
@@ -39,6 +40,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Select [Extension],[IsImage],[Ignored] from [Extension] Where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {

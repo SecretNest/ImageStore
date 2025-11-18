@@ -25,6 +25,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Select [Id],[Extension],[IsImage],[Ignored] from [Extension] Where [Extension]=@Extension"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Extension", System.Data.SqlDbType.NVarChar, 256) { Value = Extension });
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))

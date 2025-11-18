@@ -35,7 +35,8 @@ namespace SecretNest.ImageStore.SameFile
                 using (var command = new SqlCommand("Select [FileId] from [SameFile]"))
                 {
                     command.Connection = connection;
-                    
+                    command.CommandTimeout = 0;
+
                     using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                     {
                         while (reader.Read())
@@ -52,6 +53,7 @@ namespace SecretNest.ImageStore.SameFile
                 using (var command = new SqlCommand("Delete from [SameFile]"))
                 {
                     command.Connection = connection;
+                    command.CommandTimeout = 0;
                     command.ExecuteNonQuery();
                 }
             }
@@ -79,6 +81,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("Insert into [SameFile] values(@Id, @Sha1Hash, @FileId, 0)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
                 command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20));
                 command.Parameters.Add(new SqlParameter("@FileId", System.Data.SqlDbType.UniqueIdentifier));

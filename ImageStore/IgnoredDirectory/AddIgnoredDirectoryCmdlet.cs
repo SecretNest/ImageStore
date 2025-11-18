@@ -33,6 +33,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
             using (var command = new SqlCommand("Insert into [IgnoredDirectory] values(@Id, @FolderId, @Directory, @IsSubDirectoryIncluded)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
                 command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = FolderId });
                 command.Parameters.Add(new SqlParameter("@Directory", System.Data.SqlDbType.NVarChar, 256) { Value = Directory });

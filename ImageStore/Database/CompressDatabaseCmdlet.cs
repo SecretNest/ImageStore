@@ -19,6 +19,7 @@ namespace SecretNest.ImageStore.Database
             using (SqlCommand command = new SqlCommand("DECLARE @dbName VARCHAR(500); SELECT @dbName = DB_NAME(); DBCC SHRINKDATABASE(@dbName)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.ExecuteNonQuery();
             }
 

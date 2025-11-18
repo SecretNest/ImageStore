@@ -178,6 +178,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("select [Sha1Hash] from [SameFile] group by [Sha1Hash] having Count([Id]) > 1"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
@@ -213,6 +214,7 @@ namespace SecretNest.ImageStore.SameFile
             using (var command = new SqlCommand("select [SameFile].[Id],[File].[FolderId],[SameFile].[FileId],[File].[Path],[File].[FileName],[File].[ExtensionId],[SameFile].[IsIgnored] from [SameFile] inner join [File] on SameFile.FileId = [File].[Id] where [SameFile].[Sha1Hash]=@Sha1Hash"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = sha1Hash });
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))

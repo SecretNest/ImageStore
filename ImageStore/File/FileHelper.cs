@@ -147,9 +147,11 @@ namespace SecretNest.ImageStore.File
             using (var transation = connection.BeginTransaction())
             {
                 commandFile.Connection = connection;
+                commandFile.CommandTimeout = 0;
                 commandFile.Transaction = transation;
                 commandFile.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
                 commandSimilar.Connection = connection;
+                commandSimilar.CommandTimeout = 0;
                 commandSimilar.Transaction = transation;
                 commandSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
 
@@ -175,9 +177,11 @@ namespace SecretNest.ImageStore.File
             using (var transation = connection.BeginTransaction())
             {
                 commandFile.Connection = connection;
+                commandFile.CommandTimeout = 0;
                 commandFile.Transaction = transation;
                 commandFile.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
                 commandSimilar.Connection = connection;
+                commandSimilar.CommandTimeout = 0;
                 commandSimilar.Transaction = transation;
                 commandSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
 
@@ -217,10 +221,12 @@ namespace SecretNest.ImageStore.File
             using (var transation = connection.BeginTransaction())
             {
                 commandCreateTable.Connection = connection;
+                commandCreateTable.CommandTimeout = 0;
                 commandCreateTable.Transaction = transation;
                 commandCreateTable.ExecuteNonQuery();
 
                 commandSelect.Connection = connection;
+                commandSelect.CommandTimeout = 0;
                 commandSelect.Transaction = transation;
                 commandSelect.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = folderId });
                 if (pathStart == "")
@@ -237,9 +243,11 @@ namespace SecretNest.ImageStore.File
                 if (commandSelect.ExecuteNonQuery() != 0)
                 {
                     commandDeleteSimilar.Connection = connection;
+                    commandDeleteSimilar.CommandTimeout = 0;
                     commandDeleteSimilar.Transaction = transation;
                     commandDeleteSimilar.ExecuteNonQuery();
                     commandDeleteFile.Connection = connection;
+                    commandDeleteFile.CommandTimeout = 0;
                     commandDeleteFile.Transaction = transation;
                     result = commandDeleteFile.ExecuteNonQuery();
 
@@ -248,6 +256,7 @@ namespace SecretNest.ImageStore.File
                         using (var commandReadId = new SqlCommand("Select [Id] from #tempFileId"))
                         {
                             commandReadId.Connection = connection;
+                            commandReadId.CommandTimeout = 0;
                             commandReadId.Transaction = transation;
                             using (var reader = commandReadId.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                             {
@@ -262,6 +271,7 @@ namespace SecretNest.ImageStore.File
                     result = 0;
 
                 commandDropTable.Connection = connection;
+                commandDropTable.CommandTimeout = 0;
                 commandDropTable.Transaction = transation;
                 commandDropTable.ExecuteNonQuery();
 
@@ -283,6 +293,7 @@ namespace SecretNest.ImageStore.File
             using (var transation = connection.BeginTransaction())
             {
                 commandCreateTable.Connection = connection;
+                commandCreateTable.CommandTimeout = 0;
                 commandCreateTable.Transaction = transation;
                 commandSelect.Connection = connection;
                 commandSelect.CommandTimeout = 0;
@@ -296,6 +307,7 @@ namespace SecretNest.ImageStore.File
                 commandDeleteFile.CommandTimeout = 0;
                 commandDeleteFile.Transaction = transation;
                 commandDropTable.Connection = connection;
+                commandDropTable.CommandTimeout = 0;
                 commandDropTable.Transaction = transation;
                 foreach (var operation in operations)
                 {
@@ -316,6 +328,7 @@ namespace SecretNest.ImageStore.File
                             using (var commandReadId = new SqlCommand("Select [Id] from #tempFileId"))
                             {
                                 commandReadId.Connection = connection;
+                                commandReadId.CommandTimeout = 0;
                                 commandReadId.Transaction = transation;
                                 using (var reader = commandReadId.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                                 {

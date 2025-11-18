@@ -40,6 +40,7 @@ namespace SecretNest.ImageStore.Folder
             using (var command = new SqlCommand("Insert into [Folder] values(@Id, @Name, @Path, @CompareImageWith, @IsSealed)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
                 command.Parameters.Add(new SqlParameter("@Name", System.Data.SqlDbType.NVarChar, 256) { Value = Name });
                 command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = Path });

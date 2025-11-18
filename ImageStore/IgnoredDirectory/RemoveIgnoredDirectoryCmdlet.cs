@@ -28,6 +28,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
             using (var command = new SqlCommand("Delete from [IgnoredDirectory] where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
 
                 if (command.ExecuteNonQuery() == 0)

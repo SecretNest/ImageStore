@@ -35,6 +35,7 @@ namespace SecretNest.ImageStore.File
             using (var command = new SqlCommand("Update [File] Set [ImageHash]=@ImageHash, [Sha1Hash]=@Sha1Hash, [FileSize]=@FileSize, [FileState]=@FileState, [ImageComparedThreshold]=@ImageComparedThreshold where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = file.Id });
                 command.Parameters.Add(new SqlParameter("@ImageHash", System.Data.SqlDbType.Binary, 40) { Value = DBNullableReader.NullCheck(file.ImageHash) });
                 command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = DBNullableReader.NullCheck(file.Sha1Hash) });

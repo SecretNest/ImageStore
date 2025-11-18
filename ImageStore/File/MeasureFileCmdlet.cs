@@ -98,10 +98,12 @@ namespace SecretNest.ImageStore.File
                 using (var commandToDeleteSimilar = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
                 {
                     commandToDeleteSame.Connection = connection;
+                    commandToDeleteSame.CommandTimeout = 0;
                     commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
                     commandToDeleteSame.ExecuteNonQuery();
 
                     commandToDeleteSimilar.Connection = connection;
+                    commandToDeleteSimilar.CommandTimeout = 0;
                     commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
                     commandToDeleteSimilar.ExecuteNonQuery();
                 }

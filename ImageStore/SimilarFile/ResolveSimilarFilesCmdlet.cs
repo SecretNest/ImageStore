@@ -153,6 +153,7 @@ namespace SecretNest.ImageStore.SimilarFile
             using (var command = new SqlCommand("Select min([ImageComparedThreshold]) from [file] where [ImageHash] is not null and [FileState]=255"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 var result = command.ExecuteScalar();
 
                 if (result == DBNull.Value)

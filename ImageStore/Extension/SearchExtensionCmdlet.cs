@@ -33,6 +33,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Select [Id],[Extension],[IsImage],[Ignored] from [Extension]"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
 
                 whereCauseBuilder.AddStringComparingCause("Extension", Extension, ExtensionPropertyComparingModes);

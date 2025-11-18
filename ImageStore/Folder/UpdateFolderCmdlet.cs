@@ -25,6 +25,7 @@ namespace SecretNest.ImageStore.Folder
             using (var command = new SqlCommand("Update [Folder] Set [Name]=@Name, [Path]=@Path, [CompareImageWith]=@CompareImageWith, [IsSealed]=@IsSealed where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Folder.Id });
                 command.Parameters.Add(new SqlParameter("@Name", System.Data.SqlDbType.NVarChar, 256) { Value = Folder.Name });
                 command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = Folder.Path });

@@ -17,6 +17,7 @@ namespace SecretNest.ImageStore.Folder
             using (var command = new SqlCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder]"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
@@ -42,6 +43,7 @@ namespace SecretNest.ImageStore.Folder
             using (var command = new SqlCommand("Select [Path],[IsSealed] from [Folder] Where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))

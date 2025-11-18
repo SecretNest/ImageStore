@@ -16,6 +16,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
             using (var command = new SqlCommand("Select [Id],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory] Where [FolderId]=@FolderId"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = folderId });
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))

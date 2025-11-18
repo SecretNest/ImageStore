@@ -91,6 +91,7 @@ namespace SecretNest.ImageStore.File
             using (var command = new SqlCommand("Update [File] Set [FileName]=@FileName, [ExtensionId]=@ExtensionId where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
                 command.Parameters.Add(new SqlParameter("@FileName", System.Data.SqlDbType.NVarChar, 256) { Value = NewFileName });
                 command.Parameters.Add(new SqlParameter("@ExtensionId", System.Data.SqlDbType.UniqueIdentifier) { Value = NewExtensionId });

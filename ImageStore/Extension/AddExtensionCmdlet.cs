@@ -34,6 +34,7 @@ namespace SecretNest.ImageStore.Extension
             using (var command = new SqlCommand("Insert into [Extension] values(@Id, @Extension, @IsImage, @Ignored)"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
                 command.Parameters.Add(new SqlParameter("@Extension", System.Data.SqlDbType.NVarChar, 256) { Value = Extension });
                 command.Parameters.Add(new SqlParameter("@IsImage", System.Data.SqlDbType.Bit) { Value = IsImage });

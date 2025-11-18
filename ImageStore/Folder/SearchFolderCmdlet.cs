@@ -39,6 +39,7 @@ namespace SecretNest.ImageStore.Folder
             using (var command = new SqlCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder]"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
 
                 whereCauseBuilder.AddStringComparingCause("Name", Name, NamePropertyComparingModes);

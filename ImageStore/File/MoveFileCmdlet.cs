@@ -100,6 +100,7 @@ namespace SecretNest.ImageStore.File
             using (var command = new SqlCommand("Update [File] Set [FolderId]=@FolderId, [Path]=@Path where [Id]=@Id"))
             {
                 command.Connection = connection;
+                command.CommandTimeout = 0;
                 command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
                 command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = NewFolderId });
                 command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = NewPath });
