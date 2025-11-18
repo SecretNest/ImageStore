@@ -18,11 +18,11 @@ namespace SecretNest.ImageStore.SimilarFile
         HashSet<Guid> selectedFiles;
         Dictionary<Guid, FileInfo> allFileInfo;
         Func<Guid, Image> loadImage;
-        Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles;
+        Dictionary<int, Dictionary<Guid, HashSet<Guid>>> groupedFiles;
         Dictionary<Guid, ImageStoreSimilarFile> allRecords;
         Func<Guid, IgnoredMode, bool> markIgnoreCallback;
         public SimilarFileInGroupManager(HashSet<Guid> selectedFiles, Dictionary<Guid, FileInfo> allFileInfo, Func<Guid, Image> loadImage,
-            Dictionary<int, Dictionary<Guid, List<Guid>>> groupedFiles,
+            Dictionary<int, Dictionary<Guid, HashSet<Guid>>> groupedFiles,
             Dictionary<Guid, ImageStoreSimilarFile> allRecords, Func<Guid, IgnoredMode, bool> markIgnoreCallback)
         {
             InitializeComponent();
@@ -271,11 +271,14 @@ namespace SecretNest.ImageStore.SimilarFile
             ImageStoreSimilarFile[] grouped;
             if (showHiddenRecord)
             {
-                grouped = relatedRecords.ConvertAll(i => allRecords[i]).OrderBy(i => i.DifferenceDegree).ToArray();
+                grouped = relatedRecords.Select(i => allRecords[i])
+                    .OrderBy(i => i.DifferenceDegree).ToArray();
             }
             else
             {
-                grouped = relatedRecords.ConvertAll(i => allRecords[i]).Where(i => i.IgnoredMode == IgnoredMode.Effective).OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
+                grouped = relatedRecords.Select(i => allRecords[i])
+                    .Where(i => i.IgnoredMode == IgnoredMode.Effective)
+                    .OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
             }
 
             if (grouped.Length > 0)
