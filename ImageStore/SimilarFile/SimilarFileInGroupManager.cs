@@ -68,7 +68,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
                 else
                 {
-                    listViewItem.Group = listView1.Groups[0];
+                    //listViewItem.Group = listView1.Groups[0];
                     lock(effectiveGroups)
                     {
                         effectiveGroups[i] = listViewItem;
@@ -79,7 +79,7 @@ namespace SecretNest.ImageStore.SimilarFile
             imageList1.Images.AddRange(images);
             images = null;
 
-            listView1.Items.AddRange(effectiveGroups.Values.ToArray());
+            listView1.Items.AddRange(effectiveGroups.Values.Select(i => { i.Group = listView1.Groups[0]; return i; }).ToArray());
             this.hiddenGroups = hiddenGroups.Values.ToArray();
 
             if (groupedFiles.TryGetValue(-1, out var disconnectedGroup))
