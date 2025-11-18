@@ -43,50 +43,41 @@ namespace SecretNest.ImageStore.SimilarFile
         { 
             listView1.BeginUpdate();
             var groupCount = groupedFiles.Count;
-            SortedList<int, ListViewItem> effectiveGroups = new SortedList<int, ListViewItem>(groupCount);
-            SortedList<int, ListViewItem> hiddenGroups = new SortedList<int, ListViewItem>(groupCount);
             groupBox1.Text = string.Format("Groups: {0}", groupCount);
             if (groupedFiles.ContainsKey(-1))
             {
                 groupCount--;
             }
-            Image[] images = new Image[groupCount];
-            //Tuple<ListViewItem, bool>[] listViewItems = new Tuple<ListViewItem, bool>[groupCount];
+            var images = new Image[groupCount];
+            var isEffectiveGroups = new bool[groupCount];
 
             Parallel.For(0, groupCount, i =>
             {
                 var fileGroup = groupedFiles[i];
                 images[i] = loadImage(fileGroup.Keys.First());
-                bool isHiddenGroup = !fileGroup.Any(file => file.Value.Any(id => allRecords[id].IgnoredMode == IgnoredMode.Effective));
-                var listViewItem = new ListViewItem(string.Format("{0} files", fileGroup.Count), i) { Tag = i };
-                if (isHiddenGroup)
-                {
-                    lock (hiddenGroups)
-                    {
-                        hiddenGroups[i] = listViewItem;
-                    }
-                }
-                else
-                {
-                    //listViewItem.Group = listView1.Groups[0];
-                    lock(effectiveGroups)
-                    {
-                        effectiveGroups[i] = listViewItem;
-                    }
-                }
+                isEffectiveGroups[i] = fileGroup.Any(file => file.Value.Any(id => allRecords[id].IgnoredMode == IgnoredMode.Effective));
             });
 
             imageList1.Images.AddRange(images);
             images = null;
-
-            listView1.Items.AddRange(effectiveGroups.Values.Select(i => { i.Group = listView1.Groups[0]; return i; }).ToArray());
-            this.hiddenGroups = hiddenGroups.Values.ToArray();
+            var effectiveListViewItems = groupedFiles.Where(item => item.Key != -1 && isEffectiveGroups[item.Key])
+                .Select(item =>
+                new ListViewItem(string.Format("{0} files", item.Value.Count), item.Key)
+                { Tag = item.Key, Group = listView1.Groups[0] })
+                .ToArray();
+            listView1.Items.AddRange(effectiveListViewItems);
+            hiddenGroups = groupedFiles.Where(item => item.Key != -1 && !isEffectiveGroups[item.Key])
+                .Select(item =>
+                new ListViewItem(string.Format("{0} files", item.Value.Count), item.Key)
+                { Tag = item.Key, Group = listView1.Groups[1] })
+                .ToArray();
 
             if (groupedFiles.TryGetValue(-1, out var disconnectedGroup))
             {
                 int index = imageList1.Images.Count;
                 imageList1.Images.Add(Resources.Disconnected);
-                disconnectedGroupItem = new ListViewItem(string.Format("{0} files", disconnectedGroup.Count), index) { Tag = -1 };
+                disconnectedGroupItem = new ListViewItem(string.Format("{0} files", disconnectedGroup.Count), index) 
+                { Tag = -1, Group = listView1.Groups[2] };
             }
             else
             {
@@ -94,7 +85,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
             listView1.EndUpdate();
-            if (effectiveGroups.Count == 0)
+            if (effectiveListViewItems.Length == 0)
             {
                 if (listView1.Items.Count > 0)
                     listView1.Items[0].Selected = true;
@@ -107,8 +98,6 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 listView1.Groups[0].Items[0].Selected = true;
             }
-            effectiveGroups = null;
-            hiddenGroups = null;
 
             Focus();
         }
@@ -579,9 +568,6 @@ namespace SecretNest.ImageStore.SimilarFile
             dataGridView1.Rows.Clear();
             var showHiddenRecord = checkBox1.Checked;
 
-            //Dictionary<Guid, List<ImageStoreSimilarFile>> grouped;
-            //Dictionary<Guid, List<Guid>> grouped;
-
             ImageStoreSimilarFile[] grouped;
 
             if (selectedGroupId != -2)
@@ -781,7 +767,6 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
             RelationModeChangeSelection(false, true);
         }
 
-
         private void button7_Click(object sender, EventArgs e)
         {
             RelationModeChangeIgnore(IgnoredMode.Effective);
@@ -808,7 +793,6 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
             doublePictureBox1.ClearPictures();
         }
 
-
         bool shownHiddenChanging = false;
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
@@ -826,11 +810,8 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
             {
                 if (disconnectedGroupItem != null)
                 {
-                    disconnectedGroupItem.Group = listView1.Groups[2];
                     listView1.Items.Add(disconnectedGroupItem);
                 }
-                foreach (var item in hiddenGroups)
-                    item.Group = listView1.Groups[1];
                 listView1.Items.AddRange(hiddenGroups);
                 if (listView1.SelectedItems.Count == 0 && listView1.Items.Count > 0)
                 {
@@ -838,7 +819,6 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                 }
             }
             listView1.EndUpdate();
-
 
             if (shownHiddenChanging) return;
 
