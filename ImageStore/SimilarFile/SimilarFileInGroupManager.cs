@@ -475,6 +475,8 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void FileModeChangeIgnore(IgnoredMode mode)
         {
+            //
+
             if (selectedFileModeFile2RowIndex == -1) return;
             int lastSelected = selectedFileModeFile2RowIndex;
 
@@ -575,15 +577,19 @@ namespace SecretNest.ImageStore.SimilarFile
 
             if (selectedGroupId != -2)
             {
+                //In relation mode, every record of datarow is presenting twice, for file1 and file2.
+                //Deduplication is required.
                 if (showHiddenRecord)
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))//.Distinct()
+                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
+                        .Distinct()
                         .OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
                 }
                 else
                 {
                     grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
-                        .Where(i => i.IgnoredMode == IgnoredMode.Effective)//.Distinct()
+                        .Where(i => i.IgnoredMode == IgnoredMode.Effective)
+                        .Distinct()
                         .OrderBy(i => i.DifferenceDegree).ToArray();
                 }
             }
@@ -597,7 +603,7 @@ namespace SecretNest.ImageStore.SimilarFile
             {
                 if (groupLengthLimited > 1000)
                 {
-                    if (MessageBox.Show(this, @"The selected group contains more than 1000 similar file records to show. Displaying all records may cause the UI to freeze for a while.
+                    if (MessageBox.Show(this, "The selected group contains " + groupLengthLimited.ToString() + @" similar file records to show. Displaying all records may cause the UI to freeze for a while.
 Press Yes to show all records, or No to show first 1000 instead.", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                     {
                         groupLengthLimited = 1000;
@@ -831,6 +837,21 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             RefreshWhenHiddenVisibleChanged();
+        }
+
+        private void SimilarFileInGroupManager_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void SimilarFileInGroupManager_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void SimilarFileInGroupManager_Deactivate(object sender, EventArgs e)
+        {
+
         }
     }
 }
