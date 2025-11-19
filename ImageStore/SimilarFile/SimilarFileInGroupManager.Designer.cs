@@ -713,6 +713,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button5);
+            this.KeyPreview = true;
             this.MinimumSize = new System.Drawing.Size(980, 569);
             this.Name = "SimilarFileInGroupManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;

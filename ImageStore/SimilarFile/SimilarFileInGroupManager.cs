@@ -39,6 +39,9 @@ namespace SecretNest.ImageStore.SimilarFile
         ListViewItem[] hiddenGroups;
         ListViewItem disconnectedGroupItem;
 
+        ImageStoreSimilarFile[] currentDisplayingGroupRecords;
+        int? groupLengthLimited = null;
+
         private void SimilarFileManager_Load(object sender, EventArgs e)
         { 
             listView1.BeginUpdate();
@@ -268,23 +271,23 @@ namespace SecretNest.ImageStore.SimilarFile
             button10.Enabled = false;
             listView3.Items.Clear();
             var relatedRecords = groupedFiles[selectedGroupId][fileModeFile1SelectedFileId];
-            ImageStoreSimilarFile[] grouped;
+            
             if (showHiddenRecord)
             {
-                grouped = relatedRecords.Select(i => allRecords[i])
+                currentDisplayingGroupRecords = relatedRecords.Select(i => allRecords[i])
                     .OrderBy(i => i.DifferenceDegree).ToArray();
             }
             else
             {
-                grouped = relatedRecords.Select(i => allRecords[i])
+                currentDisplayingGroupRecords = relatedRecords.Select(i => allRecords[i])
                     .Where(i => i.IgnoredMode == IgnoredMode.Effective)
                     .OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
             }
 
-            if (grouped.Length > 0)
+            if (currentDisplayingGroupRecords.Length > 0)
             {
                 List<ListViewItem> items = new List<ListViewItem>();
-                foreach (var similarFileRecord in grouped)
+                foreach (var similarFileRecord in currentDisplayingGroupRecords)
                 {
                     var isFile1InMain = similarFileRecord.File1Id == fileModeFile1SelectedFileId;
                     FileInfo file;
@@ -475,30 +478,125 @@ namespace SecretNest.ImageStore.SimilarFile
 
         void FileModeChangeIgnore(IgnoredMode mode)
         {
-            //
-
-            if (selectedFileModeFile2RowIndex == -1) return;
-            int lastSelected = selectedFileModeFile2RowIndex;
-
-            listView3.BeginUpdate();
-            foreach(ListViewItem listViewItem in listView3.Items)
+            //Ctrl: Batch Mode
+            //Normally: all listed in group. When Alt is also pressed, including all not listed (>1000 for example).
+            //Normally: change only between Effective <-> Hidden. When Shift is also pressed, change to specified mode directly.
+            if (ctrlKeyStatus)
             {
-                if (listViewItem.Selected)
+                //all listed
+                IEnumerable<ImageStoreSimilarFile> targetRecords;
+                if (shitKeyStatus)
                 {
-                    //Tuple<Guid, Guid, bool>(similarFileRecordId, fileId, isFile1InMain)
-                    Tuple<Guid, Guid, bool> tag = (Tuple<Guid, Guid, bool>)listViewItem.Tag;
-                    var record = allRecords[tag.Item1];
-                    var result = markIgnoreCallback(tag.Item1, mode);
+                    if (mode == IgnoredMode.Effective)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective);
+                    }
+                    else if (mode == IgnoredMode.HiddenButConnected)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenButConnected);
+                    }
+                    else if (mode == IgnoredMode.HiddenAndDisconnected)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected);
+                    }
+                    else
+                    {
+                        targetRecords = null;
+                    }
+                }
+                else
+                {
+                    if (mode == IgnoredMode.Effective)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective);
+                    }
+                    else if (mode == IgnoredMode.HiddenButConnected)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective);
+                    }
+                    else if (mode == IgnoredMode.HiddenAndDisconnected)
+                    {
+                        if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        {
+                            return;
+                        }
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective);
+                    }
+                    else
+                    {
+                        targetRecords = null;
+                    }
+                }
+                if (targetRecords == null) return;
+
+                HashSet<Guid> updated = new HashSet<Guid>();
+                foreach (var record in targetRecords)
+                {
+                    var result = markIgnoreCallback(record.Id, mode);
                     if (result)
                     {
                         record.IgnoredMode = mode;
-                        listViewItem.SubItems[4].Text = SimilarFileHelper.IgnoredModeToString(mode);
+                        updated.Add(record.Id);
                     }
-                    lastSelected = listViewItem.Index;
                 }
+
+                listView3.BeginUpdate();
+                foreach (ListViewItem listViewItem in listView3.Items)
+                {
+                    Tuple<Guid, Guid, bool> tag = (Tuple<Guid, Guid, bool>)listViewItem.Tag;
+                    var record = allRecords[tag.Item1];
+                    if (!updated.Contains(record.Id)) continue;
+                    var newStatus = SimilarFileHelper.IgnoredModeToString(record.IgnoredMode);
+                    if (newStatus != listViewItem.SubItems[4].Text) listViewItem.SubItems[4].Text = newStatus;
+                }
+                listView3.EndUpdate();
             }
-            listView3.EndUpdate();
-            FileModeMoveNext(lastSelected);
+            else
+            {
+                //selected mode
+                if (selectedFileModeFile2RowIndex == -1) return;
+                int lastSelected = selectedFileModeFile2RowIndex;
+
+                listView3.BeginUpdate();
+                foreach (ListViewItem listViewItem in listView3.Items)
+                {
+                    if (listViewItem.Selected)
+                    {
+                        //Tuple<Guid, Guid, bool>(similarFileRecordId, fileId, isFile1InMain)
+                        Tuple<Guid, Guid, bool> tag = (Tuple<Guid, Guid, bool>)listViewItem.Tag;
+                        var record = allRecords[tag.Item1];
+                        var result = markIgnoreCallback(tag.Item1, mode);
+                        if (result)
+                        {
+                            record.IgnoredMode = mode;
+                            listViewItem.SubItems[4].Text = SimilarFileHelper.IgnoredModeToString(mode);
+                        }
+                        lastSelected = listViewItem.Index;
+                    }
+                }
+                listView3.EndUpdate();
+                FileModeMoveNext(lastSelected);
+            }
         }
 
         private void button16_Click(object sender, EventArgs e)
@@ -573,21 +671,19 @@ namespace SecretNest.ImageStore.SimilarFile
             dataGridView1.Rows.Clear();
             var showHiddenRecord = checkBox1.Checked;
 
-            ImageStoreSimilarFile[] grouped;
-
             if (selectedGroupId != -2)
             {
                 //In relation mode, every record of datarow is presenting twice, for file1 and file2.
                 //Deduplication is required.
                 if (showHiddenRecord)
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
+                    currentDisplayingGroupRecords = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
                         .Distinct()
                         .OrderBy(i => i.IgnoredModeCode).ThenBy(i => i.DifferenceDegree).ToArray();
                 }
                 else
                 {
-                    grouped = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
+                    currentDisplayingGroupRecords = groupedFiles[selectedGroupId].Values.SelectMany(i => i.Select(j => allRecords[j]))
                         .Where(i => i.IgnoredMode == IgnoredMode.Effective)
                         .Distinct()
                         .OrderBy(i => i.DifferenceDegree).ToArray();
@@ -595,10 +691,10 @@ namespace SecretNest.ImageStore.SimilarFile
             }
             else
             {
-                grouped = null;
+                currentDisplayingGroupRecords = null;
             }
 
-            var groupLengthLimited = grouped?.Length;
+            groupLengthLimited = currentDisplayingGroupRecords?.Length;
             if (groupLengthLimited > 0)
             {
                 if (groupLengthLimited > 1000)
@@ -613,7 +709,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                 DataGridViewRow[] rows = new DataGridViewRow[groupLengthLimited.Value];
                 Parallel.For(0, groupLengthLimited.Value, rowIndex =>
                 {
-                    var similarFileRecord = grouped[rowIndex];
+                    var similarFileRecord = currentDisplayingGroupRecords[rowIndex];
                     var selectedText = GetSeletedStatusText(similarFileRecord);
                     var file1 = allFileInfo[similarFileRecord.File1Id];
                     var file2 = allFileInfo[similarFileRecord.File2Id];
@@ -711,25 +807,186 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
 
         void RelationModeChangeIgnore(IgnoredMode mode)
         {
-            if (selectedRalationModeRowIndex == -1) return;
-            int lastSelected = selectedRalationModeRowIndex;
-
-            foreach (DataGridViewRow row in dataGridView1.Rows)
+            //Ctrl: Batch Mode
+            //Normally: all listed in group. When Alt is also pressed, including all not listed (>1000 for example).
+            //Normally: change only between Effective <-> Hidden. When Shift is also pressed, change to specified mode directly.
+            if (ctrlKeyStatus)
             {
-                if (row.Selected)
+                IEnumerable<ImageStoreSimilarFile> targetRecords;
+                if (altKeyStatus)
                 {
-                    var record = allRecords[(Guid)row.Tag];
+                    //all in group including not listed
+                    if (shitKeyStatus)
+                    {
+                        if (mode == IgnoredMode.Effective)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records, including not listed, in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective);
+                        }
+                        else if (mode == IgnoredMode.HiddenButConnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records, including not listed, in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenButConnected);
+                        }
+                        else if (mode == IgnoredMode.HiddenAndDisconnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records, including not listed, in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected);
+                        }
+                        else
+                        {
+                            targetRecords = null;
+                        }
+                    }
+                    else
+                    {
+                        if (mode == IgnoredMode.Effective)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records, including not listed, in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective);
+                        }
+                        else if (mode == IgnoredMode.HiddenButConnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL effective records, including not listed, in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective);
+                        }
+                        else if (mode == IgnoredMode.HiddenAndDisconnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL effective records, including not listed, in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective);
+                        }
+                        else
+                        {
+                            targetRecords = null;
+                        }
+                    }
+                }
+                else
+                {
+                    //all listed
+                    if (shitKeyStatus)
+                    {
+                        if (mode == IgnoredMode.Effective)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else if (mode == IgnoredMode.HiddenButConnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenButConnected).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else if (mode == IgnoredMode.HiddenAndDisconnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else
+                        {
+                            targetRecords = null;
+                        }
+                    }
+                    else
+                    {
+                        if (mode == IgnoredMode.Effective)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as Effective?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.Effective).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else if (mode == IgnoredMode.HiddenButConnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else if (mode == IgnoredMode.HiddenAndDisconnected)
+                        {
+                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            {
+                                return;
+                            }
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.Effective).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                        }
+                        else
+                        {
+                            targetRecords = null;
+                        }
+                    }
+                }
+                if (targetRecords == null) return;
+
+                HashSet<Guid> updated = new HashSet<Guid>();
+                foreach (var record in targetRecords)
+                {
                     var result = markIgnoreCallback(record.Id, mode);
                     if (result)
                     {
                         record.IgnoredMode = mode;
-                        row.Cells[5].Value = SimilarFileHelper.IgnoredModeToString(mode);
+                        updated.Add(record.Id);
                     }
-                    lastSelected = row.Index;
+                }
+
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    var similarFileId = (Guid)row.Tag;
+                    if (!updated.Contains(similarFileId)) continue;
+                    var record = allRecords[similarFileId];
+                    row.Cells[5].Value = SimilarFileHelper.IgnoredModeToString(record.IgnoredMode);
                 }
             }
+            else
+            {
+                if (selectedRalationModeRowIndex == -1) return;
+                int lastSelected = selectedRalationModeRowIndex;
 
-            RelationModeMoveNext(lastSelected);
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (row.Selected)
+                    {
+                        var record = allRecords[(Guid)row.Tag];
+                        var result = markIgnoreCallback(record.Id, mode);
+                        if (result)
+                        {
+                            record.IgnoredMode = mode;
+                            row.Cells[5].Value = SimilarFileHelper.IgnoredModeToString(mode);
+                        }
+                        lastSelected = row.Index;
+                    }
+                }
+                RelationModeMoveNext(lastSelected);
+            }
         }
 
         void RelationModeMoveNext()
@@ -839,19 +1096,44 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
             RefreshWhenHiddenVisibleChanged();
         }
 
+        bool shitKeyStatus, ctrlKeyStatus, altKeyStatus;
         private void SimilarFileInGroupManager_KeyDown(object sender, KeyEventArgs e)
         {
-
+            if (e.KeyCode == Keys.Shift)
+            {
+                shitKeyStatus = true;
+            }
+            else if (e.KeyCode == Keys.Control)
+            {
+                ctrlKeyStatus = true;
+            }
+            else if (e.KeyCode == Keys.Alt)
+            {
+                altKeyStatus = true;
+            }
         }
 
         private void SimilarFileInGroupManager_KeyUp(object sender, KeyEventArgs e)
         {
-
+            if (e.KeyCode == Keys.Shift)
+            {
+                shitKeyStatus = false;
+            }
+            else if (e.KeyCode == Keys.Control)
+            {
+                ctrlKeyStatus = false;
+            }
+            else if (e.KeyCode == Keys.Alt)
+            {
+                altKeyStatus = false;
+            }
         }
 
         private void SimilarFileInGroupManager_Deactivate(object sender, EventArgs e)
         {
-
+            shitKeyStatus = false;
+            ctrlKeyStatus = false;
+            altKeyStatus = false;
         }
     }
 }
