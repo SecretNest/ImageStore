@@ -481,11 +481,11 @@ namespace SecretNest.ImageStore.SimilarFile
             //Ctrl: Batch Mode
             //Normally: all listed in group. When Alt is also pressed, including all not listed (>1000 for example).
             //Normally: change only between Effective <-> Hidden. When Shift is also pressed, change to specified mode directly.
-            if (ctrlKeyStatus)
+            if ((ModifierKeys & Keys.Control) == Keys.Control)
             {
                 //all listed
                 IEnumerable<ImageStoreSimilarFile> targetRecords;
-                if (shitKeyStatus)
+                if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                 {
                     if (mode == IgnoredMode.Effective)
                     {
@@ -810,13 +810,13 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
             //Ctrl: Batch Mode
             //Normally: all listed in group. When Alt is also pressed, including all not listed (>1000 for example).
             //Normally: change only between Effective <-> Hidden. When Shift is also pressed, change to specified mode directly.
-            if (ctrlKeyStatus)
+            if ((ModifierKeys & Keys.Control) == Keys.Control)
             {
                 IEnumerable<ImageStoreSimilarFile> targetRecords;
-                if (altKeyStatus)
+                if ((ModifierKeys & Keys.Alt) == Keys.Alt)
                 {
                     //all in group including not listed
-                    if (shitKeyStatus)
+                    if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                     {
                         if (mode == IgnoredMode.Effective)
                         {
@@ -882,7 +882,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                 else
                 {
                     //all listed
-                    if (shitKeyStatus)
+                    if ((ModifierKeys & Keys.Shift) == Keys.Shift)
                     {
                         if (mode == IgnoredMode.Effective)
                         {
@@ -1094,46 +1094,6 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             RefreshWhenHiddenVisibleChanged();
-        }
-
-        bool shitKeyStatus, ctrlKeyStatus, altKeyStatus;
-        private void SimilarFileInGroupManager_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Shift)
-            {
-                shitKeyStatus = true;
-            }
-            else if (e.KeyCode == Keys.Control)
-            {
-                ctrlKeyStatus = true;
-            }
-            else if (e.KeyCode == Keys.Alt)
-            {
-                altKeyStatus = true;
-            }
-        }
-
-        private void SimilarFileInGroupManager_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Shift)
-            {
-                shitKeyStatus = false;
-            }
-            else if (e.KeyCode == Keys.Control)
-            {
-                ctrlKeyStatus = false;
-            }
-            else if (e.KeyCode == Keys.Alt)
-            {
-                altKeyStatus = false;
-            }
-        }
-
-        private void SimilarFileInGroupManager_Deactivate(object sender, EventArgs e)
-        {
-            shitKeyStatus = false;
-            ctrlKeyStatus = false;
-            altKeyStatus = false;
         }
     }
 }

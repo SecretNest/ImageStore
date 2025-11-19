@@ -713,16 +713,12 @@ namespace SecretNest.ImageStore.SimilarFile
             this.Controls.Add(this.checkBox2);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button5);
-            this.KeyPreview = true;
             this.MinimumSize = new System.Drawing.Size(980, 569);
             this.Name = "SimilarFileInGroupManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Similar File Manager - Check the files to return";
-            this.Deactivate += new System.EventHandler(this.SimilarFileInGroupManager_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SimilarFileManager_FormClosing);
             this.Load += new System.EventHandler(this.SimilarFileManager_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SimilarFileInGroupManager_KeyDown);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.SimilarFileInGroupManager_KeyUp);
             this.groupBox1.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
