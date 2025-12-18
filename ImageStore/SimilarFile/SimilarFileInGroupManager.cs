@@ -528,7 +528,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     else if (mode == IgnoredMode.HiddenButConnected)
                     {
-                        if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        if (MessageBox.Show(this, "Are you sure to mark ALL effective records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                         {
                             return;
                         }
@@ -536,7 +536,7 @@ namespace SecretNest.ImageStore.SimilarFile
                     }
                     else if (mode == IgnoredMode.HiddenAndDisconnected)
                     {
-                        if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                        if (MessageBox.Show(this, "Are you sure to mark ALL effective records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                         {
                             return;
                         }
@@ -925,7 +925,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                         }
                         else if (mode == IgnoredMode.HiddenButConnected)
                         {
-                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            if (MessageBox.Show(this, "Are you sure to mark ALL effective records listed in this group as HiddenButConnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                             {
                                 return;
                             }
@@ -933,7 +933,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                         }
                         else if (mode == IgnoredMode.HiddenAndDisconnected)
                         {
-                            if (MessageBox.Show(this, "Are you sure to mark ALL hidden records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                            if (MessageBox.Show(this, "Are you sure to mark ALL effective records listed in this group as HiddenAndDisconnected?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                             {
                                 return;
                             }
