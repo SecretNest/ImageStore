@@ -289,6 +289,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button10.Text = "Mark as Hidden and &Disconnected";
             this.button10.UseVisualStyleBackColor = true;
             this.button10.Click += new System.EventHandler(this.button10_Click);
+            this.toolTip1.SetToolTip(this.button10, "Ctrl: On all records, changing from Effective to HiddenAndDisconnected.\nCtrl-Shift: On all records, changing to HiddenAndDisconnected.");
             // 
             // button11
             // 
@@ -300,6 +301,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button11.Text = "Mark as Hidden but &Connected";
             this.button11.UseVisualStyleBackColor = true;
             this.button11.Click += new System.EventHandler(this.button11_Click);
+            this.toolTip1.SetToolTip(this.button11, "Ctrl: On all records, changing from Effective to HiddenButConnected.\nCtrl-Shift: On all records, changing to HiddenButConnected.");
             // 
             // button12
             // 
@@ -311,6 +313,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button12.Text = "Mark as &Effective";
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
+            this.toolTip1.SetToolTip(this.button12, "Ctrl: On all records, changing from Hidden to Effective.\nCtrl-Shift: On all records, changing to Effective.");
             // 
             // button13
             // 
@@ -510,6 +513,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button9.Text = "Mark as Hidden and &Disconnected";
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.button9_Click);
+            this.toolTip1.SetToolTip(this.button9, "Ctrl: On all records, changing from Effective to HiddenAndDisconnected.\nCtrl-Shift: On all records, changing to HiddenAndDisconnected.\n+Alt: Including all not listed (>1000).");
             // 
             // button8
             // 
@@ -521,6 +525,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button8.Text = "Mark as Hidden but &Connected";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
+            this.toolTip1.SetToolTip(this.button8, "Ctrl: On all records, changing from Effective to HiddenButConnected.\nCtrl-Shift: On all records, changing to HiddenButConnected.\n+Alt: Including all not listed (>1000).");
             // 
             // button7
             // 
@@ -532,6 +537,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.button7.Text = "Mark as &Effective";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
+            this.toolTip1.SetToolTip(this.button7, "Ctrl: On all records, changing from Hidden to Effective.\nCtrl-Shift: On all records, changing to Effective.\n+Alt: Including all not listed (>1000).");
             // 
             // button6
             // 
