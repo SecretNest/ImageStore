@@ -509,7 +509,7 @@ namespace SecretNest.ImageStore.SimilarFile
                         {
                             return;
                         }
-                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected);
+                        targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenAndDisconnected);
                     }
                     else
                     {
@@ -840,7 +840,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                             {
                                 return;
                             }
-                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected);
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenAndDisconnected);
                         }
                         else
                         {
@@ -906,7 +906,7 @@ Press Yes to show all records, or No to show first 1000 instead.", "Warning", Me
                             {
                                 return;
                             }
-                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode == IgnoredMode.HiddenAndDisconnected).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
+                            targetRecords = currentDisplayingGroupRecords.Where(i => i.IgnoredMode != IgnoredMode.HiddenAndDisconnected).Take(groupLengthLimited ?? currentDisplayingGroupRecords.Length);
                         }
                         else
                         {
