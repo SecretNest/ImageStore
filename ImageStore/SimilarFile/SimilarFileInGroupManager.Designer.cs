@@ -89,6 +89,7 @@ namespace SecretNest.ImageStore.SimilarFile
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.doublePictureBox1 = new DoublePictureBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -789,5 +790,6 @@ namespace SecretNest.ImageStore.SimilarFile
         private DoubleBufferedDataGridView dataGridView1;
         private DoublePictureBox doublePictureBox1;
         private System.Windows.Forms.CheckBox checkBox1;
+        private ToolTip toolTip1;
     }
 }
