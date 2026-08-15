@@ -17,10 +17,10 @@ namespace SecretNest.ImageStore.SimilarFile
 
         protected override void ProcessRecord()
         {
-            //Assembly.CodeBase is obsolete on .NET 5+ and throws for single-file
-            //publishes. AppContext.BaseDirectory gives the module folder directly,
-            //without the Uri round-trip.
-            LoadImageHelper.cachePath = System.IO.Path.Combine(AppContext.BaseDirectory, Path);
+            //Relative to the module, which is where the old Assembly.CodeBase
+            //resolved to. Not AppContext.BaseDirectory: under Import-Module that is
+            //the host's directory, so the cache would land next to pwsh.exe.
+            LoadImageHelper.cachePath = System.IO.Path.Combine(ModuleLifetime.Directory, Path);
             Directory.CreateDirectory(LoadImageHelper.cachePath);
         }
     }
