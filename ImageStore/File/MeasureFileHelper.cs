@@ -14,7 +14,9 @@ namespace SecretNest.ImageStore.File
 {
     class MeasureFileHelper : IDisposable
     {
-        SHA1Managed sha1 = new SHA1Managed();
+        //SHA1.Create() rather than new SHA1Managed(): the derived crypto types
+        //are obsolete on .NET 5+ (SYSLIB0021). Same algorithm, same output.
+        SHA1 sha1 = SHA1.Create();
 
         byte[] ComputeSha1Hash(FileStream stream)
         {

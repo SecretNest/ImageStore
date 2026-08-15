@@ -3,6 +3,11 @@ name: Build and Release
 # Every push to master builds the module and publishes a release, tagged with
 # the build date. Pushing a v* tag by hand publishes under that tag instead.
 #
+# A pull request runs the same build but stops short of publishing, which is
+# how a risky change gets verified without leaving half-working commits on
+# master. Nothing here can be built or tested on Linux, so CI is the only
+# feedback available before merging.
+#
 # This does not recurse. The tag created below is pushed with GITHUB_TOKEN, and
 # GitHub deliberately does not start a new workflow run for events raised by
 # that token — so "push to master -> create v* tag" does not re-enter the
@@ -11,30 +16,35 @@ on:
   push:
     branches: [master]
     tags: ['v*']
+  pull_request:
+    branches: [master]
   workflow_dispatch:
 
 # The date-based sequence number is derived from tags that already exist, so
 # two runs racing each other could pick the same number. Keep runs serialised
 # and let queued ones finish rather than cancelling them — every push is meant
-# to produce its own release.
+# to produce its own release. Pull requests get their own group per branch so
+# that iterating on a PR does not queue up behind unrelated runs.
 concurrency:
-  group: build-and-release
-  cancel-in-progress: false
+  group: build-and-release-${{ github.event_name == 'pull_request' && github.ref || 'master' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: write # create tags and releases
 
 env:
-  SOLUTION: ImageStore.sln
+  PROJECT: ImageStore/ImageStore.csproj
   CONFIGURATION: Release
-  BUILD_OUTPUT: ImageStore\bin\Release
+  # dotnet publish, not build: it gathers the full runtime dependency set into
+  # one directory, which is what a PowerShell module folder has to contain.
+  BUILD_OUTPUT: publish
   # Date-based tags follow this timezone rather than the runner's UTC clock, so
   # a tag reads the same date the commit was authored in.
   TAG_TIMEZONE: China Standard Time
 
 jobs:
   build:
-    # .NET Framework 4.8.1 + Windows Forms — this cannot be built on Linux.
+    # net10.0-windows + Windows Forms — this cannot be built on Linux.
     runs-on: windows-latest
 
     steps:
@@ -48,8 +58,17 @@ jobs:
       - name: Resolve version
         id: version
         shell: pwsh
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if ($env:GITHUB_REF -like 'refs/tags/*') {
+          if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+              # Never published, so it gets a name that cannot be mistaken for a
+              # release if the artifact is downloaded and passed around.
+              $tag = "pr$($env:PR_NUMBER)-$($env:GITHUB_SHA.Substring(0, 7))"
+              $tagExists = 'false'
+              Write-Host "Pull request build, not a release: $tag"
+          }
+          elseif ($env:GITHUB_REF -like 'refs/tags/*') {
               # A human pushed a tag — publish under it verbatim.
               $tag = $env:GITHUB_REF -replace '^refs/tags/', ''
               $tagExists = 'true'
@@ -84,39 +103,33 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag_exists=$tagExists"
 
-      - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v3
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
 
-      - name: Set up NuGet
-        uses: nuget/setup-nuget@v4
-
-      - name: Restore NuGet packages
-        shell: pwsh
-        # Legacy csproj with a PackageReference (Microsoft.PowerShell.5.ReferenceAssemblies);
-        # restore has to run before msbuild.
-        run: nuget restore $env:SOLUTION
-
-      - name: Build
+      - name: Build and publish
         shell: pwsh
         run: |
-          msbuild $env:SOLUTION `
-            /p:Configuration=$env:CONFIGURATION `
-            '/p:Platform=Any CPU' `
-            /m /nologo /verbosity:minimal
+          dotnet publish $env:PROJECT `
+            --configuration $env:CONFIGURATION `
+            --output $env:BUILD_OUTPUT `
+            --nologo
 
       - name: Verify build output
         shell: pwsh
         run: |
           # Import-Module fails at load time if any of these is missing from the
           # module folder, so publishing without them would ship a broken release.
+          # The BCL packages the 4.8.1 build needed (System.Buffers, System.Memory,
+          # System.Numerics.Vectors, System.Runtime.CompilerServices.Unsafe) are
+          # part of the framework on .NET 10 and no longer appear here.
           $required = @(
               'ImageStore.dll'
+              'ImageStore.deps.json'
               'Shipwreck.Phash.dll'
               'Shipwreck.Phash.Bitmaps.dll'
-              'System.Buffers.dll'
-              'System.Memory.dll'
-              'System.Numerics.Vectors.dll'
-              'System.Runtime.CompilerServices.Unsafe.dll'
+              'Microsoft.Data.SqlClient.dll'
           )
           $missing = $required | Where-Object { -not (Test-Path (Join-Path $env:BUILD_OUTPUT $_)) }
           if ($missing) {
@@ -124,19 +137,42 @@ jobs:
               exit 1
           }
 
-          # And the opposite check. Reference assemblies have no method bodies
-          # and must never be shipped — the PowerShell host supplies the real
-          # System.Management.Automation at run time. ExcludeAssets=runtime in
-          # the csproj keeps it out of the output; this is the net that catches
-          # a regression there, since a merely-too-large zip looks fine.
-          $banned = @('System.Management.Automation.dll')
-          $leaked = $banned | Where-Object { Test-Path (Join-Path $env:BUILD_OUTPUT $_) }
-          if ($leaked) {
-              Write-Error "Reference assembly leaked into $($env:BUILD_OUTPUT): $($leaked -join ', ')"
+          # SqlClient's native SNI library lives in a runtimes\ subdirectory. A
+          # module missing it loads fine and then fails on the first connection,
+          # so check it separately from the flat files above.
+          if (-not (Get-ChildItem $env:BUILD_OUTPUT -Recurse -File -Filter 'Microsoft.Data.SqlClient.SNI.dll')) {
+              Write-Error "Native SNI library missing from $($env:BUILD_OUTPUT)\runtimes"
               exit 1
           }
 
-          Get-ChildItem $env:BUILD_OUTPUT | Format-Table Name, Length, LastWriteTime
+          # And the opposite check: nothing belonging to the PowerShell host may
+          # ship. System.Management.Automation.dll is a reference assembly with no
+          # method bodies, and the native payload beside it is the host's own
+          # (including Linux and macOS libraries, in a Windows-only module).
+          # ExcludeAssets="runtime;native" in the csproj keeps them out; this is
+          # the net for a regression, since an oversized package still looks fine.
+          # Recursive, because the native files sit under runtimes\<rid>\native.
+          $banned = @(
+              'System.Management.Automation.dll'
+              'pwrshplugin.dll'
+              'PowerShell.Core.Instrumentation.dll'
+              'libpsl-native.*'
+              'getfilesiginforedist.dll'
+          )
+          $leaked = $banned |
+              ForEach-Object { Get-ChildItem $env:BUILD_OUTPUT -Recurse -File -Filter $_ } |
+              Select-Object -ExpandProperty Name -Unique
+          if ($leaked) {
+              Write-Error "PowerShell host payload leaked into the package: $($leaked -join ', ')"
+              exit 1
+          }
+
+          # Recursive: Microsoft.Data.SqlClient carries a native SNI library under
+          # runtimes\win-*\native, and that layout has to survive into the package.
+          Get-ChildItem $env:BUILD_OUTPUT -Recurse -File |
+              Select-Object @{n='Path';e={$_.FullName.Substring((Resolve-Path $env:BUILD_OUTPUT).Path.Length + 1)}}, Length |
+              Sort-Object Path |
+              Format-Table -AutoSize
 
       - name: Package
         id: package
@@ -149,11 +185,16 @@ jobs:
         run: |
           $tag = $env:TAG
 
-          # The module: dlls only — the .pdb is not part of a release.
+          # The module: the whole publish output minus debug symbols. Copied
+          # wholesale rather than picking out *.dll, because the tree matters —
+          # ImageStore.deps.json drives dependency resolution, and SqlClient's
+          # native SNI library lives under runtimes\win-*\native. Flattening it
+          # produces a module that loads and then fails on first connect.
           $moduleStage = Join-Path $env:RUNNER_TEMP 'module'
           $moduleZip   = "ImageStore-$tag.zip"
           New-Item -ItemType Directory -Path $moduleStage -Force | Out-Null
-          Copy-Item "$env:BUILD_OUTPUT\*.dll" -Destination $moduleStage
+          Copy-Item "$env:BUILD_OUTPUT\*" -Destination $moduleStage -Recurse -Force
+          Get-ChildItem $moduleStage -Recurse -Include '*.pdb' | Remove-Item -Force
           Compress-Archive -Path "$moduleStage\*" -DestinationPath $moduleZip -Force
 
           # The database: shipped as its own asset. It is a one-time download
@@ -180,6 +221,9 @@ jobs:
           if-no-files-found: error
 
       - name: Publish release
+        # Pull requests stop here: they have proved the build and produced a
+        # downloadable artifact, which is the whole point of the PR run.
+        if: github.event_name != 'pull_request'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -17,6 +17,8 @@ namespace SecretNest.ImageStore.SimilarFile
         Guid loadedFileId1, loadedFileId2;
 
         bool _autoResizePictures;
+        //See the note in SimilarFileCheck: set from code, not the designer (WFO1000).
+        [DefaultValue(false)]
         public bool AutoResizePictures
         {
             get => _autoResizePictures;

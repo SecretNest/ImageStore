@@ -12,12 +12,17 @@ namespace SecretNest.ImageStore.SimilarFile
 {
     internal partial class SimilarFileCheck : UserControl
     {
+        //DefaultValue tells the WinForms designer these need no serialization
+        //unless changed from the default (WFO1000). They are set from code, not
+        //the designer.
+        [DefaultValue(false)]
         public bool AutoResizePictures
         {
             get => doublePictureBox1.AutoResizePictures;
             set => doublePictureBox1.AutoResizePictures = value;
         }
 
+        [DefaultValue(false)]
         public bool AutoMoveNext { get; set; }
 
         public SimilarFileCheck()

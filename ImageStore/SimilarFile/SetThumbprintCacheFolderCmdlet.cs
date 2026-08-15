@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,10 +17,10 @@ namespace SecretNest.ImageStore.SimilarFile
 
         protected override void ProcessRecord()
         {
-            Assembly assembly = typeof(SetThumbprintCacheFolderCmdlet).Assembly;
-            var path = new Uri(assembly.CodeBase).LocalPath;
-            var assemblyFolder = System.IO.Path.GetDirectoryName(path);
-            LoadImageHelper.cachePath = System.IO.Path.Combine(assemblyFolder, Path);
+            //Assembly.CodeBase is obsolete on .NET 5+ and throws for single-file
+            //publishes. AppContext.BaseDirectory gives the module folder directly,
+            //without the Uri round-trip.
+            LoadImageHelper.cachePath = System.IO.Path.Combine(AppContext.BaseDirectory, Path);
             Directory.CreateDirectory(LoadImageHelper.cachePath);
         }
     }

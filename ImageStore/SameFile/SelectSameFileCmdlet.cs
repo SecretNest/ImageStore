@@ -3,7 +3,7 @@ using SecretNest.ImageStore.File;
 using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Management.Automation;
