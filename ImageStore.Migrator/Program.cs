@@ -89,6 +89,18 @@ namespace SecretNest.ImageStore.Migrator
                 foreach (var table in SqliteSchema.TablesInDependencyOrder)
                     total += CopyTable(sqlServer, sqlite, table);
 
+                //Without this the new database has no query statistics, and SQLite's
+                //planner then ignores the indexes entirely - a single-row file lookup
+                //degrades into a scan of the whole table. Sql Server maintained these
+                //automatically; SQLite does not, so the migration has to.
+                Console.Write("statistics        ");
+                using (var analyze = sqlite.CreateCommand())
+                {
+                    analyze.CommandText = "ANALYZE";
+                    analyze.ExecuteNonQuery();
+                }
+                Console.WriteLine(" done");
+
                 stopwatch.Stop();
                 Console.WriteLine();
                 Console.WriteLine($"Done. {total:N0} rows in {stopwatch.Elapsed:hh\\:mm\\:ss}.");

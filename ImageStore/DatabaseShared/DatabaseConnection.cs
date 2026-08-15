@@ -69,8 +69,37 @@ namespace SecretNest.ImageStore
             //reason not to verify the result here.
             Execute(connection, "PRAGMA journal_mode = WAL");
 
+            EnsureStatistics(connection);
+
             _current = connection;
             _currentPath = connection.DataSource;
+        }
+
+        /// <summary>
+        /// Makes sure the query planner has table statistics.
+        /// </summary>
+        /// <remarks>
+        /// This is the one piece of maintenance Sql Server did for us and SQLite does
+        /// not. Without an ANALYZE there is no sqlite_stat1, and the planner falls
+        /// back to guesses that ignore indexes: measured on a 500k-file library, the
+        /// single-row lookup behind Find-ImageStoreFile became a full table scan and
+        /// took 55 ms instead of under 1 ms. Sync-ImageStoreFolder performs one of
+        /// those per file, so the difference is hours against minutes.
+        ///
+        /// Only runs when statistics are absent, which is the first open of a
+        /// migrated or hand-made database - a few seconds once. Afterwards
+        /// PRAGMA optimize in Close keeps them current.
+        /// </remarks>
+        static void EnsureStatistics(SqliteConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "Select count(*) from [sqlite_master] where [name] = 'sqlite_stat1'";
+                if (Convert.ToInt64(command.ExecuteScalar()) > 0)
+                    return;
+            }
+
+            Execute(connection, "ANALYZE");
         }
 
         static void Execute(SqliteConnection connection, string commandText)

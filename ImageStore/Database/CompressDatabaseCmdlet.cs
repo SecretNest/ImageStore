@@ -26,6 +26,17 @@ namespace SecretNest.ImageStore.Database
                 command.ExecuteNonQuery();
             }
 
+            //Refresh the query statistics while we are here. Compacting usually
+            //follows a large removal, which is exactly when the planner's idea of
+            //table sizes has gone stale - and stale statistics make it stop using
+            //indexes rather than merely pick a worse one.
+            using (SqliteCommand command = new SqliteCommand("ANALYZE"))
+            {
+                command.Connection = connection;
+                command.CommandTimeout = 0;
+                command.ExecuteNonQuery();
+            }
+
         }
     }
 }
