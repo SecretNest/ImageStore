@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -19,11 +19,11 @@ namespace SecretNest.ImageStore.IgnoredDirectory
         protected override void ProcessRecord()
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [FolderId],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory] Where [Id]=@Id"))
+            using (var command = new SqliteCommand("Select [FolderId],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory] Where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
+                command.Parameters.AddGuid("@Id", Id);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
@@ -31,9 +31,9 @@ namespace SecretNest.ImageStore.IgnoredDirectory
                     {
                         ImageStoreIgnoredDirectory line = new ImageStoreIgnoredDirectory(Id)
                         {
-                            FolderId = (Guid)reader[0],
-                            Directory = (string)reader[1],
-                            IsSubDirectoryIncluded = (bool)reader[2]
+                            FolderId = reader.GetGuid(0),
+                            Directory = reader.GetString(1),
+                            IsSubDirectoryIncluded = reader.GetBoolean(2)
                         };
                         WriteObject(line);
                     }

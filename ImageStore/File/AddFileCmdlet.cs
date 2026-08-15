@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -44,15 +44,15 @@ namespace SecretNest.ImageStore.File
             var connection = DatabaseConnection.Current;
             var id = Guid.NewGuid();
 
-            using (var command = new SqlCommand("Insert into [File] values(@Id, @FolderId, @Path, @FileName, @ExtensionId, null, null, -1, 0, 0)"))
+            using (var command = new SqliteCommand("Insert into [File] values(@Id, @FolderId, @Path, @FileName, @ExtensionId, null, null, -1, 0, 0)"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
-                command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = Folder.Id });
-                command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = Path });
-                command.Parameters.Add(new SqlParameter("@FileName", System.Data.SqlDbType.NVarChar, 256) { Value = FileName });
-                command.Parameters.Add(new SqlParameter("@ExtensionId", System.Data.SqlDbType.UniqueIdentifier) { Value = Extension.Id });
+                command.Parameters.AddGuid("@Id", id);
+                command.Parameters.AddGuid("@FolderId", Folder.Id);
+                command.Parameters.AddText("@Path", Path);
+                command.Parameters.AddText("@FileName", FileName);
+                command.Parameters.AddGuid("@ExtensionId", Extension.Id);
 
                 if (command.ExecuteNonQuery() > 0)
                 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +10,8 @@ namespace SecretNest.ImageStore.DatabaseShared
 
     class WhereCauseBuilder
     {
-        SqlParameterCollection parameters; List<string> whereCauses; bool allMet;
-        public WhereCauseBuilder(SqlParameterCollection parameters, bool allMet = true)
+        SqliteParameterCollection parameters; List<string> whereCauses; bool allMet;
+        public WhereCauseBuilder(SqliteParameterCollection parameters, bool allMet = true)
         {
             this.parameters = parameters;
             whereCauses = new List<string>();
@@ -51,7 +51,7 @@ namespace SecretNest.ImageStore.DatabaseShared
             else if (value != null)
             {
                 whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.Binary, length) { Value = value });
+                parameters.AddBlob("@" + columnName, value);
             }
         }
 
@@ -60,7 +60,7 @@ namespace SecretNest.ImageStore.DatabaseShared
             if (value.HasValue)
             {
                 whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.UniqueIdentifier) { Value = value.Value });
+                parameters.AddGuid("@" + columnName, value.Value);
             }
         }
 
@@ -93,7 +93,7 @@ namespace SecretNest.ImageStore.DatabaseShared
             if (value.HasValue)
             {
                 whereCauses.Add(string.Format("[{0}] = @{1}", columnName, parameterName));
-                parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.Int) { Value = value.Value });
+                parameters.AddInt("@" + parameterName, value.Value);
             }
         }
 
@@ -102,20 +102,20 @@ namespace SecretNest.ImageStore.DatabaseShared
             if (value.HasValue)
             {
                 whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.Int) { Value = value.Value });
+                parameters.AddInt("@" + columnName, value.Value);
             }
             else
             {
                 if (greaterOrEqual.HasValue)
                 {
                     whereCauses.Add(string.Format("[{0}] >= @GreaterOrEqual{0}", columnName));
-                    parameters.Add(new SqlParameter("@GreaterOrEqual" + columnName, System.Data.SqlDbType.Int) { Value = greaterOrEqual.Value });
+                    parameters.AddInt("@GreaterOrEqual" + columnName, greaterOrEqual.Value);
                 }
 
                 if (lessOrEqual.HasValue)
                 {
                     whereCauses.Add(string.Format("[{0}] <= @LessOrEqual{0}", columnName));
-                    parameters.Add(new SqlParameter("@LessOrEqual" + columnName, System.Data.SqlDbType.Int) { Value = lessOrEqual.Value });
+                    parameters.AddInt("@LessOrEqual" + columnName, lessOrEqual.Value);
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace SecretNest.ImageStore.DatabaseShared
             if (value.HasValue)
             {
                 whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.Bit) { Value = value.Value });
+                parameters.AddBool("@" + columnName, value.Value);
             }
         }
 
@@ -134,20 +134,20 @@ namespace SecretNest.ImageStore.DatabaseShared
             if (value.HasValue)
             {
                 whereCauses.Add(string.Format("[{0}] = @{0}", columnName));
-                parameters.Add(new SqlParameter("@" + columnName, System.Data.SqlDbType.Real) { Value = value });
+                parameters.AddReal("@" + columnName, value.Value);
             }
             else
             {
                 if (greaterOrEqual.HasValue)
                 {
                     whereCauses.Add(string.Format("[{0}] >= @GreaterOrEqual{0}", columnName));
-                    parameters.Add(new SqlParameter("@GreaterOrEqual" + columnName, System.Data.SqlDbType.Real) { Value = greaterOrEqual.Value });
+                    parameters.AddReal("@GreaterOrEqual" + columnName, greaterOrEqual.Value);
                 }
 
                 if (lessOrEqual.HasValue)
                 {
                     whereCauses.Add(string.Format("[{0}] <= @LessOrEqual{0}", columnName));
-                    parameters.Add(new SqlParameter("@LessOrEqual" + columnName, System.Data.SqlDbType.Real) { Value = lessOrEqual.Value });
+                    parameters.AddReal("@LessOrEqual" + columnName, lessOrEqual.Value);
                 }
             }
         }
@@ -169,27 +169,23 @@ namespace SecretNest.ImageStore.DatabaseShared
                 {
                     if (comparingModes == StringPropertyComparingModes.Contains)
                     {
-                        whereCauses.Add(string.Format("[{0}] like @{1}", columnName, parameterName));
-                        parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3 + 2)
-                        { Value = SqlServerLikeValueBuilder.EscapeAndInclude(value) });
+                        whereCauses.Add(string.Format("[{0}] like @{1}" + SqliteLikeValueBuilder.EscapeClause, columnName, parameterName));
+                        parameters.AddText("@" + parameterName, SqliteLikeValueBuilder.EscapeAndInclude(value));
                     }
                     else if (comparingModes == StringPropertyComparingModes.Equals)
                     {
                         whereCauses.Add(string.Format("[{0}] = @{1}", columnName, parameterName));
-                        parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3)
-                        { Value = SqlServerLikeValueBuilder.EscapeForEquals(value) });
+                        parameters.AddText("@" + parameterName, value);
                     }
                     else if (comparingModes == StringPropertyComparingModes.StartsWith)
                     {
-                        whereCauses.Add(string.Format("[{0}] like @{1}", columnName, parameterName));
-                        parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3 + 1)
-                        { Value = SqlServerLikeValueBuilder.Escape(value) + "%" });
+                        whereCauses.Add(string.Format("[{0}] like @{1}" + SqliteLikeValueBuilder.EscapeClause, columnName, parameterName));
+                        parameters.AddText("@" + parameterName, SqliteLikeValueBuilder.Escape(value) + "%");
                     }
                     else if (comparingModes == StringPropertyComparingModes.EndsWith)
                     {
-                        whereCauses.Add(string.Format("[{0}] like @{1}", columnName, parameterName));
-                        parameters.Add(new SqlParameter("@" + parameterName, System.Data.SqlDbType.NVarChar, length * 3 + 1)
-                        { Value = "%" + SqlServerLikeValueBuilder.Escape(value) });
+                        whereCauses.Add(string.Format("[{0}] like @{1}" + SqliteLikeValueBuilder.EscapeClause, columnName, parameterName));
+                        parameters.AddText("@" + parameterName, "%" + SqliteLikeValueBuilder.Escape(value));
                     }
                     else
                     {

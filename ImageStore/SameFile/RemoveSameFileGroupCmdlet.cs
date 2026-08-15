@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -19,11 +19,11 @@ namespace SecretNest.ImageStore.SameFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Delete from [SameFile] where [Sha1Hash]=@Sha1Hash"))
+            using (var command = new SqliteCommand("Delete from [SameFile] where [Sha1Hash]=@Sha1Hash"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = Sha1Hash });
+                command.Parameters.AddBlob("@Sha1Hash", Sha1Hash);
 
                 if (command.ExecuteNonQuery() == 0)
                 {

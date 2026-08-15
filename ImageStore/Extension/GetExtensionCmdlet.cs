@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -19,11 +19,11 @@ namespace SecretNest.ImageStore.Extension
         protected override void ProcessRecord()
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Extension],[IsImage],[Ignored] from [Extension] Where [Id]=@Id"))
+            using (var command = new SqliteCommand("Select [Extension],[IsImage],[Ignored] from [Extension] Where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
+                command.Parameters.AddGuid("@Id", Id);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
@@ -31,9 +31,9 @@ namespace SecretNest.ImageStore.Extension
                     {
                         ImageStoreExtension line = new ImageStoreExtension(Id)
                         {
-                            Extension = (string)reader[0],
-                            IsImage = (bool)reader[1],
-                            Ignored = (bool)reader[2]
+                            Extension = reader.GetString(0),
+                            IsImage = reader.GetBoolean(1),
+                            Ignored = reader.GetBoolean(2)
                         };
                         WriteObject(line);
                     }

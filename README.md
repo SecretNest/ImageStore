@@ -7,7 +7,9 @@ Specially, it is optimized for CG libraries storing by allowing user to suppress
 # Requirements
   * Windows.
   * [PowerShell 7.6](https://github.com/PowerShell/PowerShell/releases) or later. The module targets .NET 10, and 7.6 is the first PowerShell release built on it.
-  * Sql Server 2017. See [Database](#database) below.
+  * [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0), which the windows opened by some cmdlets need. If ```Import-Module``` fails complaining about a missing framework, this is the one to install.
+
+No database server is needed. A library is a single SQLite file, created by [New-ImageStoreDatabase](doc/cmdlet/Database/NewDatabase.md).
 
 *Note: Windows PowerShell 5.1 — the ```powershell.exe``` that ships with Windows — cannot load this module, because it runs on .NET Framework. Use ```pwsh```. The last release that works under 5.1 is [v2026.08.15.2](https://github.com/SecretNest/ImageStore/releases/tag/v2026.08.15.2).*
 
@@ -42,15 +44,25 @@ These setting will not be preserved among instances of PowerShell. Every time th
 "SilentlyContinue"```.
 
 # Database
-ImageStore need Sql Server 2017 for hosting database. Each project should have a dedicated database.
+ImageStore stores everything in one SQLite file. There is nothing to install and no server to run, and each project has its own file.
 
-All editions of Sql Server 2017 on Windows are supported, including LocalDb, Express, Standard, Enterprise and Developer. Linux versions are not tested.
+Create one and start using it:
+```
+New-ImageStoreDatabase D:\Library\library.db
+```
+This creates the file, builds the schema and opens it, so no separate [Open-ImageStoreDatabase](doc/cmdlet/Database/OpenDatabase.md) is needed afterwards. Later sessions open the existing file:
+```
+Open-ImageStoreDatabase D:\Library\library.db
+```
 
-Attached database file mode is supported and recommended.
+**Keep the database file on a local disk.** SQLite relies on file locking, which is unreliable over SMB and other network shares, and write-ahead logging cannot be used there at all. This is safe and normal even when the images themselves live on a NAS: the database stores paths, not image data, so the two do not have to sit together.
 
-To install Sql Server 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
-
-You could download the empty database file DataStore.mdf and DataStore_log.ldf from Database folder, or create an empty database by script provided as CreateDatabase.txt in the same folder.
+## Upgrading from a Sql Server library
+Releases before v2.0 kept data in Sql Server. To bring an existing library across, download ```ImageStore-Migrator``` from the [release](https://github.com/SecretNest/ImageStore/releases) and run it once:
+```
+ImageStore.Migrator --source "server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\DataStore.mdf;Integrated Security=True" --target D:\Library\library.db
+```
+It copies every record and leaves the Sql Server database untouched, so the old one remains as a fallback. [v2.0](https://github.com/SecretNest/ImageStore/releases/tag/v2.0) is the last release that works against Sql Server.
 
 # Concepts
 There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.

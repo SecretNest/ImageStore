@@ -31,7 +31,7 @@
     <PackageReference Include="Shipwreck.Phash" Version="0.5.0" />
     <PackageReference Include="Shipwreck.Phash.Bitmaps" Version="0.5.0" />
 
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
 
     <!-- Reference assemblies only. The PowerShell host supplies the real
          implementation at run time; shipping ours would be dead weight at best.

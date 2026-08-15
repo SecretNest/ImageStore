@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -28,22 +28,22 @@ namespace SecretNest.ImageStore.IgnoredDirectory
                 throw new ArgumentNullException(nameof(Directory));
 
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Id],[Directory] from [IgnoredDirectory] Where [FolderId]=@FolderId and [Directory]=@Directory and [IsSubDirectoryIncluded]=@IsSubDirectoryIncluded"))
+            using (var command = new SqliteCommand("Select [Id],[Directory] from [IgnoredDirectory] Where [FolderId]=@FolderId and [Directory]=@Directory and [IsSubDirectoryIncluded]=@IsSubDirectoryIncluded"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = FolderId });
-                command.Parameters.Add(new SqlParameter("@Directory", System.Data.SqlDbType.NVarChar, 256) { Value = Directory });
-                command.Parameters.Add(new SqlParameter("@IsSubDirectoryIncluded", System.Data.SqlDbType.Bit) { Value = IsSubDirectoryIncluded });
+                command.Parameters.AddGuid("@FolderId", FolderId);
+                command.Parameters.AddText("@Directory", Directory);
+                command.Parameters.AddBool("@IsSubDirectoryIncluded", IsSubDirectoryIncluded);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     if (reader.Read())
                     {
-                        ImageStoreIgnoredDirectory line = new ImageStoreIgnoredDirectory((Guid)reader[0])
+                        ImageStoreIgnoredDirectory line = new ImageStoreIgnoredDirectory(reader.GetGuid(0))
                         {
                             FolderId = FolderId,
-                            Directory = (string)reader[1],
+                            Directory = reader.GetString(1),
                             IsSubDirectoryIncluded = IsSubDirectoryIncluded
                         };
                         WriteObject(line);

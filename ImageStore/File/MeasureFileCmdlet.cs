@@ -3,7 +3,7 @@ using SecretNest.ImageStore.Folder;
 using Shipwreck.Phash;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -94,17 +94,17 @@ namespace SecretNest.ImageStore.File
             if (isRecomputing)
             {
                 var connection = DatabaseConnection.Current;
-                using (var commandToDeleteSame = new SqlCommand("Delete from [SameFile] Where [FileId]=@Id"))
-                using (var commandToDeleteSimilar = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
+                using (var commandToDeleteSame = new SqliteCommand("Delete from [SameFile] Where [FileId]=@Id"))
+                using (var commandToDeleteSimilar = new SqliteCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
                 {
                     commandToDeleteSame.Connection = connection;
                     commandToDeleteSame.CommandTimeout = 0;
-                    commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
+                    commandToDeleteSame.Parameters.AddGuid("@Id", File.Id);
                     commandToDeleteSame.ExecuteNonQuery();
 
                     commandToDeleteSimilar.Connection = connection;
                     commandToDeleteSimilar.CommandTimeout = 0;
-                    commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = File.Id });
+                    commandToDeleteSimilar.Parameters.AddGuid("@Id", File.Id);
                     commandToDeleteSimilar.ExecuteNonQuery();
                 }
             }

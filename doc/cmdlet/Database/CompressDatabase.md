@@ -1,8 +1,11 @@
 # Compress-ImageStoreDatabase
 
-Runs ShrinkDatabase command in connected database to shrink the size of the data and log files.
+Runs VACUUM in the connected database, rebuilding the file to reclaim the space left by deleted records.
 
 Alias: ShrinkDatabase, CompressDatabase, Shrink-ImageStoreDatabase
+
+# Remarks
+Requires free disk space roughly equal to the size of the database while it runs, since VACUUM rebuilds the file.
 
 # Parameters
 None

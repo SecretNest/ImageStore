@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -17,7 +17,7 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("DELETE FROM [SimilarFile]"))
+            using (var command = new SqliteCommand("DELETE FROM [SimilarFile]"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
@@ -25,7 +25,7 @@ namespace SecretNest.ImageStore.SimilarFile
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("Update [File] Set [ImageComparedThreshold]=0"))
+            using (var command = new SqliteCommand("Update [File] Set [ImageComparedThreshold]=0"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;

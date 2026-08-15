@@ -34,10 +34,12 @@ permissions:
 
 env:
   PROJECT: ImageStore/ImageStore.csproj
+  MIGRATOR_PROJECT: ImageStore.Migrator/ImageStore.Migrator.csproj
   CONFIGURATION: Release
   # dotnet publish, not build: it gathers the full runtime dependency set into
   # one directory, which is what a PowerShell module folder has to contain.
   BUILD_OUTPUT: publish
+  MIGRATOR_OUTPUT: publish-migrator
   # Date-based tags follow this timezone rather than the runner's UTC clock, so
   # a tag reads the same date the commit was authored in.
   TAG_TIMEZONE: China Standard Time
@@ -116,20 +118,45 @@ jobs:
             --output $env:BUILD_OUTPUT `
             --nologo
 
+          dotnet publish $env:MIGRATOR_PROJECT `
+            --configuration $env:CONFIGURATION `
+            --output $env:MIGRATOR_OUTPUT `
+            --nologo
+
+      - name: Trim non-Windows native libraries
+        shell: pwsh
+        run: |
+          # SQLite ships its native library for every platform it supports -
+          # Linux, macOS, wasm, a dozen architectures each. Both of these run only
+          # on Windows, so those copies are pure weight: leaving them in takes the
+          # module from about 4 MB to 34 MB.
+          #
+          # Done here rather than with a RuntimeIdentifier so that all three
+          # Windows architectures stay in the package.
+          foreach ($output in @($env:BUILD_OUTPUT, $env:MIGRATOR_OUTPUT)) {
+              $runtimes = Join-Path $output 'runtimes'
+              if (-not (Test-Path $runtimes)) { continue }
+
+              $dropped = Get-ChildItem $runtimes -Directory | Where-Object { $_.Name -notlike 'win*' }
+              foreach ($rid in $dropped) { Remove-Item $rid.FullName -Recurse -Force }
+
+              Write-Host "$output : removed $($dropped.Count) non-Windows runtime directories, kept $((Get-ChildItem $runtimes -Directory).Name -join ', ')"
+          }
+
       - name: Verify build output
         shell: pwsh
         run: |
           # Import-Module fails at load time if any of these is missing from the
           # module folder, so publishing without them would ship a broken release.
-          # The BCL packages the 4.8.1 build needed (System.Buffers, System.Memory,
-          # System.Numerics.Vectors, System.Runtime.CompilerServices.Unsafe) are
-          # part of the framework on .NET 10 and no longer appear here.
           $required = @(
               'ImageStore.dll'
               'ImageStore.deps.json'
               'Shipwreck.Phash.dll'
               'Shipwreck.Phash.Bitmaps.dll'
-              'Microsoft.Data.SqlClient.dll'
+              'Microsoft.Data.Sqlite.dll'
+              'SQLitePCLRaw.core.dll'
+              'SQLitePCLRaw.provider.e_sqlite3.dll'
+              'SQLitePCLRaw.batteries_v2.dll'
           )
           $missing = $required | Where-Object { -not (Test-Path (Join-Path $env:BUILD_OUTPUT $_)) }
           if ($missing) {
@@ -137,21 +164,28 @@ jobs:
               exit 1
           }
 
-          # SqlClient's native SNI library lives in a runtimes\ subdirectory. A
-          # module missing it loads fine and then fails on the first connection,
-          # so check it separately from the flat files above.
-          if (-not (Get-ChildItem $env:BUILD_OUTPUT -Recurse -File -Filter 'Microsoft.Data.SqlClient.SNI.dll')) {
-              Write-Error "Native SNI library missing from $($env:BUILD_OUTPUT)\runtimes"
+          # The SQLite engine itself is a native library under runtimes\win-*\native.
+          # Without it the module loads and then throws on the first query, so check
+          # it separately from the flat files above - and check that the trim step
+          # above did not take it with the others.
+          if (-not (Test-Path (Join-Path $env:BUILD_OUTPUT 'runtimes\win-x64\native\e_sqlite3.dll'))) {
+              Write-Error "Native SQLite library missing from $($env:BUILD_OUTPUT)\runtimes\win-x64\native"
               exit 1
+          }
+
+          # The migrator is the only thing that still talks to Sql Server.
+          foreach ($f in @('ImageStore.Migrator.dll', 'Microsoft.Data.SqlClient.dll', 'Microsoft.Data.Sqlite.dll')) {
+              if (-not (Test-Path (Join-Path $env:MIGRATOR_OUTPUT $f))) {
+                  Write-Error "Missing from $($env:MIGRATOR_OUTPUT): $f"
+                  exit 1
+              }
           }
 
           # And the opposite check: nothing belonging to the PowerShell host may
           # ship. System.Management.Automation.dll is a reference assembly with no
-          # method bodies, and the native payload beside it is the host's own
-          # (including Linux and macOS libraries, in a Windows-only module).
+          # method bodies, and the native payload beside it is the host's own.
           # ExcludeAssets="runtime;native" in the csproj keeps them out; this is
           # the net for a regression, since an oversized package still looks fine.
-          # Recursive, because the native files sit under runtimes\<rid>\native.
           $banned = @(
               'System.Management.Automation.dll'
               'pwrshplugin.dll'
@@ -167,8 +201,12 @@ jobs:
               exit 1
           }
 
-          # Recursive: Microsoft.Data.SqlClient carries a native SNI library under
-          # runtimes\win-*\native, and that layout has to survive into the package.
+          # Sql Server support was removed from the module; only the migrator keeps it.
+          if (Get-ChildItem $env:BUILD_OUTPUT -Recurse -File -Filter 'Microsoft.Data.SqlClient.dll') {
+              Write-Error "SqlClient is still being shipped inside the module package"
+              exit 1
+          }
+
           Get-ChildItem $env:BUILD_OUTPUT -Recurse -File |
               Select-Object @{n='Path';e={$_.FullName.Substring((Resolve-Path $env:BUILD_OUTPUT).Path.Length + 1)}}, Length |
               Sort-Object Path |
@@ -187,9 +225,9 @@ jobs:
 
           # The module: the whole publish output minus debug symbols. Copied
           # wholesale rather than picking out *.dll, because the tree matters —
-          # ImageStore.deps.json drives dependency resolution, and SqlClient's
-          # native SNI library lives under runtimes\win-*\native. Flattening it
-          # produces a module that loads and then fails on first connect.
+          # ImageStore.deps.json drives dependency resolution, and the native
+          # SQLite engine lives under runtimes\win-*\native. Flattening it
+          # produces a module that loads and then throws on the first query.
           $moduleStage = Join-Path $env:RUNNER_TEMP 'module'
           $moduleZip   = "ImageStore-$tag.zip"
           New-Item -ItemType Directory -Path $moduleStage -Force | Out-Null
@@ -197,19 +235,21 @@ jobs:
           Get-ChildItem $moduleStage -Recurse -Include '*.pdb' | Remove-Item -Force
           Compress-Archive -Path "$moduleStage\*" -DestinationPath $moduleZip -Force
 
-          # The database: shipped as its own asset. It is a one-time download
-          # when setting up a project and does not change between builds, so it
-          # has no business inflating every module download.
-          $dbStage = Join-Path $env:RUNNER_TEMP 'database'
-          $dbZip   = "ImageStore-Database-$tag.zip"
-          New-Item -ItemType Directory -Path $dbStage -Force | Out-Null
-          Copy-Item 'Database\DataStore.mdf', `
-                    'Database\DataStore_log.ldf', `
-                    'Database\CreateDatabase.txt' -Destination $dbStage
-          Compress-Archive -Path "$dbStage\*" -DestinationPath $dbZip -Force
+          # The migration tool: separate because it is needed once per library, by
+          # the few users coming from Sql Server, and it carries the whole SqlClient
+          # dependency tree that the module itself no longer has.
+          $migratorStage = Join-Path $env:RUNNER_TEMP 'migrator'
+          $migratorZip   = "ImageStore-Migrator-$tag.zip"
+          New-Item -ItemType Directory -Path $migratorStage -Force | Out-Null
+          Copy-Item "$env:MIGRATOR_OUTPUT\*" -Destination $migratorStage -Recurse -Force
+          Get-ChildItem $migratorStage -Recurse -Include '*.pdb' | Remove-Item -Force
+          Compress-Archive -Path "$migratorStage\*" -DestinationPath $migratorZip -Force
+
+          # There is no empty-database asset any more: New-ImageStoreDatabase
+          # creates the file, so there is nothing to hand out in advance.
 
           Add-Content -Path $env:GITHUB_OUTPUT -Value "module_zip=$moduleZip"
-          Add-Content -Path $env:GITHUB_OUTPUT -Value "database_zip=$dbZip"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "migrator_zip=$migratorZip"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
@@ -217,7 +257,7 @@ jobs:
           name: ImageStore-${{ steps.version.outputs.tag }}
           path: |
             ${{ steps.package.outputs.module_zip }}
-            ${{ steps.package.outputs.database_zip }}
+            ${{ steps.package.outputs.migrator_zip }}
           if-no-files-found: error
 
       - name: Publish release
@@ -229,12 +269,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.version.outputs.tag }}
           MODULE_ZIP: ${{ steps.package.outputs.module_zip }}
-          DATABASE_ZIP: ${{ steps.package.outputs.database_zip }}
+          MIGRATOR_ZIP: ${{ steps.package.outputs.migrator_zip }}
           TAG_EXISTS: ${{ steps.version.outputs.tag_exists }}
         run: |
           $tag       = $env:TAG
           $moduleZip = $env:MODULE_ZIP
-          $dbZip     = $env:DATABASE_ZIP
+          $migratorZip = $env:MIGRATOR_ZIP
 
           # Single-quoted here-string: no interpolation, so backslashes and the
           # indented code block survive untouched. Placeholders filled in below.
@@ -242,17 +282,21 @@ jobs:
           ### Downloads
 
           - **__MODULE_ZIP__** — the module and its dependencies. This is the one you want.
-          - **__DATABASE_ZIP__** — an empty database (DataStore.mdf, DataStore_log.ldf) and the
-            schema script (CreateDatabase.txt). Only needed once, when setting up a new project;
-            the contents are the same in every release.
+          - **__MIGRATOR_ZIP__** — only for upgrading an existing Sql Server library. Not needed
+            for a new one.
 
           ### Usage
 
-          Unpack the module archive into a folder and load it:
+          Unpack the module archive into a folder as a whole, then:
 
+              pwsh
               Import-Module .\ImageStore.dll
+              New-ImageStoreDatabase .\library.db
 
-          Requires Windows, .NET Framework 4.8.1 and SQL Server 2017 (LocalDB or Express is enough).
+          There is no database server to install: a library is a single file, and
+          New-ImageStoreDatabase creates it and opens it in one step.
+
+          Requires Windows, PowerShell 7.6 or later, and the .NET 10 Desktop Runtime.
 
           Built from commit __SHA__.
           '@
@@ -260,7 +304,7 @@ jobs:
           # .Replace(), not -replace: a plain string swap with no regex meaning
           # attached to the replacement text.
           $notes = $notes.Replace('__MODULE_ZIP__', $moduleZip)
-          $notes = $notes.Replace('__DATABASE_ZIP__', $dbZip)
+          $notes = $notes.Replace('__MIGRATOR_ZIP__', $migratorZip)
           $notes = $notes.Replace('__SHA__', $env:GITHUB_SHA)
 
           Set-Content -Path release-notes.md -Value $notes -Encoding utf8
@@ -268,7 +312,7 @@ jobs:
           # Splatted as an array, so each element reaches gh as one argument
           # without going through a shell. Both archives are attached to the
           # same release.
-          $ghArgs = @($tag, $moduleZip, $dbZip, '--title', $tag, '--notes-file', 'release-notes.md', '--generate-notes')
+          $ghArgs = @($tag, $moduleZip, $migratorZip, '--title', $tag, '--notes-file', 'release-notes.md', '--generate-notes')
           if ($env:TAG_EXISTS -ne 'true') {
               # Tag does not exist yet — gh creates it on the commit being built.
               $ghArgs += @('--target', $env:GITHUB_SHA)

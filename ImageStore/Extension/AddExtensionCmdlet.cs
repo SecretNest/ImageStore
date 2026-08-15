@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -31,14 +31,14 @@ namespace SecretNest.ImageStore.Extension
             var connection = DatabaseConnection.Current;
             var id = Guid.NewGuid();
 
-            using (var command = new SqlCommand("Insert into [Extension] values(@Id, @Extension, @IsImage, @Ignored)"))
+            using (var command = new SqliteCommand("Insert into [Extension] values(@Id, @Extension, @IsImage, @Ignored)"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
-                command.Parameters.Add(new SqlParameter("@Extension", System.Data.SqlDbType.NVarChar, 256) { Value = Extension });
-                command.Parameters.Add(new SqlParameter("@IsImage", System.Data.SqlDbType.Bit) { Value = IsImage });
-                command.Parameters.Add(new SqlParameter("@Ignored", System.Data.SqlDbType.Bit) { Value = Ignored });
+                command.Parameters.AddGuid("@Id", id);
+                command.Parameters.AddText("@Extension", Extension);
+                command.Parameters.AddBool("@IsImage", IsImage);
+                command.Parameters.AddBool("@Ignored", Ignored);
 
                 if (command.ExecuteNonQuery() > 0)
                 {

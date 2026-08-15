@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -25,11 +25,11 @@ namespace SecretNest.ImageStore.SimilarFile
 
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Delete from [SimilarFile] where [Id]=@Id"))
+            using (var command = new SqliteCommand("Delete from [SimilarFile] where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
+                command.Parameters.AddGuid("@Id", Id);
 
                 if (command.ExecuteNonQuery() == 0)
                 {

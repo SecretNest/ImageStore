@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +12,12 @@ namespace SecretNest.ImageStore.SimilarFile
         internal static bool MarkIgnore(Guid similarFileId, IgnoredMode ignoredMode)
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Update [SimilarFile] set [IgnoredMode]=@IgnoredMode where [Id]=@Id"))
+            using (var command = new SqliteCommand("Update [SimilarFile] set [IgnoredMode]=@IgnoredMode where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@IgnoredMode", System.Data.SqlDbType.Int) { Value = (int)ignoredMode });
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = similarFileId });
+                command.Parameters.AddInt("@IgnoredMode", (int)ignoredMode);
+                command.Parameters.AddGuid("@Id", similarFileId);
 
                 return (command.ExecuteNonQuery() == 1);
             }

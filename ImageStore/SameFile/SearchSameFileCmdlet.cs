@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -33,23 +33,18 @@ namespace SecretNest.ImageStore.SameFile
 
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand())
+            using (var command = new SqliteCommand())
             {
                 string text = " [Id],[Sha1Hash],[FileId],[IsIgnored] from [SameFile] ";
 
-                if (Top.HasValue)
-                {
-                    text = "SELECT TOP " + Top.Value.ToString() + text;
-                }
-                else
-                {
-                    text = "SELECT" + text;
-                }
+                //SQLite has no TOP; the row limit goes on the end as LIMIT, after
+                //the clauses appended below.
+                text = "SELECT" + text;
 
                 if (Sha1Hash != null)
                 {
                     text += "Where [Sha1Hash]=@Sha1Hash";
-                    command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = Sha1Hash });
+                    command.Parameters.AddBlob("@Sha1Hash", Sha1Hash);
                     if (OnlyIgnored.IsPresent)
                         text += " and [IsIgnored]=1";
                     else if (!IncludesIgnored.IsPresent)
@@ -73,6 +68,9 @@ namespace SecretNest.ImageStore.SameFile
                 }
 
                 command.CommandText = text + " order by [Sha1Hash]";
+
+                if (Top.HasValue)
+                    command.CommandText += " limit " + Top.Value.ToString();
                 command.Connection = connection;
                 command.CommandTimeout = 0;
 
@@ -82,9 +80,9 @@ namespace SecretNest.ImageStore.SameFile
                 {
                     while (reader.Read())
                     {
-                        ImageStoreSameFile line = new ImageStoreSameFile((Guid)reader[0], (byte[])reader[1], (Guid)reader[2])
+                        ImageStoreSameFile line = new ImageStoreSameFile(reader.GetGuid(0), (byte[])reader[1], reader.GetGuid(2))
                         {
-                            IsIgnored = (bool)reader[3]
+                            IsIgnored = reader.GetBoolean(3)
                         };
                         result.Add(line);
                     }

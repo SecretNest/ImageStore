@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -37,15 +37,15 @@ namespace SecretNest.ImageStore.Folder
             var connection = DatabaseConnection.Current;
             var id = Guid.NewGuid();
 
-            using (var command = new SqlCommand("Insert into [Folder] values(@Id, @Name, @Path, @CompareImageWith, @IsSealed)"))
+            using (var command = new SqliteCommand("Insert into [Folder] values(@Id, @Name, @Path, @CompareImageWith, @IsSealed)"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
-                command.Parameters.Add(new SqlParameter("@Name", System.Data.SqlDbType.NVarChar, 256) { Value = Name });
-                command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = Path });
-                command.Parameters.Add(new SqlParameter("@CompareImageWith", System.Data.SqlDbType.Int) { Value = (int)CompareImageWith });
-                command.Parameters.Add(new SqlParameter("@IsSealed", System.Data.SqlDbType.Bit) { Value = IsSealed });
+                command.Parameters.AddGuid("@Id", id);
+                command.Parameters.AddText("@Name", Name);
+                command.Parameters.AddText("@Path", Path);
+                command.Parameters.AddInt("@CompareImageWith", (int)CompareImageWith);
+                command.Parameters.AddBool("@IsSealed", IsSealed);
 
                 if (command.ExecuteNonQuery() > 0)
                 {

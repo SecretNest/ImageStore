@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -34,26 +34,26 @@ namespace SecretNest.ImageStore.File
                 throw new ArgumentNullException(nameof(FileName));
 
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Id],[Path],[FileName],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [FolderId]=@FolderId and [Path]=@Path and [FileName]=@FileName and [ExtensionId]=@ExtensionId"))
+            using (var command = new SqliteCommand("Select [Id],[Path],[FileName],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [FolderId]=@FolderId and [Path]=@Path and [FileName]=@FileName and [ExtensionId]=@ExtensionId"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = FolderId });
-                command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256) { Value = Path });
-                command.Parameters.Add(new SqlParameter("@FileName", System.Data.SqlDbType.NVarChar, 256) { Value = FileName });
-                command.Parameters.Add(new SqlParameter("@ExtensionId", System.Data.SqlDbType.UniqueIdentifier) { Value = ExtensionId });
+                command.Parameters.AddGuid("@FolderId", FolderId);
+                command.Parameters.AddText("@Path", Path);
+                command.Parameters.AddText("@FileName", FileName);
+                command.Parameters.AddGuid("@ExtensionId", ExtensionId);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     if (reader.Read())
                     {
-                        ImageStoreFile line = new ImageStoreFile((Guid)reader[0], FolderId, (string)reader[1], (string)reader[2], ExtensionId)
+                        ImageStoreFile line = new ImageStoreFile(reader.GetGuid(0), FolderId, reader.GetString(1), reader.GetString(2), ExtensionId)
                         {
                             ImageHash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[3]),
                             Sha1Hash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[4]),
-                            FileSize = (int)reader[5],
-                            FileStateCode = (int)reader[6],
-                            ImageComparedThreshold = (float)reader[7]
+                            FileSize = reader.GetInt32(5),
+                            FileStateCode = reader.GetInt32(6),
+                            ImageComparedThreshold = reader.GetFloat(7)
                         };
                         WriteObject(line);
                     }

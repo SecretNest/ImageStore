@@ -4,7 +4,7 @@ using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -139,7 +139,7 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
             var sqlCommandTextGetNewFiles = "select [FolderId],[Path],[Id],[ImageHash],[ImageComparedThreshold],[FileName],[ExtensionId] from [File] where [ImageHash] is not null order by [FolderId],[Path]";
-            using (var command = new SqlCommand(sqlCommandTextGetNewFiles, connection) { CommandTimeout = 0 })
+            using (var command = new SqliteCommand(sqlCommandTextGetNewFiles, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
                 Guid lastFolderKey = Guid.Empty;
@@ -152,13 +152,13 @@ namespace SecretNest.ImageStore.SimilarFile
 
                 while (reader.Read())
                 {
-                    var folderId = (Guid)reader[0];
-                    string path = (string)reader[1];
-                    var fileId = (Guid)reader[2];
+                    var folderId = reader.GetGuid(0);
+                    string path = reader.GetString(1);
+                    var fileId = reader.GetGuid(2);
                     var imageHash = (byte[])reader[3];
-                    var threshold = (float)reader[4];
-                    var fileName = (string)reader[5];
-                    var extensionId = (Guid)reader[6];
+                    var threshold = reader.GetFloat(4);
+                    var fileName = reader.GetString(5);
+                    var extensionId = reader.GetGuid(6);
 
                     var folder = folders[folderId];
                     var fullPath = FileHelper.GetFullFilePath(folder.Item2, path, fileName, extensions[extensionId]);
@@ -196,26 +196,26 @@ namespace SecretNest.ImageStore.SimilarFile
                 reader.Close();
             }
 
-            var sqlCommandTextCreateTable = "Create table #filesToBeCompared ([Id] uniqueidentifier)";
-            using (var command = new SqlCommand(sqlCommandTextCreateTable, connection))
+            var sqlCommandTextCreateTable = "Create temp table filesToBeCompared ([Id] BLOB)";
+            using (var command = new SqliteCommand(sqlCommandTextCreateTable, connection))
             {
                 command.ExecuteNonQuery();
             }
-            var sqlCommandTextInsertFilesToBeCompared = "Insert into #filesToBeCompared Select [Id] from [File] where [ImageComparedThreshold] < @ImageComparedThreshold";
-            using (var command = new SqlCommand(sqlCommandTextInsertFilesToBeCompared, connection) { CommandTimeout = 0 })
+            var sqlCommandTextInsertFilesToBeCompared = "Insert into filesToBeCompared Select [Id] from [File] where [ImageComparedThreshold] < @ImageComparedThreshold";
+            using (var command = new SqliteCommand(sqlCommandTextInsertFilesToBeCompared, connection) { CommandTimeout = 0 })
             {
-                command.Parameters.Add(new SqlParameter("@ImageComparedThreshold", System.Data.SqlDbType.Real) { Value = ImageComparedThreshold });
+                command.Parameters.AddReal("@ImageComparedThreshold", ImageComparedThreshold);
                 command.ExecuteNonQuery();
             }
 
-            var sqlCommandTextSelectSimilar = "Select [File1Id],[File2Id] from [SimilarFile] where [File1Id] in (Select [Id] from #filesToBeCompared) or [File2Id] in (Select [Id] from #filesToBeCompared)";
-            using (var command = new SqlCommand(sqlCommandTextSelectSimilar, connection) { CommandTimeout = 0 })
+            var sqlCommandTextSelectSimilar = "Select [File1Id],[File2Id] from [SimilarFile] where [File1Id] in (Select [Id] from filesToBeCompared) or [File2Id] in (Select [Id] from filesToBeCompared)";
+            using (var command = new SqliteCommand(sqlCommandTextSelectSimilar, connection) { CommandTimeout = 0 })
             using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
             {
                 while (reader.Read())
                 {
-                    var file1Id = (Guid)reader[0];
-                    var file2Id = (Guid)reader[1];
+                    var file1Id = reader.GetGuid(0);
+                    var file2Id = reader.GetGuid(1);
 
                     if (!existingSimilars.TryGetValue(file1Id, out var set))
                     {
@@ -234,8 +234,8 @@ namespace SecretNest.ImageStore.SimilarFile
                 reader.Close();
             }
 
-            var sqlCommandTextDeleteTable = "Drop table #filesToBeCompared";
-            using (var command = new SqlCommand(sqlCommandTextDeleteTable, connection))
+            var sqlCommandTextDeleteTable = "Drop table filesToBeCompared";
+            using (var command = new SqliteCommand(sqlCommandTextDeleteTable, connection))
             {
                 command.ExecuteNonQuery();
             }

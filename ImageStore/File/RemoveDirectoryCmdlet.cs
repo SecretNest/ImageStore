@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;

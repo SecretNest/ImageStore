@@ -3,7 +3,7 @@ using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -302,23 +302,23 @@ namespace SecretNest.ImageStore.File
 
             var connection = DatabaseConnection.Current;
 
-            using (var commandToDeleteSame = new SqlCommand("Delete from [SameFile] Where [FileId]=@Id"))
-            using (var commandToDeleteSimilar = new SqlCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
-            using (var command = new SqlCommand("Update [File] Set [ImageHash]=@ImageHash, [Sha1Hash]=@Sha1Hash, [FileSize]=@FileSize, [FileState]=@FileState, [ImageComparedThreshold]=0 where [Id]=@Id"))
+            using (var commandToDeleteSame = new SqliteCommand("Delete from [SameFile] Where [FileId]=@Id"))
+            using (var commandToDeleteSimilar = new SqliteCommand("Delete from [SimilarFile] Where [File1Id]=@Id or [File2Id]=@Id"))
+            using (var command = new SqliteCommand("Update [File] Set [ImageHash]=@ImageHash, [Sha1Hash]=@Sha1Hash, [FileSize]=@FileSize, [FileState]=@FileState, [ImageComparedThreshold]=0 where [Id]=@Id"))
             {
                 commandToDeleteSame.Connection = connection;
                 commandToDeleteSame.CommandTimeout = 0;
-                commandToDeleteSame.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
+                commandToDeleteSame.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
                 commandToDeleteSimilar.Connection = connection;
                 commandToDeleteSimilar.CommandTimeout = 0;
-                commandToDeleteSimilar.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
+                commandToDeleteSimilar.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                command.Parameters.Add(new SqlParameter("@ImageHash", System.Data.SqlDbType.Binary, 40));
-                command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20));
-                command.Parameters.Add(new SqlParameter("@FileSize", System.Data.SqlDbType.Int));
-                command.Parameters.Add(new SqlParameter("@FileState", System.Data.SqlDbType.Int));
+                command.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
+                command.Parameters.Add(new SqliteParameter("@ImageHash", SqliteType.Blob));
+                command.Parameters.Add(new SqliteParameter("@Sha1Hash", SqliteType.Blob));
+                command.Parameters.Add(new SqliteParameter("@FileSize", SqliteType.Integer));
+                command.Parameters.Add(new SqliteParameter("@FileState", SqliteType.Integer));
 
                 Tuple<Guid, byte[], byte[], int, FileState, bool> record;
 
@@ -328,7 +328,7 @@ namespace SecretNest.ImageStore.File
                     {
                         record = toWrite.Take();
 
-                        command.Parameters[0].Value = record.Item1;
+                        command.Parameters[0].Value = record.Item1.ToByteArray();
                         command.Parameters[1].Value = DBNullableReader.NullCheck(record.Item2);
                         command.Parameters[2].Value = DBNullableReader.NullCheck(record.Item3);
                         command.Parameters[3].Value = record.Item4;
@@ -343,9 +343,9 @@ namespace SecretNest.ImageStore.File
 
                         if (!record.Item6)
                         {
-                            commandToDeleteSame.Parameters[0].Value = record.Item1;
+                            commandToDeleteSame.Parameters[0].Value = record.Item1.ToByteArray();
                             commandToDeleteSame.ExecuteNonQuery();
-                            commandToDeleteSimilar.Parameters[0].Value = record.Item1;
+                            commandToDeleteSimilar.Parameters[0].Value = record.Item1.ToByteArray();
                             commandToDeleteSimilar.ExecuteNonQuery();
                         }
                     }

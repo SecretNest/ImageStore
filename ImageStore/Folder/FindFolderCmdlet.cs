@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -23,21 +23,21 @@ namespace SecretNest.ImageStore.Folder
                 throw new ArgumentNullException(nameof(Name));
 
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder] Where [Name]=@Name"))
+            using (var command = new SqliteCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder] Where [Name]=@Name"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Name", System.Data.SqlDbType.NVarChar, 256) { Value = Name });
+                command.Parameters.AddText("@Name", Name);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     if (reader.Read())
                     {
-                        ImageStoreFolder line = new ImageStoreFolder((Guid)reader[0],(string)reader[1])
+                        ImageStoreFolder line = new ImageStoreFolder(reader.GetGuid(0),reader.GetString(1))
                         {
-                            Name = (string)reader[2],
-                            CompareImageWithCode = (int)reader[3],
-                            IsSealed = (bool)reader[4]
+                            Name = reader.GetString(2),
+                            CompareImageWithCode = reader.GetInt32(3),
+                            IsSealed = reader.GetBoolean(4)
                         };
                         WriteObject(line);
                     }

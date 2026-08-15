@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -16,7 +16,10 @@ namespace SecretNest.ImageStore.Database
         {
             var connection = DatabaseConnection.Current;
 
-            using (SqlCommand command = new SqlCommand("DECLARE @dbName VARCHAR(500); SELECT @dbName = DB_NAME(); DBCC SHRINKDATABASE(@dbName)"))
+            //VACUUM rebuilds the database file, reclaiming pages freed by deletes.
+            //It cannot run inside a transaction and needs free disk space roughly
+            //equal to the database size while it works.
+            using (SqliteCommand command = new SqliteCommand("VACUUM"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;

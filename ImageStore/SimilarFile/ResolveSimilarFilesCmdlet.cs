@@ -4,7 +4,7 @@ using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -150,7 +150,7 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Select min([ImageComparedThreshold]) from [file] where [ImageHash] is not null and [FileState]=255"))
+            using (var command = new SqliteCommand("Select min([ImageComparedThreshold]) from [file] where [ImageHash] is not null and [FileState]=255"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
@@ -171,36 +171,36 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Create table #tempSimilarFile ([Id] uniqueidentifier, [File1Id] uniqueidentifier, [File2Id] uniqueidentifier, [DifferenceDegree] real, [IgnoredMode] int)", connection))
+            using (var command = new SqliteCommand("Create temp table tempSimilarFile ([Id] BLOB, [File1Id] BLOB, [File2Id] BLOB, [DifferenceDegree] REAL, [IgnoredMode] INTEGER)", connection))
             {
                 command.ExecuteNonQuery();
             }
 
-            var insertCommand = "insert into #tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
+            var insertCommand = "insert into tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
             if (!IncludesDisconnected.IsPresent) //skip while loading to memory
             {
                 insertCommand += " and [IgnoredMode]<>2";
             }
-            using (var command = new SqlCommand(insertCommand, connection) { CommandTimeout = 180 })
+            using (var command = new SqliteCommand(insertCommand, connection) { CommandTimeout = 180 })
             {
-                command.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real) { Value = DifferenceDegree });
+                command.Parameters.AddReal("@DifferenceDegree", DifferenceDegree.Value);
                 if (fileIdSpecified != Guid.Empty)
                 {
                     command.CommandText += " and ([File1Id] = @FileId or [File2Id] = @FileId)";
-                    command.Parameters.Add(new SqlParameter("@FileId", System.Data.SqlDbType.UniqueIdentifier) { Value = fileIdSpecified });
+                    command.Parameters.AddGuid("@FileId", fileIdSpecified);
                 }
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from #tempSimilarFile", connection) { CommandTimeout = 180 })
+            using (var command = new SqliteCommand("Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from tempSimilarFile", connection) { CommandTimeout = 180 })
             {
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
                     {
-                        ImageStoreSimilarFile line = new ImageStoreSimilarFile((Guid)reader[0], (Guid)reader[1], (Guid)reader[2], (float)reader[3])
+                        ImageStoreSimilarFile line = new ImageStoreSimilarFile(reader.GetGuid(0), reader.GetGuid(1), reader.GetGuid(2), reader.GetFloat(3))
                         {
-                            IgnoredModeCode = (int)reader[4]
+                            IgnoredModeCode = reader.GetInt32(4)
                         };
                         allRecords.Add(line.Id, line);
 
@@ -220,35 +220,35 @@ namespace SecretNest.ImageStore.SimilarFile
                 }
             }
 
-            using (var command = new SqlCommand("Create table #tempSimilarFileId ([Id] uniqueidentifier)", connection))
+            using (var command = new SqliteCommand("Create temp table tempSimilarFileId ([Id] BLOB)", connection))
             {
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("insert into #tempSimilarFileId select distinct * from (select [File1Id] from #tempSimilarFile union select [File2Id] from #tempSimilarFile) IdTable", connection) { CommandTimeout = 180 })
+            using (var command = new SqliteCommand("insert into tempSimilarFileId select distinct * from (select [File1Id] from tempSimilarFile union select [File2Id] from tempSimilarFile) IdTable", connection) { CommandTimeout = 180 })
             {
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("drop table #tempSimilarFile", connection))
+            using (var command = new SqliteCommand("drop table tempSimilarFile", connection))
             {
                 command.ExecuteNonQuery();
             }
 
-            using (var command = new SqlCommand("Select [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id] in (select [id] from #tempSimilarFileId)", connection) { CommandTimeout = 180 })
+            using (var command = new SqliteCommand("Select [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id] in (select [id] from tempSimilarFileId)", connection) { CommandTimeout = 180 })
             {
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     ImageStoreFile result;
                     while (reader.Read())
                     {
-                        result = new ImageStoreFile((Guid)reader[0], (Guid)reader[1], (string)reader[2], (string)reader[3], (Guid)reader[4])
+                        result = new ImageStoreFile(reader.GetGuid(0), reader.GetGuid(1), reader.GetString(2), reader.GetString(3), reader.GetGuid(4))
                         {
                             ImageHash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[5]),
                             Sha1Hash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[6]),
-                            FileSize = (int)reader[7],
-                            FileStateCode = (int)reader[8],
-                            ImageComparedThreshold = (float)reader[9]
+                            FileSize = reader.GetInt32(7),
+                            FileStateCode = reader.GetInt32(8),
+                            ImageComparedThreshold = reader.GetFloat(9)
                         };
                         allFiles.Add(result.Id, result);
                         allFileInfo.Add(result.Id, new FileInfo());
@@ -258,7 +258,7 @@ namespace SecretNest.ImageStore.SimilarFile
             }
 
 
-            using (var command = new SqlCommand("drop table #tempSimilarFileId", connection))
+            using (var command = new SqliteCommand("drop table tempSimilarFileId", connection))
             {
                 command.ExecuteNonQuery();
             }

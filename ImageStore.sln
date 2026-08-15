@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageStore", "ImageStore\ImageStore.csproj", "{8FA09B96-6FA3-4BBF-9E30-CC720D43C041}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageStore.Migrator", "ImageStore.Migrator\ImageStore.Migrator.csproj", "{3D6C1B84-9E27-4C55-9F53-2A7E51B0C6D2}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{9C14AD78-9262-4C54-927A-A58133A7CF94}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmdlet", "cmdlet", "{20CDC5AD-D882-474E-AFEB-B26828597677}"
@@ -44,6 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{EF
 	ProjectSection(SolutionItems) = preProject
 		doc\cmdlet\Database\CloseDatabase.md = doc\cmdlet\Database\CloseDatabase.md
 		doc\cmdlet\Database\CompressDatabase.md = doc\cmdlet\Database\CompressDatabase.md
+		doc\cmdlet\Database\NewDatabase.md = doc\cmdlet\Database\NewDatabase.md
 		doc\cmdlet\Database\OpenDatabase.md = doc\cmdlet\Database\OpenDatabase.md
 	EndProjectSection
 EndProject
@@ -130,13 +133,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{FD8A01E1-83A0-4C10-B69E-7CED2BD8ED1E}"
-	ProjectSection(SolutionItems) = preProject
-		Database\CreateDatabase.txt = Database\CreateDatabase.txt
-		Database\DataStore.mdf = Database\DataStore.mdf
-		Database\DataStore_log.ldf = Database\DataStore_log.ldf
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +143,10 @@ Global
 		{8FA09B96-6FA3-4BBF-9E30-CC720D43C041}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FA09B96-6FA3-4BBF-9E30-CC720D43C041}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FA09B96-6FA3-4BBF-9E30-CC720D43C041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D6C1B84-9E27-4C55-9F53-2A7E51B0C6D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D6C1B84-9E27-4C55-9F53-2A7E51B0C6D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D6C1B84-9E27-4C55-9F53-2A7E51B0C6D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D6C1B84-9E27-4C55-9F53-2A7E51B0C6D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

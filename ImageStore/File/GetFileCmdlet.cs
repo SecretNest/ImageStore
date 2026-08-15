@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -25,24 +25,24 @@ namespace SecretNest.ImageStore.File
         internal static ImageStoreFile GetFile(Guid id)
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id]=@Id"))
+            using (var command = new SqliteCommand("Select [FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File] Where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
+                command.Parameters.AddGuid("@Id", id);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     ImageStoreFile result;
                     if (reader.Read())
                     {
-                        result = new ImageStoreFile(id, (Guid)reader[0], (string)reader[1], (string)reader[2], (Guid)reader[3])
+                        result = new ImageStoreFile(id, reader.GetGuid(0), reader.GetString(1), reader.GetString(2), reader.GetGuid(3))
                         {
                             ImageHash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[4]),
                             Sha1Hash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[5]),
-                            FileSize = (int)reader[6],
-                            FileStateCode = (int)reader[7],
-                            ImageComparedThreshold = (float)reader[8]
+                            FileSize = reader.GetInt32(6),
+                            FileStateCode = reader.GetInt32(7),
+                            ImageComparedThreshold = reader.GetFloat(8)
                         };
                     }
                     else

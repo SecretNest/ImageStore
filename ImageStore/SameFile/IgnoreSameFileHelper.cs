@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +12,12 @@ namespace SecretNest.ImageStore.SameFile
         internal static bool MarkIgnore(Guid sameFileId, bool state)
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Update [SameFile] set [IsIgnored]=@IsIgnored where [Id]=@Id"))
+            using (var command = new SqliteCommand("Update [SameFile] set [IsIgnored]=@IsIgnored where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@IsIgnored", System.Data.SqlDbType.Bit) { Value = state });
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = sameFileId });
+                command.Parameters.AddBool("@IsIgnored", state);
+                command.Parameters.AddGuid("@Id", sameFileId);
 
                 return (command.ExecuteNonQuery() == 1);
             }

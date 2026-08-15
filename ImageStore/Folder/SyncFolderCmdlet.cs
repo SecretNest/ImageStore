@@ -4,7 +4,7 @@ using SecretNest.ImageStore.Folder;
 using SecretNest.ImageStore.IgnoredDirectory;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -193,15 +193,15 @@ namespace SecretNest.ImageStore.Folder
 
             if (allFiles.Length != 0)
             {
-                using (var command = new SqlCommand("Insert into [File] values(@Id, @FolderId, @Path, @FileName, @ExtensionId, NULL, NULL, -1, 0, 0)"))
+                using (var command = new SqliteCommand("Insert into [File] values(@Id, @FolderId, @Path, @FileName, @ExtensionId, NULL, NULL, -1, 0, 0)"))
                 {
                     command.Connection = connection;
                     command.CommandTimeout = 0;
-                    command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                    command.Parameters.Add(new SqlParameter("@FolderId", System.Data.SqlDbType.UniqueIdentifier) { Value = folder.Id });
-                    command.Parameters.Add(new SqlParameter("@Path", System.Data.SqlDbType.NVarChar, 256));
-                    command.Parameters.Add(new SqlParameter("@FileName", System.Data.SqlDbType.NVarChar, 256));
-                    command.Parameters.Add(new SqlParameter("@ExtensionId", System.Data.SqlDbType.UniqueIdentifier));
+                    command.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
+                    command.Parameters.AddGuid("@FolderId", folder.Id);
+                    command.Parameters.Add(new SqliteParameter("@Path", SqliteType.Text));
+                    command.Parameters.Add(new SqliteParameter("@FileName", SqliteType.Text));
+                    command.Parameters.Add(new SqliteParameter("@ExtensionId", SqliteType.Blob));
 
                     foreach (var fullFilePath in allFiles)
                     {
@@ -235,10 +235,10 @@ namespace SecretNest.ImageStore.Folder
                         if (dbFilesInDirectory == null || !dbFilesInDirectory.Remove(fileNameKey))
                         {
                             //Add file
-                            command.Parameters[0].Value = Guid.NewGuid();
+                            command.Parameters[0].Value = Guid.NewGuid().ToByteArray();
                             command.Parameters[2].Value = directoryName;
                             command.Parameters[3].Value = fileNameWithoutExtension;
-                            command.Parameters[4].Value = extension.Id;
+                            command.Parameters[4].Value = extension.Id.ToByteArray();
 
                             if (command.ExecuteNonQuery() == 0)
                             {

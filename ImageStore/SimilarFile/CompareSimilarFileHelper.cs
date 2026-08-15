@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
@@ -198,19 +198,19 @@ namespace SecretNest.ImageStore.SimilarFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var commandInserting = new SqlCommand("Insert into [SimilarFile] Values(@Id,@File1Id,@File2Id,@DifferenceDegree,0)"))
-            using (var commandUpdating = new SqlCommand("Update [File] Set [ImageComparedThreshold]=@ImageComparedThreshold where [Id]=@Id"))
+            using (var commandInserting = new SqliteCommand("Insert into [SimilarFile] Values(@Id,@File1Id,@File2Id,@DifferenceDegree,0)"))
+            using (var commandUpdating = new SqliteCommand("Update [File] Set [ImageComparedThreshold]=@ImageComparedThreshold where [Id]=@Id"))
             {
                 commandInserting.Connection = connection;
                 commandInserting.CommandTimeout = 0;
-                commandInserting.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandInserting.Parameters.Add(new SqlParameter("@File1Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandInserting.Parameters.Add(new SqlParameter("@File2Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandInserting.Parameters.Add(new SqlParameter("@DifferenceDegree", System.Data.SqlDbType.Real));
+                commandInserting.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
+                commandInserting.Parameters.Add(new SqliteParameter("@File1Id", SqliteType.Blob));
+                commandInserting.Parameters.Add(new SqliteParameter("@File2Id", SqliteType.Blob));
+                commandInserting.Parameters.Add(new SqliteParameter("@DifferenceDegree", SqliteType.Real));
                 commandUpdating.Connection = connection;
                 commandUpdating.CommandTimeout = 0;
-                commandUpdating.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier));
-                commandUpdating.Parameters.Add(new SqlParameter("@ImageComparedThreshold", System.Data.SqlDbType.Real) { Value = imageComparedThreshold });
+                commandUpdating.Parameters.Add(new SqliteParameter("@Id", SqliteType.Blob));
+                commandUpdating.Parameters.AddReal("@ImageComparedThreshold", imageComparedThreshold);
 
                 while (true)
                 {
@@ -231,11 +231,11 @@ namespace SecretNest.ImageStore.SimilarFile
                     {
                         if (targetCount > 0)
                         {
-                            commandInserting.Parameters[1].Value = item.File1Id;
+                            commandInserting.Parameters[1].Value = item.File1Id.ToByteArray();
                             foreach (var oneJob in item.Jobs)
                             {
-                                commandInserting.Parameters[0].Value = Guid.NewGuid();
-                                commandInserting.Parameters[2].Value = oneJob.File2Id;
+                                commandInserting.Parameters[0].Value = Guid.NewGuid().ToByteArray();
+                                commandInserting.Parameters[2].Value = oneJob.File2Id.ToByteArray();
                                 commandInserting.Parameters[3].Value = oneJob.Difference;
                                 if (commandInserting.ExecuteNonQuery() == 0)
                                 {
@@ -254,7 +254,7 @@ namespace SecretNest.ImageStore.SimilarFile
                         }
                         else
                         {
-                            commandUpdating.Parameters[0].Value = item.File1Id;
+                            commandUpdating.Parameters[0].Value = item.File1Id.ToByteArray();
                             if (commandUpdating.ExecuteNonQuery() == 0)
                             {
                                 var text = string.Format("Cannot update file record. Id: {0}", item.File1Id);

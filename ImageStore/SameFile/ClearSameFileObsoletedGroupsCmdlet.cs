@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -16,7 +16,7 @@ namespace SecretNest.ImageStore.SameFile
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Delete from [SameFile] where [Sha1Hash] in (Select [Sha1Hash] From [SameFile] Group by [Sha1Hash] Having count([id]) = 1)"))
+            using (var command = new SqliteCommand("Delete from [SameFile] where [Sha1Hash] in (Select [Sha1Hash] From [SameFile] Group by [Sha1Hash] Having count([id]) = 1)"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;

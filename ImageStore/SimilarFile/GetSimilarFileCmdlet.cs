@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -19,19 +19,19 @@ namespace SecretNest.ImageStore.SimilarFile
         protected override void ProcessRecord()
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] Where [Id]=@Id"))
+            using (var command = new SqliteCommand("Select [File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] Where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = Id });
+                command.Parameters.AddGuid("@Id", Id);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     if (reader.Read())
                     {
-                        ImageStoreSimilarFile line = new ImageStoreSimilarFile(Id, (Guid)reader[0], (Guid)reader[1], (float)reader[2])
+                        ImageStoreSimilarFile line = new ImageStoreSimilarFile(Id, reader.GetGuid(0), reader.GetGuid(1), reader.GetFloat(2))
                         {
-                            IgnoredModeCode = (int)reader[3]
+                            IgnoredModeCode = reader.GetInt32(3)
                         };
                         WriteObject(line);
                     }

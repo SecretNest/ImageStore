@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace SecretNest.ImageStore.Folder
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder]"))
+            using (var command = new SqliteCommand("Select [Id],[Path],[Name],[CompareImageWith],[IsSealed] from [Folder]"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
@@ -23,11 +23,11 @@ namespace SecretNest.ImageStore.Folder
                 {
                     while (reader.Read())
                     {
-                        ImageStoreFolder line = new ImageStoreFolder((Guid)reader[0], (string)reader[1])
+                        ImageStoreFolder line = new ImageStoreFolder(reader.GetGuid(0), reader.GetString(1))
                         {
-                            Name = (string)reader[2],
-                            CompareImageWithCode = (int)reader[3],
-                            IsSealed = (bool)reader[4]
+                            Name = reader.GetString(2),
+                            CompareImageWithCode = reader.GetInt32(3),
+                            IsSealed = reader.GetBoolean(4)
                         };
                         yield return line;
                     }
@@ -40,19 +40,19 @@ namespace SecretNest.ImageStore.Folder
         internal static string GetFolderPath(Guid id, out bool isSealed)
         {
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Path],[IsSealed] from [Folder] Where [Id]=@Id"))
+            using (var command = new SqliteCommand("Select [Path],[IsSealed] from [Folder] Where [Id]=@Id"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Id", System.Data.SqlDbType.UniqueIdentifier) { Value = id });
+                command.Parameters.AddGuid("@Id", id);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     string result;
                     if (reader.Read())
                     {
-                        result = (string)reader[0];
-                        isSealed = (bool)reader[1];
+                        result = reader.GetString(0);
+                        isSealed = reader.GetBoolean(1);
                     }
                     else
                     {

@@ -10,9 +10,13 @@ After PowerShell started, enter these commands:
 
     ```import-module .\ImageStore.dll```
 
-  * Opens database connection. I placed the database file in D:\ImageStoreDatabase and want to use it with Sql Server 2017 LocalDB.
+  * Opens the database. I keep the library file in D:\ImageStoreDatabase.
 
-    ```open-ImageStoreDatabase "server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\ImageStoreDatabase\DataStore.mdf;Integrated Security=True"``` 
+    ```open-ImageStoreDatabase "D:\ImageStoreDatabase\library.db"```
+
+    The first time round there is no file yet, so create one instead. It is opened as part of creating it, so this replaces the command above rather than adding to it.
+
+    ```new-ImageStoreDatabase "D:\ImageStoreDatabase\library.db"```
 
   * Makes the outputs on.
 
@@ -26,7 +30,7 @@ After PowerShell started, enter these commands:
 
 To start PowerShell from windows and apply commands above, you can enter this in one line like:
 
-    ```powershell -noexit -command "import-module .\ImageStore.dll; open-imagestoredatabase \"server=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\ImageStoreDatabase\DataStore.mdf;Integrated Security=True\"; $InformationPreference=\"Continue\"; $VerbosePreference=\"Continue\"; SetThumbprintCacheFolder \"D:\ImageStoreDatabase\Cache\""```
+    ```pwsh -noexit -command "import-module .\ImageStore.dll; open-imagestoredatabase \"D:\ImageStoreDatabase\library.db\"; $InformationPreference=\"Continue\"; $VerbosePreference=\"Continue\"; SetThumbprintCacheFolder \"D:\ImageStoreDatabase\Cache\""```
 
 # Preparation
 ## Folders

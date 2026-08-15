@@ -3,7 +3,7 @@ using SecretNest.ImageStore.File;
 using SecretNest.ImageStore.Folder;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Drawing;
 using System.Linq;
 using System.Management.Automation;
@@ -175,7 +175,7 @@ namespace SecretNest.ImageStore.SameFile
             List<byte[]> result = new List<byte[]>();
 
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("select [Sha1Hash] from [SameFile] group by [Sha1Hash] having Count([Id]) > 1"))
+            using (var command = new SqliteCommand("select [Sha1Hash] from [SameFile] group by [Sha1Hash] having Count([Id]) > 1"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
@@ -211,25 +211,25 @@ namespace SecretNest.ImageStore.SameFile
 
             List<SameFileMatchingRecord> recordsInGroup = new List<SameFileMatchingRecord>();
             
-            using (var command = new SqlCommand("select [SameFile].[Id],[File].[FolderId],[SameFile].[FileId],[File].[Path],[File].[FileName],[File].[ExtensionId],[SameFile].[IsIgnored] from [SameFile] inner join [File] on SameFile.FileId = [File].[Id] where [SameFile].[Sha1Hash]=@Sha1Hash"))
+            using (var command = new SqliteCommand("select [SameFile].[Id],[File].[FolderId],[SameFile].[FileId],[File].[Path],[File].[FileName],[File].[ExtensionId],[SameFile].[IsIgnored] from [SameFile] inner join [File] on SameFile.FileId = [File].[Id] where [SameFile].[Sha1Hash]=@Sha1Hash"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Sha1Hash", System.Data.SqlDbType.Binary, 20) { Value = sha1Hash });
+                command.Parameters.AddBlob("@Sha1Hash", sha1Hash);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
                     {
-                        var sameFileId = (Guid)reader[0];
-                        var folderId = (Guid)reader[1];
+                        var sameFileId = reader.GetGuid(0);
+                        var folderId = reader.GetGuid(1);
                         SameFileMatchingRecord record = new SameFileMatchingRecord()
                         {
                             IsInTargetFolder = folderIds.Contains(folderId),
                             FolderId = folderId,
-                            FileId = (Guid)reader[2],
-                            FileName = GetFileName(folderId, (string)reader[3], (string)reader[4], (Guid)reader[5]),
-                            IsIgnored = (bool)reader[6],
+                            FileId = reader.GetGuid(2),
+                            FileName = GetFileName(folderId, reader.GetString(3), reader.GetString(4), reader.GetGuid(5)),
+                            IsIgnored = reader.GetBoolean(6),
                             GroupNumber = currentGroupNumber,
                             Sha1Hash = sha1Hash
                         };

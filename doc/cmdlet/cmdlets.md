@@ -3,12 +3,13 @@
 Here lists all cmdlets provided from ImageStore.
 
 # Database
-Operates on [database](../concept/Database.md) connection or shrinks database.
+Creates, opens and closes the [database](../concept/Database.md) file, or compacts it.
 
 |Command|Alias|Description|
 |---|---|---|
-|[Open-ImageStoreDatabase](Database/OpenDatabase.md)|OpenDatabase|Sets connection string and opens connection to the target database.|
-|[Compress-ImageStoreDatabase](Database/CompressDatabase.md)|ShrinkDatabase, CompressDatabase, Shrink-ImageStoreDatabase|Runs ShrinkDatabase command in connected database to shrink the size of the data and log files.|
+|[New-ImageStoreDatabase](Database/NewDatabase.md)|NewDatabase|Creates a database file, builds the schema and opens it.|
+|[Open-ImageStoreDatabase](Database/OpenDatabase.md)|OpenDatabase|Opens an existing database file.|
+|[Compress-ImageStoreDatabase](Database/CompressDatabase.md)|ShrinkDatabase, CompressDatabase, Shrink-ImageStoreDatabase|Runs VACUUM to reclaim space left by deleted records.|
 |[Close-ImageStoreDatabase](Database/CloseDatabase.md)|CloseDatabase|Closes the connection to the database.|
 
 # Folder

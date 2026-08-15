@@ -48,7 +48,7 @@ Dependencies come from NuGet; nothing is committed to the repo:
 | Package | Note |
 |---|---|
 | `Shipwreck.Phash`, `Shipwreck.Phash.Bitmaps` | Upstream. A fork used to be vendored here for extra `GetCrossCorrelation` overloads; upstream 0.5.0 has them. |
-| `Microsoft.Data.SqlClient` | Replaces `System.Data.SqlClient`, which has no .NET 10 story. |
+| `Microsoft.Data.Sqlite` | The database. `ImageStore.Migrator` additionally uses `Microsoft.Data.SqlClient`, which the module itself no longer references. |
 | `System.Management.Automation` | `ExcludeAssets="runtime;native"` — see below. |
 
 **`ExcludeAssets` on `System.Management.Automation` must keep both `runtime` and `native`.**
@@ -59,15 +59,19 @@ payload into the output — `pwrshplugin.dll`, `PowerShell.Core.Instrumentation.
 ~36 files and is invisible unless the package is opened.
 
 Use `dotnet publish`, not `dotnet build`, when producing something to ship: the module needs its
-full dependency closure, `ImageStore.deps.json`, and `runtimes/win-*/native/Microsoft.Data.SqlClient.SNI.dll`.
-A package missing SNI loads fine and then fails on the first database connection.
+full dependency closure, `ImageStore.deps.json`, and `runtimes/win-*/native/e_sqlite3.dll`.
+A package missing the native engine loads fine and then throws on the first query.
+
+SQLite ships that native library for every platform it supports. The workflow deletes every
+non-`win*` runtime directory before packaging; skipping that takes the module from ~6 MB to 34 MB
+of Linux and macOS binaries that a Windows-only module can never load.
 
 ## Repository layout
 
 ```
 ImageStore.sln          Solution; also carries every doc/*.md as SolutionItems
 ImageStore/             The only real project
-  Database/             Open/Close/Compress database cmdlets
+  Database/             New/Open/Close/Compress cmdlets, and SqliteSchema.cs
   DatabaseShared/       Connection singleton + SQL building helpers
   Folder/               Folder entity, helper, cmdlets
   IgnoredDirectory/     Directory-exclusion entity, helper, cmdlets
@@ -75,7 +79,7 @@ ImageStore/             The only real project
   File/                 File entity, hashing (Measure*), file-system operations
   SameFile/             SHA-1 duplicate detection + WinForms review UI
   SimilarFile/          pHash similarity detection + WinForms review UI + thumbprint cache
-Database/               CreateDatabase.txt (full schema script) + an empty DataStore.mdf/.ldf
+ImageStore.Migrator/    Console tool: copies a Sql Server library into a SQLite file
 doc/                    User documentation: concept/, cmdlet/, type/, walkthrough/
 ```
 
@@ -87,7 +91,11 @@ Keep that alignment when adding features.
 ### One class per cmdlet
 
 Every cmdlet is its own file named `<Verb><Noun>Cmdlet.cs`, deriving from
-`System.Management.Automation.Cmdlet` (not `PSCmdlet`). Cross-cmdlet logic lives in a
+`System.Management.Automation.Cmdlet`. The two exceptions are `New-ImageStoreDatabase` and
+`Open-ImageStoreDatabase`, which derive from `PSCmdlet` because they need
+`GetUnresolvedProviderPathFromPSPath` — the PowerShell location and the process working directory
+are routinely different, and resolving a path against the wrong one opens a file somewhere the
+user did not mean. Cross-cmdlet logic lives in a
 `<Area>Helper.cs` static class in the same directory. Entity classes are named
 `ImageStore<Thing>.cs` and are the public surface returned to PowerShell.
 
@@ -96,50 +104,65 @@ Every cmdlet is its own file named `<Verb><Noun>Cmdlet.cs`, deriving from
 Two static fields hold state for the whole PowerShell session:
 
 - `DatabaseConnection.Current` (`DatabaseShared/DatabaseConnection.cs`) — a single open
-  `SqlConnection`, set by `Open-ImageStoreDatabase`, torn down by `Close-ImageStoreDatabase`.
-  Accessing it before opening throws `InvalidOperationException("Database is not specified.")`.
-  Every cmdlet starts with `var connection = DatabaseConnection.Current;`.
+  `SqliteConnection`, set by `Open-ImageStoreDatabase` or `New-ImageStoreDatabase`, torn down by
+  `Close-ImageStoreDatabase`. Accessing it before opening throws
+  `InvalidOperationException("Database is not specified.")`. Every cmdlet starts with
+  `var connection = DatabaseConnection.Current;`.
 - `LoadImageHelper.cachePath` (`SimilarFile/LoadImageHelper.cs`) — the thumbprint cache directory,
   set by `Set-ImageStoreThumbprintCacheFolder` (resolved **relative to the assembly folder**),
   cleared by `Clear-ImageStoreThumbprintCacheFolder`. `null` means caching is disabled.
 
 Consequences to respect: there is exactly one connection, so nothing may run two DB-touching
-cmdlets concurrently; and several code paths create `#temp` tables, which only work because that
-one connection is reused for the whole operation. Neither setting survives a PowerShell restart.
+cmdlets concurrently; and several code paths create temp tables, which are connection-scoped and
+only work because that one connection is reused for the whole operation. Neither setting survives
+a PowerShell restart.
+
+`DatabaseShared/ModuleLifetime.cs` closes the database on `Remove-Module` (`IModuleAssemblyCleanup`)
+and on host exit (`AppDomain.ProcessExit`). Both are needed: neither covers the other. `Close()` is
+idempotent and locked because they can race the pipeline thread.
 
 ### ADO.NET conventions
 
-Raw `Microsoft.Data.SqlClient` throughout — no ORM, no EF, no async. Only the namespace differs
-from the old `System.Data.SqlClient`; the type names are the same, and `SqlDbType` is still
-`System.Data.SqlDbType`. The consistent shape is:
+Raw `Microsoft.Data.Sqlite` throughout — no ORM, no EF, no async. The consistent shape is:
 
 ```csharp
 var connection = DatabaseConnection.Current;
-using (var command = new SqlCommand("Select [Id],[Extension] from [Extension]"))
+using (var command = new SqliteCommand("Select [Id],[Extension] from [Extension]"))
 {
     command.Connection = connection;
     command.CommandTimeout = 0;                 // long-running by design; do not remove
-    command.Parameters.Add(new SqlParameter("@Id", SqlDbType.UniqueIdentifier) { Value = id });
+    command.Parameters.AddGuid("@Id", id);      // never bind a Guid directly - see below
     using (var reader = command.ExecuteReader(CommandBehavior.SequentialAccess))
     {
-        while (reader.Read()) { /* read by ordinal */ }
+        while (reader.Read()) { /* reader.GetGuid(0), GetString(1), ... */ }
         reader.Close();
     }
 }
 ```
 
+- **Read with typed getters, never `(T)reader[i]`.** SQLite has five storage classes, so
+  `reader[i]` returns `long` for every integer and bool, `double` for every real, and `string` or
+  `byte[]` for a Guid. Casting directly throws `InvalidCastException`. `GetGuid`, `GetBoolean`,
+  `GetInt32` and `GetFloat` all convert correctly.
+- **Bind Guids through `Parameters.AddGuid`** (`DatabaseShared/SqliteParameterExtensions.cs`).
+  Binding a `Guid` directly makes the provider store 36-character TEXT while the schema says BLOB,
+  and the failure is silent — queries simply match nothing. The same file has `AddBlob`, `AddText`,
+  `AddInt`, `AddBool` and `AddReal`.
 - `CommandTimeout = 0` (infinite) is deliberate — comparison passes can run for hours or days.
 - Columns are read **by ordinal**, so changing the `Select` list means changing the indices too.
-- Nullable columns go through `DBNullableReader.ConvertFromReferenceType<T>` /
-  `ConvertFromValueType<T>`.
+- Nullable columns go through `DBNullableReader.ConvertFromReferenceType<T>`.
 - **Never concatenate user values into SQL.** Dynamic filters are built with
   `DatabaseShared/WhereCauseBuilder.cs`, which appends parameterized predicates
   (`AddStringComparingCause`, `AddIntComparingCause`, `AddBitComparingCause`,
   `AddUniqueIdentifierComparingCause`, `AddRealComparingCause`, `AddIntInRangeCause`) and emits
-  the final clause via `ToFullWhereCommand()`. `LIKE` values are escaped by
-  `SqlServerLikeValueBuilder`.
+  the final clause via `ToFullWhereCommand()`.
+- `LIKE` values are escaped by `SqliteLikeValueBuilder`, and every `LIKE` needs
+  `SqliteLikeValueBuilder.EscapeClause` appended — SQLite has no character classes, so escaping
+  only works through an explicit `ESCAPE`. Do not reintroduce quote-doubling: these are parameters,
+  never parsed as SQL, and doubling corrupted searches for names containing an apostrophe.
 - The name "Cause" is a long-standing misspelling of "Clause" in this codebase. Match the existing
   spelling rather than renaming.
+- SQLite has no `TOP`; row limits are `LIMIT n` **appended after** the where and order by clauses.
 
 ### PowerShell surface conventions
 
@@ -190,18 +213,35 @@ exist to keep large lists from flickering.
 
 ## Data model
 
-Schema lives in `Database/CreateDatabase.txt` (SQL Server 2017; LocalDB/Express are fine, attached
-`.mdf` mode is the recommended setup). All primary keys are `uniqueidentifier` generated in C# with
-`Guid.NewGuid()`, never by the database.
+Schema lives in `ImageStore/Database/SqliteSchema.cs`, as the statements
+`New-ImageStoreDatabase` executes. `ImageStore.Migrator` compiles that same file **by linked
+compile item** — a migrated database and a freshly created one have to match, and two copies would
+eventually disagree. Change it in one place only.
+
+All primary keys are Guids generated in C# with `Guid.NewGuid()`, never by the database, and stored
+as 16-byte `BLOB`.
 
 | Table | Notes |
 |---|---|
 | `Folder` | Root of an image library. `CompareImageWith` controls comparison scope. `IsSealed` marks read-only libraries. |
 | `IgnoredDirectory` | Per-folder exclusions, optionally recursive. |
 | `Extension` | One row per file extension; `IsImage` and `Ignored` drive what gets hashed. |
-| `File` | `Path` + `FileName` + `ExtensionId` relative to the folder; `ImageHash binary(40)` (pHash), `Sha1Hash binary(20)`, `FileState`, `ImageComparedThreshold`. |
+| `File` | `Path` + `FileName` + `ExtensionId` relative to the folder; `ImageHash` (pHash, 40 bytes), `Sha1Hash` (20 bytes), `FileState`, `ImageComparedThreshold`. |
 | `SameFile` | Rows grouped by shared `Sha1Hash`; `IsIgnored` hides a row from review. |
 | `SimilarFile` | Pair `File1Id`/`File2Id` with `DifferenceDegree` and `IgnoredMode`. |
+
+Two schema details are load-bearing:
+
+- **`COLLATE NOCASE`** on `Path`, `FileName`, `Extension`, `Name` and `Directory`. Without it path
+  comparison turns case-sensitive, which contradicts both the Windows file system and the
+  in-memory `StringComparer.OrdinalIgnoreCase` use, and the UNIQUE indexes stop catching `.JPG`
+  versus `.jpg`. Note the limit: SQLite's NOCASE folds ASCII only, so accented names still compare
+  exactly.
+- **Cascades are asymmetric, deliberately.** `File`, `IgnoredDirectory` and `SameFile` cascade from
+  their parent; `SimilarFile` does not. That is why `FileHelper` deletes `SimilarFile` rows by hand
+  before deleting files, and why `RemoveFolderCmdlet` deletes only `Folder` and `SimilarFile` and
+  lets the rest cascade. `DatabaseConnection` sets `PRAGMA foreign_keys = ON` explicitly rather
+  than relying on the provider default.
 
 Enums that must stay in sync with the stored `int` values:
 
@@ -243,21 +283,24 @@ Use it for anything risky: nothing here can be *run* outside Windows, so CI is t
 feedback before merging.
 
 Each release carries two assets: `ImageStore-<tag>.zip` (the whole publish tree minus `.pdb`) and
-`ImageStore-Database-<tag>.zip` (the empty `.mdf`/`.ldf` and `CreateDatabase.txt`). The database is
-deliberately separate — its contents are identical in every release and are only needed once, when
-setting up a project. The module archive is copied wholesale rather than as flat `*.dll`, because
-`deps.json` and `runtimes/win-*/native/` have to keep their layout.
+`ImageStore-Migrator-<tag>.zip`. The migrator is separate because it is needed once per library, by
+the few users coming from Sql Server, and it carries the whole SqlClient dependency tree the module
+no longer has. There is no empty-database asset any more — `New-ImageStoreDatabase` creates the
+file. The module archive is copied wholesale rather than as flat `*.dll`, because `deps.json` and
+`runtimes/win-*/native/` have to keep their layout.
 
 The "Verify build output" step guards the package in both directions:
 
 - **Nothing missing.** `ImageStore.dll`, `ImageStore.deps.json`, both `Shipwreck.Phash*` dlls,
-  `Microsoft.Data.SqlClient.dll`, and — checked recursively — the native SNI library.
+  `Microsoft.Data.Sqlite.dll`, the three `SQLitePCLRaw.*` dlls, and the native `e_sqlite3.dll`
+  under `runtimes\win-x64\native` — which also proves the non-Windows trim did not take it.
 - **Nothing extra.** No `System.Management.Automation.dll`, `pwrshplugin.dll`,
   `PowerShell.Core.Instrumentation.dll`, `libpsl-native.*` or `getfilesiginforedist.dll`. These
   belong to the PowerShell host and are kept out by `ExcludeAssets="runtime;native"`; the check is
-  the net for a regression, since an oversized package otherwise looks perfectly healthy. Both
-  halves of this have already caught a real mistake — v2026.08.15.1 shipped the reference assembly,
-  and the native payload leaked in during the .NET 10 upgrade.
+  the net for a regression, since an oversized package otherwise looks perfectly healthy. It also
+  asserts no `Microsoft.Data.SqlClient.dll` reaches the module. Both halves have already caught
+  real mistakes — v2026.08.15.1 shipped the reference assembly, and the native payload leaked in
+  during the .NET 10 upgrade.
 
 The workflow does not touch `AssemblyInfo.cs`: the dll stays at `1.0.0.0` and the version lives
 only in the tag, release title, and asset name.

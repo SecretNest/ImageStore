@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.DatabaseShared;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -85,18 +85,13 @@ namespace SecretNest.ImageStore.File
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand(" [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File]"))
+            using (var command = new SqliteCommand(" [Id],[FolderId],[Path],[FileName],[ExtensionId],[ImageHash],[Sha1Hash],[FileSize],[FileState],[ImageComparedThreshold] from [File]"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                if (Top.HasValue)
-                {
-                    command.CommandText = "SELECT TOP " + Top.Value.ToString() + command.CommandText;
-                }
-                else
-                {
-                    command.CommandText = "SELECT" + command.CommandText;
-                }
+                //SQLite has no TOP; the row limit goes on the end as LIMIT, after
+                //the where and order by clauses appended below.
+                command.CommandText = "SELECT" + command.CommandText;
 
                 WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
                 whereCauseBuilder.AddUniqueIdentifierComparingCause("FolderId", FolderId);
@@ -127,19 +122,22 @@ namespace SecretNest.ImageStore.File
 
                 command.CommandText += " order by [FolderId], [Path], [FileName], [ExtensionId], [FileState]";
 
+                if (Top.HasValue)
+                    command.CommandText += " limit " + Top.Value.ToString();
+
                 List<ImageStoreFile> result = new List<ImageStoreFile>();
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
                     {
-                        ImageStoreFile line = new ImageStoreFile((Guid)reader[0], (Guid)reader[1], (string)reader[2], (string)reader[3], (Guid)reader[4])
+                        ImageStoreFile line = new ImageStoreFile(reader.GetGuid(0), reader.GetGuid(1), reader.GetString(2), reader.GetString(3), reader.GetGuid(4))
                         {
                             ImageHash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[5]),
                             Sha1Hash = DBNullableReader.ConvertFromReferenceType<byte[]>(reader[6]),
-                            FileSize = (int)reader[7],
-                            FileStateCode = (int)reader[8],
-                            ImageComparedThreshold = (float)reader[9]
+                            FileSize = reader.GetInt32(7),
+                            FileStateCode = reader.GetInt32(8),
+                            ImageComparedThreshold = reader.GetFloat(9)
                         };
                         result.Add(line);
                     }

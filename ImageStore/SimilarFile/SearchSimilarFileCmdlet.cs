@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.DatabaseShared;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -57,18 +57,13 @@ namespace SecretNest.ImageStore.SimilarFile
             var connection = DatabaseConnection.Current;
             string commandPart = " [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile]";
 
-            using (var command = new SqlCommand() { CommandTimeout = 0 })
+            using (var command = new SqliteCommand() { CommandTimeout = 0 })
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                if (Top.HasValue)
-                {
-                    command.CommandText = "SELECT TOP " + Top.Value.ToString() + commandPart;
-                }
-                else
-                {
-                    command.CommandText = "SELECT" + commandPart;
-                }
+                //SQLite has no TOP; the row limit goes on the end as LIMIT, after
+                //the where and order by clauses appended below.
+                command.CommandText = "SELECT" + commandPart;
 
 
                 WhereCauseBuilder whereCauseBuilder = new WhereCauseBuilder(command.Parameters);
@@ -78,13 +73,13 @@ namespace SecretNest.ImageStore.SimilarFile
                     if (AnotherFileId.HasValue)
                     {
                         whereCauseBuilder.AddPlainCause("(([File1Id] = @File1Id and [File2Id] = @File2Id) or ([File2Id] = @File1Id and [File1Id] = @File2Id))");
-                        command.Parameters.Add(new SqlParameter("@File1Id", System.Data.SqlDbType.UniqueIdentifier) { Value = FileId.Value });
-                        command.Parameters.Add(new SqlParameter("@File2Id", System.Data.SqlDbType.UniqueIdentifier) { Value = AnotherFileId.Value });
+                        command.Parameters.AddGuid("@File1Id", FileId.Value);
+                        command.Parameters.AddGuid("@File2Id", AnotherFileId.Value);
                     }
                     else
                     {
                         whereCauseBuilder.AddPlainCause("([File1Id] = @FileId or [File2Id] = @FileId)");
-                        command.Parameters.Add(new SqlParameter("@FileId", System.Data.SqlDbType.UniqueIdentifier) { Value = FileId.Value });
+                        command.Parameters.AddGuid("@FileId", FileId.Value);
                     }
                 }
 
@@ -111,15 +106,18 @@ namespace SecretNest.ImageStore.SimilarFile
                     command.CommandText += " order by [DifferenceDegree]";
                 }
 
+                if (Top.HasValue)
+                    command.CommandText += " limit " + Top.Value.ToString();
+
                 List<ImageStoreSimilarFile> result = new List<ImageStoreSimilarFile>();
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     while (reader.Read())
                     {
-                        ImageStoreSimilarFile line = new ImageStoreSimilarFile((Guid)reader[0], (Guid)reader[1], (Guid)reader[2], (float)reader[3])
+                        ImageStoreSimilarFile line = new ImageStoreSimilarFile(reader.GetGuid(0), reader.GetGuid(1), reader.GetGuid(2), reader.GetFloat(3))
                         {
-                            IgnoredModeCode = (int)reader[4]
+                            IgnoredModeCode = reader.GetInt32(4)
                         };
                         result.Add(line);
                     }

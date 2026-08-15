@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -22,21 +22,21 @@ namespace SecretNest.ImageStore.Extension
                 throw new ArgumentNullException(nameof(Extension));
 
             var connection = DatabaseConnection.Current;
-            using (var command = new SqlCommand("Select [Id],[Extension],[IsImage],[Ignored] from [Extension] Where [Extension]=@Extension"))
+            using (var command = new SqliteCommand("Select [Id],[Extension],[IsImage],[Ignored] from [Extension] Where [Extension]=@Extension"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
-                command.Parameters.Add(new SqlParameter("@Extension", System.Data.SqlDbType.NVarChar, 256) { Value = Extension });
+                command.Parameters.AddText("@Extension", Extension);
 
                 using (var reader = command.ExecuteReader(System.Data.CommandBehavior.SequentialAccess))
                 {
                     if (reader.Read())
                     {
-                        ImageStoreExtension line = new ImageStoreExtension((Guid)reader[0])
+                        ImageStoreExtension line = new ImageStoreExtension(reader.GetGuid(0))
                         {
-                            Extension = (string)reader[1],
-                            IsImage = (bool)reader[2],
-                            Ignored = (bool)reader[3]
+                            Extension = reader.GetString(1),
+                            IsImage = reader.GetBoolean(2),
+                            Ignored = reader.GetBoolean(3)
                         };
                         WriteObject(line);
                     }

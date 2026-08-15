@@ -1,7 +1,7 @@
 ﻿using SecretNest.ImageStore.DatabaseShared;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using System.Linq;
 using System.Management.Automation;
 using System.Text;
@@ -31,7 +31,7 @@ namespace SecretNest.ImageStore.IgnoredDirectory
         {
             var connection = DatabaseConnection.Current;
 
-            using (var command = new SqlCommand("Select [Id],[FolderId],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory]"))
+            using (var command = new SqliteCommand("Select [Id],[FolderId],[Directory],[IsSubDirectoryIncluded] from [IgnoredDirectory]"))
             {
                 command.Connection = connection;
                 command.CommandTimeout = 0;
@@ -49,11 +49,11 @@ namespace SecretNest.ImageStore.IgnoredDirectory
                 {
                     while (reader.Read())
                     {
-                        ImageStoreIgnoredDirectory line = new ImageStoreIgnoredDirectory((Guid)reader[0])
+                        ImageStoreIgnoredDirectory line = new ImageStoreIgnoredDirectory(reader.GetGuid(0))
                         {
-                            FolderId = (Guid)reader[1],
-                            Directory = (string)reader[2],
-                            IsSubDirectoryIncluded = (bool)reader[3]
+                            FolderId = reader.GetGuid(1),
+                            Directory = reader.GetString(2),
+                            IsSubDirectoryIncluded = reader.GetBoolean(3)
                         };
                         result.Add(line);
                     }
