@@ -1,0 +1,219 @@
+name: Build and Release
+
+# Every push to master builds the module and publishes a release, tagged with
+# the build date. Pushing a v* tag by hand publishes under that tag instead.
+#
+# This does not recurse. The tag created below is pushed with GITHUB_TOKEN, and
+# GitHub deliberately does not start a new workflow run for events raised by
+# that token — so "push to master -> create v* tag" does not re-enter the
+# tags: ['v*'] trigger. That trigger only fires for a tag a human pushes.
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+
+# The date-based sequence number is derived from tags that already exist, so
+# two runs racing each other could pick the same number. Keep runs serialised
+# and let queued ones finish rather than cancelling them — every push is meant
+# to produce its own release.
+concurrency:
+  group: build-and-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write # create tags and releases
+
+env:
+  SOLUTION: ImageStore.sln
+  CONFIGURATION: Release
+  BUILD_OUTPUT: ImageStore\bin\Release
+  # Date-based tags follow this timezone rather than the runner's UTC clock, so
+  # a tag reads the same date the commit was authored in.
+  TAG_TIMEZONE: China Standard Time
+
+jobs:
+  build:
+    # .NET Framework 4.8.1 + Windows Forms — this cannot be built on Linux.
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          # Full history and tags: needed to continue the day's tag numbering
+          # and to generate the changelog.
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/*') {
+              # A human pushed a tag — publish under it verbatim.
+              $tag = $env:GITHUB_REF -replace '^refs/tags/', ''
+              $tagExists = 'true'
+              Write-Host "Publishing from existing tag: $tag"
+          }
+          else {
+              $tz = [TimeZoneInfo]::FindSystemTimeZoneById($env:TAG_TIMEZONE)
+              $date = [TimeZoneInfo]::ConvertTimeFromUtc([datetime]::UtcNow, $tz).ToString('yyyy.MM.dd')
+
+              # Continue from the highest number already published today, so a
+              # deleted release does not cause the sequence to collide.
+              # Built by concatenation: inside a double-quoted string the
+              # trailing "$" of the anchor sits right before the closing quote,
+              # which is legal but reads like an interpolation bug.
+              $pattern = '^v' + [regex]::Escape($date) + '\.(\d+)$'
+              $measured = git tag --list "v$date.*" |
+                  ForEach-Object { if ($_ -match $pattern) { [int]$Matches[1] } } |
+                  Measure-Object -Maximum
+
+              # Property access, not -ExpandProperty: on the first build of the
+              # day nothing matches and Maximum is $null, which ExpandProperty
+              # handles inconsistently across PowerShell versions.
+              $highest = $measured.Maximum
+              if (-not $highest) { $highest = 0 }
+
+              $tag = "v$date.$($highest + 1)"
+              $tagExists = 'false'
+              Write-Host "Publishing new date-based tag: $tag"
+          }
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "tag_exists=$tagExists"
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Set up NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        shell: pwsh
+        # Legacy csproj with a PackageReference (Microsoft.PowerShell.5.ReferenceAssemblies);
+        # restore has to run before msbuild.
+        run: nuget restore $env:SOLUTION
+
+      - name: Build
+        shell: pwsh
+        run: |
+          msbuild $env:SOLUTION `
+            /p:Configuration=$env:CONFIGURATION `
+            '/p:Platform=Any CPU' `
+            /m /nologo /verbosity:minimal
+
+      - name: Verify build output
+        shell: pwsh
+        run: |
+          # Import-Module fails at load time if any of these is missing from the
+          # module folder, so publishing without them would ship a broken release.
+          $required = @(
+              'ImageStore.dll'
+              'Shipwreck.Phash.dll'
+              'Shipwreck.Phash.Bitmaps.dll'
+              'System.Buffers.dll'
+              'System.Memory.dll'
+              'System.Numerics.Vectors.dll'
+              'System.Runtime.CompilerServices.Unsafe.dll'
+          )
+          $missing = $required | Where-Object { -not (Test-Path (Join-Path $env:BUILD_OUTPUT $_)) }
+          if ($missing) {
+              Write-Error "Missing from $($env:BUILD_OUTPUT): $($missing -join ', ')"
+              exit 1
+          }
+          Get-ChildItem $env:BUILD_OUTPUT | Format-Table Name, Length, LastWriteTime
+
+      - name: Package
+        id: package
+        shell: pwsh
+        # Passed as environment variables rather than interpolated into the
+        # script: a tag name is attacker-controllable text, and ${{ }} splices
+        # it in before PowerShell ever parses the line.
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          $tag = $env:TAG
+
+          # The module: dlls only — the .pdb is not part of a release.
+          $moduleStage = Join-Path $env:RUNNER_TEMP 'module'
+          $moduleZip   = "ImageStore-$tag.zip"
+          New-Item -ItemType Directory -Path $moduleStage -Force | Out-Null
+          Copy-Item "$env:BUILD_OUTPUT\*.dll" -Destination $moduleStage
+          Compress-Archive -Path "$moduleStage\*" -DestinationPath $moduleZip -Force
+
+          # The database: shipped as its own asset. It is a one-time download
+          # when setting up a project and does not change between builds, so it
+          # has no business inflating every module download.
+          $dbStage = Join-Path $env:RUNNER_TEMP 'database'
+          $dbZip   = "ImageStore-Database-$tag.zip"
+          New-Item -ItemType Directory -Path $dbStage -Force | Out-Null
+          Copy-Item 'Database\DataStore.mdf', `
+                    'Database\DataStore_log.ldf', `
+                    'Database\CreateDatabase.txt' -Destination $dbStage
+          Compress-Archive -Path "$dbStage\*" -DestinationPath $dbZip -Force
+
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "module_zip=$moduleZip"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "database_zip=$dbZip"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ImageStore-${{ steps.version.outputs.tag }}
+          path: |
+            ${{ steps.package.outputs.module_zip }}
+            ${{ steps.package.outputs.database_zip }}
+          if-no-files-found: error
+
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+          MODULE_ZIP: ${{ steps.package.outputs.module_zip }}
+          DATABASE_ZIP: ${{ steps.package.outputs.database_zip }}
+          TAG_EXISTS: ${{ steps.version.outputs.tag_exists }}
+        run: |
+          $tag       = $env:TAG
+          $moduleZip = $env:MODULE_ZIP
+          $dbZip     = $env:DATABASE_ZIP
+
+          # Single-quoted here-string: no interpolation, so backslashes and the
+          # indented code block survive untouched. Placeholders filled in below.
+          $notes = @'
+          ### Downloads
+
+          - **__MODULE_ZIP__** — the module and its dependencies. This is the one you want.
+          - **__DATABASE_ZIP__** — an empty database (DataStore.mdf, DataStore_log.ldf) and the
+            schema script (CreateDatabase.txt). Only needed once, when setting up a new project;
+            the contents are the same in every release.
+
+          ### Usage
+
+          Unpack the module archive into a folder and load it:
+
+              Import-Module .\ImageStore.dll
+
+          Requires Windows, .NET Framework 4.8.1 and SQL Server 2017 (LocalDB or Express is enough).
+
+          Built from commit __SHA__.
+          '@
+
+          # .Replace(), not -replace: a plain string swap with no regex meaning
+          # attached to the replacement text.
+          $notes = $notes.Replace('__MODULE_ZIP__', $moduleZip)
+          $notes = $notes.Replace('__DATABASE_ZIP__', $dbZip)
+          $notes = $notes.Replace('__SHA__', $env:GITHUB_SHA)
+
+          Set-Content -Path release-notes.md -Value $notes -Encoding utf8
+
+          # Splatted as an array, so each element reaches gh as one argument
+          # without going through a shell. Both archives are attached to the
+          # same release.
+          $ghArgs = @($tag, $moduleZip, $dbZip, '--title', $tag, '--notes-file', 'release-notes.md', '--generate-notes')
+          if ($env:TAG_EXISTS -ne 'true') {
+              # Tag does not exist yet — gh creates it on the commit being built.
+              $ghArgs += @('--target', $env:GITHUB_SHA)
+          }
+
+          gh release create @ghArgs
