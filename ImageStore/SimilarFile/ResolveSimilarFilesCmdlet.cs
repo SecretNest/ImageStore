@@ -156,10 +156,14 @@ namespace SecretNest.ImageStore.SimilarFile
                 command.CommandTimeout = 0;
                 var result = command.ExecuteScalar();
 
-                if (result == DBNull.Value)
+                //min() over an empty set gives null.
+                if (result == null || result == DBNull.Value)
                     return float.NaN;
-                else
-                    return (float)result;
+
+                //Convert rather than cast: a REAL column comes back boxed as double,
+                //and unboxing that straight to float throws. ExecuteScalar has no
+                //typed accessor to hide this the way a reader does.
+                return System.Convert.ToSingle(result);
             }
         }
         #endregion
