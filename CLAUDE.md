@@ -226,12 +226,21 @@ tags, the workflow is serialised with a `concurrency` group — do not remove th
 Each release carries two assets: `ImageStore-<tag>.zip` (every `.dll` from `ImageStore\bin\Release`)
 and `ImageStore-Database-<tag>.zip` (the empty `.mdf`/`.ldf` and `CreateDatabase.txt`). The database
 is deliberately separate — its contents are identical in every release and are only needed once,
-when setting up a project. A "Verify build output" step asserts
-the six third-party dlls landed next to `ImageStore.dll`, because `Import-Module` fails at load
-time if any is missing and the failure would otherwise only surface for the user. Those dlls reach
-the output directory through `<Reference>` CopyLocal, not through their `<Content>` entries — if a
-dependency is ever switched to a plain `<Content>` item, it will silently stop being packaged and
-that step is what will catch it.
+when setting up a project.
+
+The "Verify build output" step guards the package in both directions:
+
+- **Nothing missing.** The six third-party dlls must sit next to `ImageStore.dll`, because
+  `Import-Module` fails at load time if any is absent. They reach the output through `<Reference>`
+  CopyLocal, *not* through their `<Content>` entries (those carry no `CopyToOutputDirectory` and
+  copy nothing) — so switching a dependency to a plain `<Content>` item would silently stop
+  packaging it.
+- **Nothing extra.** `System.Management.Automation.dll` must not appear. It comes from the
+  `Microsoft.PowerShell.5.ReferenceAssemblies` package and is a *reference assembly* — metadata
+  only, no method bodies — and the PowerShell host supplies the real one at run time.
+  `<ExcludeAssets>runtime</ExcludeAssets>` on that `PackageReference` keeps it out of the output;
+  the check is the net for a regression, since an oversized zip otherwise looks perfectly healthy.
+  v2026.08.15.1 shipped with it by mistake.
 
 The workflow does not touch `AssemblyInfo.cs`: the dll stays at `1.0.0.0` and the version lives
 only in the tag, release title, and asset name.

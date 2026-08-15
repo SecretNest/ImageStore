@@ -39,7 +39,7 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # Full history and tags: needed to continue the day's tag numbering
           # and to generate the changelog.
@@ -61,8 +61,9 @@ jobs:
 
               # Continue from the highest number already published today, so a
               # deleted release does not cause the sequence to collide.
-              # Built by concatenation: inside a double-quoted string the
-              # trailing "$" of the anchor sits right before the closing quote,
+              #
+              # Built by concatenation rather than one double-quoted string: the
+              # anchor's trailing "$" would sit right before the closing quote,
               # which is legal but reads like an interpolation bug.
               $pattern = '^v' + [regex]::Escape($date) + '\.(\d+)$'
               $measured = git tag --list "v$date.*" |
@@ -84,10 +85,10 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag_exists=$tagExists"
 
       - name: Set up MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Set up NuGet
-        uses: nuget/setup-nuget@v2
+        uses: nuget/setup-nuget@v4
 
       - name: Restore NuGet packages
         shell: pwsh
@@ -122,6 +123,19 @@ jobs:
               Write-Error "Missing from $($env:BUILD_OUTPUT): $($missing -join ', ')"
               exit 1
           }
+
+          # And the opposite check. Reference assemblies have no method bodies
+          # and must never be shipped — the PowerShell host supplies the real
+          # System.Management.Automation at run time. ExcludeAssets=runtime in
+          # the csproj keeps it out of the output; this is the net that catches
+          # a regression there, since a merely-too-large zip looks fine.
+          $banned = @('System.Management.Automation.dll')
+          $leaked = $banned | Where-Object { Test-Path (Join-Path $env:BUILD_OUTPUT $_) }
+          if ($leaked) {
+              Write-Error "Reference assembly leaked into $($env:BUILD_OUTPUT): $($leaked -join ', ')"
+              exit 1
+          }
+
           Get-ChildItem $env:BUILD_OUTPUT | Format-Table Name, Length, LastWriteTime
 
       - name: Package
@@ -157,7 +171,7 @@ jobs:
           Add-Content -Path $env:GITHUB_OUTPUT -Value "database_zip=$dbZip"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ImageStore-${{ steps.version.outputs.tag }}
           path: |

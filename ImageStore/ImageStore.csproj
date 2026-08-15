@@ -265,6 +265,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.5.ReferenceAssemblies">
       <Version>1.1.0</Version>
+      <!-- Reference assemblies: compile against them, never copy them to the
+           output. System.Management.Automation.dll from this package has no
+           method bodies; the PowerShell host supplies the real one at run time,
+           so shipping it in a release is at best dead weight. -->
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
