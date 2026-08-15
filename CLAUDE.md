@@ -17,39 +17,50 @@ Duplicate detection has two independent pipelines:
 
 - **Same File** — byte-identical files, detected via SHA-1 (`SameFile` table).
 - **Similar File** — visually similar images, detected via pHash
-  ([Shipwreck.Phash](https://github.com/scegg/phash), a fork of pgrho/phash) (`SimilarFile` table).
+  ([Shipwreck.Phash](https://github.com/pgrho/phash)) (`SimilarFile` table).
 
 ## Build and toolchain
 
 | | |
 |---|---|
-| Target | .NET Framework **4.8.1**, `AnyCPU`, `OutputType=Library` |
-| UI | Windows Forms (`System.Windows.Forms`, `System.Drawing`) |
-| Project style | **Legacy (non-SDK) csproj**, ToolsVersion 15.0 |
-| Build | Visual Studio 2017+ or `msbuild ImageStore.sln` on **Windows** |
+| Target | `net10.0-windows`, `OutputType=Library` |
+| UI | Windows Forms (`UseWindowsForms`) |
+| Project style | SDK-style csproj (`Microsoft.NET.Sdk`) |
+| Build | `dotnet build` / `dotnet publish ImageStore/ImageStore.csproj -c Release` |
+| Host | **PowerShell 7.6+** only. 7.6 is the first release built on .NET 10; Windows PowerShell 5.1 cannot load the module at all. |
 | Root namespace | `SecretNest.ImageStore` (assembly name `ImageStore`) |
 | Tests | None. There is no test project. |
-| CI | `.github/workflows/build-and-release.yml` — builds on `windows-latest` and publishes a release on every push to `master`. |
+| CI | `.github/workflows/build-and-release.yml` — builds on `windows-latest`, publishes a release on every push to `master`, builds without publishing on pull requests. |
 
-**The project cannot be built on Linux/macOS.** `dotnet build` will not work — this is a legacy
-csproj targeting .NET Framework with WinForms. On a non-Windows machine, restrict work to source
-edits, review, and documentation; do not claim a change compiles unless it was actually built on
-Windows.
+**It builds on Linux**, which is worth knowing because the WinForms target suggests otherwise:
 
-**Adding or removing a source file requires editing `ImageStore/ImageStore.csproj` by hand.**
-Legacy csproj has no glob includes. A new `.cs` file that is not listed in a `<Compile Include=.../>`
-item is silently excluded from the build. WinForms files need the matching structure too:
-
-```xml
-<Compile Include="Area\MyForm.cs"><SubType>Form</SubType></Compile>
-<Compile Include="Area\MyForm.Designer.cs"><DependentUpon>MyForm.cs</DependentUpon></Compile>
-<EmbeddedResource Include="Area\MyForm.resx"><DependentUpon>MyForm.cs</DependentUpon></EmbeddedResource>
+```
+dotnet build   ImageStore/ImageStore.csproj -c Release -p:EnableWindowsTargeting=true
+dotnet publish ImageStore/ImageStore.csproj -c Release -o /tmp/out -p:EnableWindowsTargeting=true
 ```
 
-Third-party assemblies (`Shipwreck.Phash*.dll`, `System.Memory.dll`, `System.Buffers.dll`,
-`System.Numerics.Vectors.dll`, `System.Runtime.CompilerServices.Unsafe.dll`) are **committed to the
-repo** under `ImageStore/` and referenced by `HintPath`, not by NuGet. Only
-`Microsoft.PowerShell.5.ReferenceAssemblies` comes from a `PackageReference`.
+That compiles and produces a complete publish tree, so compile errors, analyzer errors and the
+exact package contents can all be checked locally. It cannot be *run* there — use it to verify
+the build, then rely on CI or a Windows box for anything behavioural.
+
+Dependencies come from NuGet; nothing is committed to the repo:
+
+| Package | Note |
+|---|---|
+| `Shipwreck.Phash`, `Shipwreck.Phash.Bitmaps` | Upstream. A fork used to be vendored here for extra `GetCrossCorrelation` overloads; upstream 0.5.0 has them. |
+| `Microsoft.Data.SqlClient` | Replaces `System.Data.SqlClient`, which has no .NET 10 story. |
+| `System.Management.Automation` | `ExcludeAssets="runtime;native"` — see below. |
+
+**`ExcludeAssets` on `System.Management.Automation` must keep both `runtime` and `native`.**
+The PowerShell host supplies that assembly at run time, and the package's managed dll is a
+reference assembly with no method bodies. Excluding only `runtime` still drags the host's *native*
+payload into the output — `pwrshplugin.dll`, `PowerShell.Core.Instrumentation.dll`, and
+`libpsl-native.so`/`.dylib` for Linux and macOS, in a Windows-only module. That mistake costs
+~36 files and is invisible unless the package is opened.
+
+Use `dotnet publish`, not `dotnet build`, when producing something to ship: the module needs its
+full dependency closure, `ImageStore.deps.json`, and `runtimes/win-*/native/Microsoft.Data.SqlClient.SNI.dll`.
+A package missing SNI loads fine and then fails on the first database connection.
 
 ## Repository layout
 
@@ -98,7 +109,9 @@ one connection is reused for the whole operation. Neither setting survives a Pow
 
 ### ADO.NET conventions
 
-Raw `System.Data.SqlClient` throughout — no ORM, no EF, no async. The consistent shape is:
+Raw `Microsoft.Data.SqlClient` throughout — no ORM, no EF, no async. Only the namespace differs
+from the old `System.Data.SqlClient`; the type names are the same, and `SqlDbType` is still
+`System.Data.SqlDbType`. The consistent shape is:
 
 ```csharp
 var connection = DatabaseConnection.Current;
@@ -169,8 +182,9 @@ careful about adding per-file state to those structures.
 
 `Select-ImageStoreSameFile` and `Resolve-ImageStoreSimilarFiles` call
 `Application.EnableVisualStyles()` in `BeginProcessing` and then `ShowDialog()`. There is no
-message loop of the module's own — the dialogs rely on the host thread being STA (the default in
-the Windows PowerShell console host). The heaviest UI is
+message loop of the module's own — the dialogs rely on the host thread being STA. `pwsh` is STA by
+default on Windows (restored in 7.0-preview.3 precisely so WinForms and WPF work), but VS Code's
+PowerShell Integrated Console is MTA, where these two cmdlets misbehave. The heaviest UI is
 `SimilarFile/SimilarFileInGroupManager.cs`; `DoubleBufferedDataGridView` / `DoubleBufferedListView`
 exist to keep large lists from flickering.
 
@@ -214,8 +228,8 @@ wipes both the pair table and those thresholds.
 
 ## CI and releases
 
-`.github/workflows/build-and-release.yml` runs on `windows-latest` (the only option — see
-build constraints above) and does restore → build → verify → package → release.
+`.github/workflows/build-and-release.yml` runs on `windows-latest` and does
+publish → verify → package → release.
 
 **Every push to `master` publishes a real release.** The tag is date-based, `v<yyyy.MM.dd>.<n>`,
 where `n` continues from the highest tag already published that day; the date is stamped in
@@ -223,24 +237,27 @@ where `n` continues from the highest tag already published that day; the date is
 publishes under that tag verbatim instead. Because the sequence number is derived from existing
 tags, the workflow is serialised with a `concurrency` group — do not remove that.
 
-Each release carries two assets: `ImageStore-<tag>.zip` (every `.dll` from `ImageStore\bin\Release`)
-and `ImageStore-Database-<tag>.zip` (the empty `.mdf`/`.ldf` and `CreateDatabase.txt`). The database
-is deliberately separate — its contents are identical in every release and are only needed once,
-when setting up a project.
+**A pull request runs the same build but skips publishing** (`if: github.event_name != 'pull_request'`
+on the last step) and labels its artifact `pr<n>-<sha>` so it cannot be mistaken for a release.
+Use it for anything risky: nothing here can be *run* outside Windows, so CI is the only behavioural
+feedback before merging.
+
+Each release carries two assets: `ImageStore-<tag>.zip` (the whole publish tree minus `.pdb`) and
+`ImageStore-Database-<tag>.zip` (the empty `.mdf`/`.ldf` and `CreateDatabase.txt`). The database is
+deliberately separate — its contents are identical in every release and are only needed once, when
+setting up a project. The module archive is copied wholesale rather than as flat `*.dll`, because
+`deps.json` and `runtimes/win-*/native/` have to keep their layout.
 
 The "Verify build output" step guards the package in both directions:
 
-- **Nothing missing.** The six third-party dlls must sit next to `ImageStore.dll`, because
-  `Import-Module` fails at load time if any is absent. They reach the output through `<Reference>`
-  CopyLocal, *not* through their `<Content>` entries (those carry no `CopyToOutputDirectory` and
-  copy nothing) — so switching a dependency to a plain `<Content>` item would silently stop
-  packaging it.
-- **Nothing extra.** `System.Management.Automation.dll` must not appear. It comes from the
-  `Microsoft.PowerShell.5.ReferenceAssemblies` package and is a *reference assembly* — metadata
-  only, no method bodies — and the PowerShell host supplies the real one at run time.
-  `<ExcludeAssets>runtime</ExcludeAssets>` on that `PackageReference` keeps it out of the output;
-  the check is the net for a regression, since an oversized zip otherwise looks perfectly healthy.
-  v2026.08.15.1 shipped with it by mistake.
+- **Nothing missing.** `ImageStore.dll`, `ImageStore.deps.json`, both `Shipwreck.Phash*` dlls,
+  `Microsoft.Data.SqlClient.dll`, and — checked recursively — the native SNI library.
+- **Nothing extra.** No `System.Management.Automation.dll`, `pwrshplugin.dll`,
+  `PowerShell.Core.Instrumentation.dll`, `libpsl-native.*` or `getfilesiginforedist.dll`. These
+  belong to the PowerShell host and are kept out by `ExcludeAssets="runtime;native"`; the check is
+  the net for a regression, since an oversized package otherwise looks perfectly healthy. Both
+  halves of this have already caught a real mistake — v2026.08.15.1 shipped the reference assembly,
+  and the native payload leaked in during the .NET 10 upgrade.
 
 The workflow does not touch `AssemblyInfo.cs`: the dll stays at `1.0.0.0` and the version lives
 only in the tag, release title, and asset name.

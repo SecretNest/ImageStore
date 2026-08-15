@@ -4,21 +4,31 @@ Image deduplication tool, optimized for large amount of pictures and CG librarie
 This tool is built as PowerShell cmdlets, providing user a flexible way to deal with large amount of image files (~1 million).
 Specially, it is optimized for CG libraries storing by allowing user to suppress the comparing among files in the same folder.
 
+# Requirements
+  * Windows.
+  * [PowerShell 7.6](https://github.com/PowerShell/PowerShell/releases) or later. The module targets .NET 10, and 7.6 is the first PowerShell release built on it.
+  * Sql Server 2017. See [Database](#database) below.
+
+*Note: Windows PowerShell 5.1 — the ```powershell.exe``` that ships with Windows — cannot load this module, because it runs on .NET Framework. Use ```pwsh```. The last release that works under 5.1 is [v2026.08.15.2](https://github.com/SecretNest/ImageStore/releases/tag/v2026.08.15.2).*
+
 # Image Hashing Arithmetic
-This tool use a [forked version](https://github.com/scegg/phash) of [priHash](https://github.com/pgrho/phash), which added methods optimized for ImageStore calling.
-priHash is a C# Implementation of pHash (http://phash.org). Based on phash-0.9.4 for Windows.
+This tool use [priHash](https://github.com/pgrho/phash), a C# Implementation of pHash (http://phash.org), based on phash-0.9.4 for Windows.
 In this tool, [difference degree](doc/concept/DifferenceDegree.md) is based on the calculation of priHash.
 
 # Use Module in PowerShell
 To use any module from dll in PowerShell, you just need 3 steps:
-1. Start PowerShell. Usually it is placed as ```C:\windows\System32\windowspowershell\v1.0\powershell.exe``` in Windows.
+1. Start PowerShell by running ```pwsh```.
 2. Use command ```Import-Module``` to load module from dll file. The parameter of this command is the path of the dll file.  
 ```Import-Module C:\ImageStore.dll``` will load the module file named as ImageStore.dll and placed in the root folder of drive C.  
 ```Import-Module .\ImageStore.dll``` will load the module file named as ImageStore.dll from the current directory.
 3. Use [cmdlets](doc/cmdlet/cmdlets.md).
 
+Unpack the whole release archive into one folder and load ImageStore.dll from there. The other files beside it are its dependencies, and the module will not work without them.
+
 Also, you can combine the step 1 and 2 as one, by passing the command as a parameter while starting PowerShell.  
-```C:\windows\System32\windowspowershell\v1.0\powershell.exe -noexit -command "Import-Module .\ImageStore.dll"```
+```pwsh -noexit -command "Import-Module .\ImageStore.dll"```
+
+*Note: [Select-ImageStoreSameFile](doc/cmdlet/SameFile/SelectSameFile.md) and [Resolve-ImageStoreSimilarFiles](doc/cmdlet/SimilarFile/ResolveSimilarFiles.md) open windows, which requires the host to run in a single-threaded apartment. ```pwsh``` does so by default, but the PowerShell Integrated Console in Visual Studio Code does not — run those two cmdlets from a real console.*
 
 ## Enable Information and Verbose Output
 By default, the information and verbose level output will be silenced. ImageStore will report key information as informational output and progress updates as verbose one. Thus, enabling information output is highly recommended. If ImageStore is dealing with large amount of files, turning on verbose output is advised.
