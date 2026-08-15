@@ -77,6 +77,23 @@ jobs:
               Write-Host "Publishing from existing tag: $tag"
           }
           else {
+              # A milestone is pushed as "master + tag" in one go, which raises two
+              # events and so two runs. Both would publish the same commit: once
+              # under the tag, once under a date name. The date one lands second and
+              # takes the "Latest" marker with it, which is how v2026.08.15.4 ended
+              # up newer than v3.0.
+              #
+              # So if this commit already carries a semantic tag, leave the release
+              # to that tag's run. The concurrency group serialises the two, and the
+              # tag is on the remote either way because the push was atomic.
+              $semantic = git tag --points-at HEAD |
+                  Where-Object { $_ -match '^v\d+(\.\d+)*$' -and $_ -notmatch '^v\d{4}\.\d{2}\.\d{2}\.\d+$' }
+
+              if ($semantic) {
+                  Write-Host "Commit is already released as $($semantic -join ', '); skipping the date-based release."
+                  Add-Content -Path $env:GITHUB_OUTPUT -Value "skip_release=true"
+              }
+
               $tz = [TimeZoneInfo]::FindSystemTimeZoneById($env:TAG_TIMEZONE)
               $date = [TimeZoneInfo]::ConvertTimeFromUtc([datetime]::UtcNow, $tz).ToString('yyyy.MM.dd')
 
@@ -262,8 +279,9 @@ jobs:
 
       - name: Publish release
         # Pull requests stop here: they have proved the build and produced a
-        # downloadable artifact, which is the whole point of the PR run.
-        if: github.event_name != 'pull_request'
+        # downloadable artifact, which is the whole point of the PR run. So does
+        # a master push whose commit is already being released under a tag.
+        if: github.event_name != 'pull_request' && steps.version.outputs.skip_release != 'true'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

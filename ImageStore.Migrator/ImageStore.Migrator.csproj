@@ -8,7 +8,10 @@
     <RootNamespace>SecretNest.ImageStore.Migrator</RootNamespace>
     <AssemblyName>ImageStore.Migrator</AssemblyName>
     <Nullable>disable</Nullable>
-    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- Globalization invariant mode must stay off. Microsoft.Data.SqlClient
+         refuses to load under it and fails with "Globalization Invariant Mode is
+         not supported." before it ever reaches a connection string. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 
   <ItemGroup>
