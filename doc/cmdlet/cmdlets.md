@@ -3,7 +3,7 @@
 Here lists all cmdlets provided from ImageStore.
 
 # Database
-Operates on [database](../concept/database.md) connection or shrinks database.
+Operates on [database](../concept/Database.md) connection or shrinks database.
 
 |Command|Alias|Description|
 |---|---|---|
@@ -12,7 +12,7 @@ Operates on [database](../concept/database.md) connection or shrinks database.
 |[Close-ImageStoreDatabase](Database/CloseDatabase.md)|CloseDatabase|Closes the connection to the database.|
 
 # Folder
-Manages [folders](../concept/folder.md).
+Manages [folders](../concept/Folder.md).
 
 |Command|Alias|Description|
 |---|---|---|
@@ -65,7 +65,7 @@ Manages [files](../concept/File.md) and computes hashing results.
 |[Rename-ImageStoreFile](File/RenameFile.md)|RenameFile|Renames the file record specified and the pointed file.|
 |[Resolve-ImageStoreFile](File/ResolveFile.md)|ResolveFile|Gets the full path of the file specified.|
 |[Search-ImageStoreFile](File/SearchFile.md)|SearchFile|Searches all files records matched with the conditions provided.|
-|[Update-ImageStoreFile](file/UpdateFile.md)|UpdateFile|Updates the file record by the entity provided.|
+|[Update-ImageStoreFile](File/UpdateFile.md)|UpdateFile|Updates the file record by the entity provided.|
 
 # Same File
 Generates, manages and deals with [same files](../concept/SameFile.md) records based on file hashing result using Sha1 algorithm.

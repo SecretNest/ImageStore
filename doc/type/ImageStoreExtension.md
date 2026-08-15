@@ -1,5 +1,5 @@
 # ImageStoreExtension
-Represents an [extension](../concept/extension.md), a kind of file.
+Represents an [extension](../concept/Extension.md), a kind of file.
 
 Namespace: SecretNest.ImageStore.Extension
 

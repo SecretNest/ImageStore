@@ -40,7 +40,7 @@ Attached database file mode is supported and recommended.
 
 To install Sql Server 2017, access [Sql Server 2017 Homepage](https://www.microsoft.com/en-us/sql-server/sql-server-2017) and download the edition you desired. LocalDb or Express edition will be a good choice IMHO.
 
-You could download the empty database file DataStore.mdf and DataStore_log.mdf from Database folder, or create an empty database by script provided as CreateDatabase.txt in the samne folder.
+You could download the empty database file DataStore.mdf and DataStore_log.ldf from Database folder, or create an empty database by script provided as CreateDatabase.txt in the same folder.
 
 # Concepts
 There are several concepts defined in ImageStore. Reading these docs will help you to understand the system.
@@ -66,7 +66,7 @@ These types of entities will be used while operating with cmdlets of ImageStore.
 | --- | --- |
 |[ImageStoreFolder](doc/type/ImageStoreFolder.md)|Represents a [folder](doc/concept/Folder.md) for storing image files.|
 |[ImageStoreIgnoredDirectory](doc/type/ImageStoreIgnoredDirectory.md)|Represents an exclusion a directory from a [folder](doc/concept/Folder.md).|
-|[ImageStoreExtension](doc/type/ImageStoreExtension.md)|Represents an [extension](doc/concept/extension.md), a kind of file.|
+|[ImageStoreExtension](doc/type/ImageStoreExtension.md)|Represents an [extension](doc/concept/Extension.md), a kind of file.|
 |[ImageStoreFile](doc/type/ImageStoreFile.md)|Represents a [file](doc/concept/File.md) stored in a [folder](doc/concept/Folder.md).|
 |[ImageStoreSameFile](doc/type/ImageStoreSameFile.md)|Represents a [record](doc/concept/SameFile.md) that a file detected to be the same as at least one other file.|
 |[ImageStoreSimilarFile](doc/type/ImageStoreSimilarFile.md)|Represents a [similar relationship](doc/concept/SimilarFile.md) between two image files.|

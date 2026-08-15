@@ -1,5 +1,5 @@
 # Clear-ImageStoreThumbprintCache
-Deletes all thumbprint cache data used by [Resolve-ImageStoreSimilarFiles](SimilarFile/ResolveSimilarFiles.md).
+Deletes all thumbprint cache data used by [Resolve-ImageStoreSimilarFiles](ResolveSimilarFiles.md).
 
 Alias: ClearThumbprintCache
 
