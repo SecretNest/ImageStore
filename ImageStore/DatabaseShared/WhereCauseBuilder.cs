@@ -71,7 +71,10 @@ namespace SecretNest.ImageStore.DatabaseShared
 
             if (values.Count == 1)
             {
+                //Falling through would append the same predicate a second time, as a
+                //one-element or group with its own parameter. Harmless but wasteful.
                 AddIntComparingCause(columnName, values[0]);
+                return;
             }
 
             WhereCauseBuilder inner = new WhereCauseBuilder(parameters, false);
