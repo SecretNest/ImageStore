@@ -99,7 +99,18 @@ namespace SecretNest.ImageStore.Database
 
             @"CREATE INDEX [IX_SimilarFile] ON [SimilarFile]([DifferenceDegree])",
             @"CREATE INDEX [IX_SimilarFile_File1] ON [SimilarFile]([File1Id])",
-            @"CREATE INDEX [IX_SimilarFile_File2] ON [SimilarFile]([File2Id])"
+            @"CREATE INDEX [IX_SimilarFile_File2] ON [SimilarFile]([File2Id])",
+
+            //IgnoredMode first, DifferenceDegree second. Every review query filters on
+            //both, and IgnoredMode is the selective one once a library has been worked
+            //through - hiding pairs leaves nearly every row at HiddenAndDisconnected.
+            //IX_SimilarFile alone cannot serve those: it locates the DifferenceDegree
+            //range, but the range is most of the table, so each entry costs a random
+            //row fetch just to read IgnoredMode and discard it. Measured on 2.26M rows
+            //with two rows not hidden, Search-ImageStoreSimilarFile went from minutes
+            //to instant. Order matters and cannot be reversed; DifferenceDegree first
+            //degenerates to the same scan.
+            @"CREATE INDEX [IX_SimilarFile_IgnoredMode_DifferenceDegree] ON [SimilarFile]([IgnoredMode],[DifferenceDegree])"
         };
 
         /// <summary>

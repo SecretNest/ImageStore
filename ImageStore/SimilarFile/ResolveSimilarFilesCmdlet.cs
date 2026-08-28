@@ -183,7 +183,12 @@ namespace SecretNest.ImageStore.SimilarFile
             var insertCommand = "insert into tempSimilarFile Select [Id],[File1Id],[File2Id],[DifferenceDegree],[IgnoredMode] from [SimilarFile] where [DifferenceDegree]<=@DifferenceDegree";
             if (!IncludesDisconnected.IsPresent) //skip while loading to memory
             {
-                insertCommand += " and [IgnoredMode]<>2";
+                //Spelled as an in list rather than <>2 so it can use
+                //IX_SimilarFile_IgnoredMode_DifferenceDegree. SQLite cannot drive an
+                //index from <>, so that form scanned every row of a worked-through
+                //library - where almost all of them are the 2 being excluded - to find
+                //the handful that remain. The two spellings select the same rows.
+                insertCommand += " and [IgnoredMode] in (0,1)";
             }
             using (var command = new SqliteCommand(insertCommand, connection) { CommandTimeout = 180 })
             {
